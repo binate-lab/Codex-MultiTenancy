@@ -1,0 +1,36 @@
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.13.35931.197
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "ABCSchoolApp", "ABCSchoolApp.csproj", "{354BADE1-5115-4EFD-91BD-2D62AA7E3000}"
+EndProject
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "src", "src", "{02EA681E-C7D8-13C7-8484-4AC65E1B71E8}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "App.Infrastructure", "..\App.Infrastructure\App.Infrastructure.csproj", "{8840CADC-17EE-4DED-B165-F70B38B5063D}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{354BADE1-5115-4EFD-91BD-2D62AA7E3000}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{354BADE1-5115-4EFD-91BD-2D62AA7E3000}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{354BADE1-5115-4EFD-91BD-2D62AA7E3000}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{354BADE1-5115-4EFD-91BD-2D62AA7E3000}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8840CADC-17EE-4DED-B165-F70B38B5063D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8840CADC-17EE-4DED-B165-F70B38B5063D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8840CADC-17EE-4DED-B165-F70B38B5063D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8840CADC-17EE-4DED-B165-F70B38B5063D}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(NestedProjects) = preSolution
+		{354BADE1-5115-4EFD-91BD-2D62AA7E3000} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+		{8840CADC-17EE-4DED-B165-F70B38B5063D} = {02EA681E-C7D8-13C7-8484-4AC65E1B71E8}
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {D4D9D033-57F1-4B9E-B80F-E63992710822}
+	EndGlobalSection
+EndGlobal

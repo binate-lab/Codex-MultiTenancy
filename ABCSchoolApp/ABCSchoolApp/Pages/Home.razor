@@ -1,0 +1,127 @@
+﻿@page "/"
+@using MudBlazor
+
+<MudContainer MaxWidth="MaxWidth.False" Class="px-0">
+    <!-- ---------- FEATURES ---------- -->
+    <MudContainer MaxWidth="MaxWidth.Large" Class="py-1">
+
+        <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
+            <!--Trajan <span class="font-weight-bold text-success">Tranquilité&nbsp;Assurance&nbsp;Souplesse</span> -->
+            Trajan <span class="font-weight-bold text-success">Tranquilité&nbsp;Et&nbsp;Souplesse</span>
+        </MudText>
+
+
+        <!-- 3-up on desktop, 2-up on tablet, 1-up on mobile -->
+        <MudGrid Spacing="3" Class="mt-4">
+            @foreach (var feature in _features)
+            {
+                <MudItem xs="12" sm="6" md="4">
+                    <MudCard Elevation="3" Class="h-100">
+                        <MudCardContent Class="d-flex flex-column align-center text-center pa-5">
+
+                            <MudImage Src="@feature.ImageSrc"
+                                      Style="width: 64px; height: 64px; object-fit: contain;" />
+
+                            <MudText Typo="Typo.h6" Class="mt-3 mb-1">
+                                @feature.Title
+                            </MudText>
+
+                            <MudText Typo="Typo.body2">
+                                @feature.Description
+                            </MudText>
+                        </MudCardContent>
+                    </MudCard>
+                </MudItem>
+            }
+        </MudGrid>
+    </MudContainer>
+
+</MudContainer>
+
+@code {
+    private readonly FeatureCardImg[] _features =
+    {
+        // new FeatureCard(Icons.Material.Filled.Domain,
+        //     "Strategies Ets",
+        //     "Base de données-par-Ets ou Base de données partagé -> basculez à tout moment."),
+
+        new FeatureCardImg("/images/LogoCouleurOrion.png",
+            "COLLEGE ORION",
+            "L'expérience au service de la population."),
+
+        new FeatureCardImg("/images/LogoCouleurAvogadro.png",
+            "COLLEGE AVOGADRO.",
+            "L'effort fait les forts."),
+
+        new FeatureCardImg("/images/LogoEcoleHeleis.png",
+            "COLLEGE HELEIS.",
+            "Le collège des enseignants."),
+
+        new FeatureCardImg("/images/LogoEcoleCAMA.png",
+            "COLLEGE CAMA.",
+            "Le collège des enseignants."),
+
+        new FeatureCardImg("/images/LogoEcoleEDEN.png",
+            "COLLEGE EDEN",
+            "Le collège des enseignants."),
+
+        new FeatureCardImg("/images/LogoEcolePEROUSE.png",
+            "COLLEGE LA PEROUSE",
+            "Le collège des enseignants."),
+
+        new FeatureCardImg("/images/LogoEcoleGARRETT.png",
+            "COLLEGE MORGAN GARRETT",
+            "Le collège des enseignants."),
+
+        new FeatureCardImg("/images/LogoEcoleDJEDRI.png",
+            "GROUPE DJEDRI",
+            "Le collège des enseignants."),
+
+        new FeatureCardImg("/images/LogoEcoleCSP.png",
+            "COLLEGE CSP",
+            "Cours Secodaire Protestant."),
+
+
+        // new FeatureCard(Icons.Material.Filled.Subscriptions,
+        //     "Gestion de la Souscription Ets.",
+        //     "Chaque Ets aura sa propre date d'expiration."),
+
+
+        // new FeatureCard(Icons.Material.Filled.AccountCircle,
+        //     "Gestion des Utilisateurs",
+        //     "Créer dynamiquement des comptes Utilisateur pour votre Ets. Activer ou désactiver les à la demande"),
+
+        // new FeatureCard(Icons.Material.Filled.Shield,
+        //     "Control Role & Permission",
+        //     "Créez des roles, assignez permissions/autorisations à des roles de façon granulaire."),
+
+        // new FeatureCard(Icons.Material.Filled.GppGood,
+        //     "Composant Authorisation",
+        //     "Route guards, menu trimming and Authorize View powered by live user claims."),
+
+        // new FeatureCard(Icons.Material.Filled.VerifiedUser,
+        //     "Gestion etat des Authorisation. (Blazor)",
+        //     "Custom AuthenticationStateProvider keeps UI in sync with silent token refreshes."),
+
+        // new FeatureCard(Icons.Material.Filled.Autorenew,
+        //     "Silent Token Refresh",
+        //     "HTTP interceptor renews JWTs in the background for uninterrupted sessions."),
+
+        // new FeatureCard(Icons.Material.Filled.Dns,
+        //     "Dependency Injection Ready",
+        //     "Learn about how to register services into DI container."),
+
+        // new FeatureCard(Icons.Material.Filled.EventBusy,
+        //     "Blazor Component LifeCycle Hooks",
+        //     "Learn about all Blazor component lifecycle hooks - demo provided")
+    };
+
+    private record FeatureCard(string Icon, string Title, string Description);
+    private record FeatureCardImg(string ImageSrc, string Title, string Description);
+
+    private void OnImageClick()
+    {
+        // Ton action ici
+    }
+
+}

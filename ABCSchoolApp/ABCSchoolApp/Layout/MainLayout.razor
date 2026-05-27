@@ -1,0 +1,52 @@
+﻿@inherits LayoutComponentBase
+
+<MudThemeProvider/>
+<MudPopoverProvider/>
+<MudDialogProvider/>
+<MudSnackbarProvider/>
+
+<AuthorizeView>
+    <NotAuthorized>
+        <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center" Style="height: 100vh">
+            <MudPaper Elevation="0" Class="py-4" Style="width: 500px">
+                <MudContainer MaxWidth="MaxWidth.False" Class="mt-4">
+                    @Body
+                </MudContainer>
+            </MudPaper>
+        </MudContainer>
+    </NotAuthorized>
+    <Authorized>
+        <MudLayout>
+            <MudAppBar Style="background-color: #4EC9B0; color: white;">
+                <MudText Typo="Typo.h6" Class="ml-2">Trajan</MudText>
+                <MudIconButton Icon="@Icons.Material.Outlined.Menu" 
+                    OnClick="@(ToggleDrawer)"
+                    Class="ml-2" 
+                    Edge="Edge.Start"/>
+                <MudSpacer/>
+                <MudMenu Icon="@Icons.Material.Outlined.Person" 
+                    Color="Color.Inherit" 
+                    TransformOrigin="Origin.BottomLeft" 
+                    Dense="true"
+                    Class="mt-1 ml-4">
+                    <ChildContent>
+                        <CurrentUserCard/>
+                        <MudDivider/>
+                        <MudList T="string">
+                            <MudListItem OnClick="LogoutDialog" Text="Quitter" Icon="@Icons.Material.Filled.Logout" />
+                        </MudList>
+                    </ChildContent>
+                </MudMenu>
+            </MudAppBar>
+            <MudDrawer @bind-Open="_drawerOpen" ClipMode="DrawerClipMode.Always">
+                <NavMenu/>
+            </MudDrawer>
+            <MudMainContent>
+                <MudContainer MaxWidth="MaxWidth.False" Class="mt-1">
+                    @Body
+                </MudContainer>
+            </MudMainContent>
+        </MudLayout>
+    </Authorized>
+</AuthorizeView>
+

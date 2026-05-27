@@ -1,0 +1,137 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Trajan</title>
+    <base href="/" />
+    <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
+    <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
+    <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
+</head>
+
+<body>
+    <div id="app">
+        <style>
+            /* ===== HIGH-CONTRAST, LIGHT-GREEN STRIPES ===== */
+
+            @keyframes panStripes {
+                0% {
+                    background-position: 0 0;
+                }
+
+                100% {
+                    background-position: 400px 0;
+                }
+            }
+
+            /* base layer shared by all striped divs */
+            .abc-mud-wasm {
+                position: fixed;
+                inset: 0; /* full-screen */
+                z-index: -1;
+                background-size: 400px 400px; /* stripe width */
+                background-repeat: repeat;
+                animation: panStripes 8s linear infinite;
+                opacity: .9; /* master brightness (layer 1) */
+            }
+
+                /* ---------- individual layers ---------- */
+
+                /* layer 1 – mint ↔ medium green */
+                .abc-mud-wasm:nth-of-type(1) {
+                    background-image: repeating-linear-gradient( -45deg, #C8E6C9 0 60px, /* mint */
+                    #81C784 60px 120px /* medium green */
+                    );
+                }
+
+                /* layer 2 – medium ↔ deep green, reverse direction */
+                .abc-mud-wasm:nth-of-type(2) {
+                    background-image: repeating-linear-gradient( -45deg, #81C784 0 60px, /* medium green */
+                    #388E3C 60px 120px /* deep green */
+                    );
+                    animation-direction: reverse;
+                    animation-duration: 10s;
+                    opacity: .7;
+                }
+
+                /* layer 3 – pale lime ↔ rich teal, slowest */
+                .abc-mud-wasm:nth-of-type(3) {
+                    background-image: repeating-linear-gradient( -45deg, #E8F5E9 0 60px, /* pale lime */
+                    #43A047 60px 120px /* teal-green */
+                    );
+                    animation-duration: 12s;
+                    opacity: .5;
+                }
+
+            /* centred content (logo / “loading” message) */
+            .abc-mud-wasm-cont {
+                position: fixed;
+                top: 50%;
+                left: 50%;
+                transform: translate(-50%, -50%);
+                padding: 10vmin;
+                text-align: center;
+                z-index: 1; /* above stripes */
+            }
+
+            /* brighter, easier-to-read loading message */
+            .abc-loader-message {
+                margin-top: 2rem;
+                font: 600 1.6rem/1.35 "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+                /* pure white text */
+                color: #ffffff;
+                /* soft outline so white text doesn’t vanish on pale stripes */
+                text-shadow: 0 0 6px rgba(0, 0, 0, 0.55), /* outer glow */
+                0 0 2px rgba(0, 0, 0, 0.40); /* inner edge */
+
+                letter-spacing: .02em;
+            }
+
+            #abc-blazor-error-ui {
+                display: none;
+            }
+        </style>
+
+
+
+        <div style="height:100%;width:100%;margin:0;position:fixed;">
+            <!-- three moving stripe layers -->
+            <div class="abc-mud-wasm"></div>
+            <div class="abc-mud-wasm" style="animation-direction:alternate-reverse;animation-duration:4s;"></div>
+            <div class="abc-mud-wasm" style="animation-duration:5s;"></div>
+
+            <!-- centred content -->
+            <div class="abc-mud-wasm-cont">
+                <!-- your SVG logo (optional) -->
+                <svg width="300" height="270" viewBox="0 0 700 700" xmlns="http://www.w3.org/2000/svg">
+                    <!-- sample placeholder path -->
+                    <circle cx="300" cy="350" r="320" fill="#ffffff55" stroke="#FF8C00" stroke-width="10" />
+                    <text x="300" y="380" text-anchor="middle"
+                          font-family="Arial black, sans-serif"
+                          font-size="140" fill="#E35A00">TRAJAN</text>
+                    <!-- font-size="180" fill="#fff">TRAJAN</text> -->
+                    <!-- stroke="#FF8C00" stroke-width="10">TRAJAN</text> -->
+                </svg>
+
+                <!-- loading message -->
+                <p class="abc-loader-message">
+                    Patientez&nbsp;Chargement&nbsp;En&nbsp;Cours&nbsp;......&hellip;
+                </p>
+            </div>
+        </div>
+
+    </div>
+
+    <div id="abc-blazor-error-ui" style="display:none">
+        Une erreur innattendue est survenue.
+        <a href="" class="reload">Reload</a>
+        <a class="dismiss">🗙</a>
+    </div>
+    <script src="_framework/blazor.webassembly.js"></script>
+    <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+</body>
+
+</html>

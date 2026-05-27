@@ -1,0 +1,12 @@
+﻿@page "/account"
+
+<Header OnReturn="ReturnClicked" Title="Compte" Description="Gère ton compte d'utilisateur'"/>
+
+<MudTabs Elevation="25" Color="Color.Transparent" Rounded="true" PanelClass="mt-6">
+    <MudTabPanel Text="Profil">
+        <Profile/>
+    </MudTabPanel>
+    <MudTabPanel Text="Securité">
+        <PasswordReset/>
+    </MudTabPanel>
+</MudTabs>

@@ -1,0 +1,31 @@
+﻿<MudForm @ref="_form" Model="SubscriptionRequest">
+    <MudDialog>
+        <TitleContent>
+            <MudText Typo="Typo.h6">
+                <MudIcon Icon="@Icons.Material.Filled.Upgrade" Class="mr-3 mb-n1"/>
+                Upgrader Souscription
+            </MudText>
+        </TitleContent>
+        <DialogContent>
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="SubscriptionRequest.TenantId" 
+                        ReadOnly
+                        Margin="Margin.Dense"
+                        Variant="Variant.Outlined"
+                        Label="Tenant Key"/>
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudDatePicker @bind-Date="NewExpiryDatePicker"                                   
+                        Margin="Margin.Dense"
+                        Variant="Variant.Outlined"
+                        Label="Nouvelle Date d'expiration'"/>
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="CancelDialog" Variant="Variant.Filled" Class="mr-auto">Cancel</MudButton>
+            <MudButton OnClick="UpgradeSubcriptionAsync" Variant="Variant.Filled" Color="Color.Primary">Enregistrer</MudButton>
+        </DialogActions>
+    </MudDialog>
+</MudForm>

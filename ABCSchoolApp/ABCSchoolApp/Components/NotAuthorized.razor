@@ -1,0 +1,30 @@
+﻿@page "/not-authorized"
+
+<MudContainer MaxWidth="MaxWidth.ExtraSmall"
+Class="d-flex flex-column justify-center align-center"
+Style="min-height: 70vh;">
+    <MudCard Elevation="25" Class="pa-6" Style="text-align:center;">
+        <MudCardContent>
+            <MudAvatar Color="Color.Error" Size="Size.Large" Class="mb-4"/>
+            <MudText>Vous n'êtes pas autorisé'</MudText>
+            <MudText Class="mb-4">
+                Désolé, vous n'avez pas la permission de voir cette page.
+                @if (!string.IsNullOrEmpty(Message))
+                {
+                    <br/>
+                    @Message
+                }
+            </MudText>
+            <MudButton OnClick="GoHome" Variant="Variant.Filled" Color="Color.Primary">
+                <MudIcon Icon="@Icons.Material.Filled.ArrowBack" Class="mr-2"/>
+                Aller à l'accueil'
+            </MudButton>
+        </MudCardContent>
+    </MudCard>
+</MudContainer>
+
+@code{
+    [Parameter] public string Message { get; set; }
+
+    private void GoHome() => _navigation.NavigateTo("/");
+}

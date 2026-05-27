@@ -1,0 +1,73 @@
+﻿<MudGrid>
+    <MudItem xs="12" sm="4" md="3">
+        <MudCard Elevation="25">
+            <MudCardContent>
+                <MudStack 
+                    AlignItems="AlignItems.Center" 
+                    Justify="Justify.Center"
+                    Spacing="0"
+                    Class="mb-4">
+                    <InputFile id="profile-avatar-input"
+                               OnChange="OnProfileImageChanged"
+                               accept="image/*"
+                               style="display: none;" />
+                    <MudTooltip Text="Clicker pour ajouter une image.">
+                        <label for="profile-avatar-input" style="cursor: pointer;">
+                            <MudAvatar Style="height:200px; width:200px; background-color: #FF8200; color: white; font-weight: bold;">
+                                @if (string.IsNullOrEmpty(_profileImageDataUrl))
+                                {
+                                    @FirstLetterOfFirstname
+                                }
+                                else
+                                {
+                                    <MudImage Src="@_profileImageDataUrl"
+                                              Alt="Photo du profil"
+                                              Style="height: 100%; width: 100%; object-fit: cover; border-radius: 50%;" />
+                                }
+                            </MudAvatar>
+                        </label>
+                    </MudTooltip>
+                </MudStack>
+                <MudText Typo="Typo.h6" Align="Align.Center"> @Firstname @Lastname</MudText>
+                <MudText Align="Align.Center">@Email</MudText>
+            </MudCardContent>
+        </MudCard>
+    </MudItem>
+    <MudItem xs="12" sm="8" md="9">
+        <MudForm @ref="_form" Model="@UpdateUserRequest">
+            <MudCard Elevation="25">
+                <MudCardHeader>
+                    <CardHeaderContent>
+                        <MudText> Details du Profil</MudText>
+                    </CardHeaderContent>
+                </MudCardHeader>
+                <MudCardContent>
+                    <MudGrid>
+                        <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="@UpdateUserRequest.FirstName" 
+                                Variant="Variant.Outlined"
+                                Label="Nom"/>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="@UpdateUserRequest.LastName" 
+                                Variant="Variant.Outlined"
+                                Label="Prénoms"/>
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="@UpdateUserRequest.PhoneNumber" 
+                                Variant="Variant.Outlined"
+                                Label="N° Téléphone"/>
+                        </MudItem>
+                    </MudGrid>
+                </MudCardContent>
+                <MudCardActions Class="pb-4 pl-4">
+                    <MudButton Variant="Variant.Filled" 
+                        Style="background-color: #4EC9B0; color: white;"
+                        Size="Size.Small"
+                        Class="ml-auto"
+                        OnClick="UpdateUserDetailsAsync">Enregister les Changements</MudButton>
+                </MudCardActions>
+            </MudCard>
+        </MudForm>
+    </MudItem>
+</MudGrid>

@@ -1,0 +1,34 @@
+﻿<MudForm @ref="_form" Model="CreateSchoolRequest" Validation="@(_validator.ValidateValue)" ValidationDelay="0">
+    <MudDialog>
+        <TitleContent>
+            <MudText>
+                <MudIcon Icon="@Icons.Material.Filled.Add" Class="mr-3 mb-n1" />
+                Ajouter une nouvelle école
+            </MudText>
+        </TitleContent>
+        <DialogContent>
+            <MudGrid>
+                <MudItem xs="12" md="6">
+                    <MudTextField @bind-Value="CreateSchoolRequest.Name"
+                                  For="@(() => CreateSchoolRequest.Name)"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Label="School Name" />
+                </MudItem>
+                <MudItem xs="12" md="6">
+                    <MudDatePicker Context="PickerContext"
+                                   @bind-Date="EstablishedDatePicker"
+                                   Variant="Variant.Outlined"
+                                   Margin="Margin.Dense"
+                                   @ref="_datePicker"
+                                   Label="Established Date" />
+                </MudItem>
+            </MudGrid>
+        </DialogContent>
+        <DialogActions>
+            <MudButton OnClick="CancelDialog" Variant="Variant.Outlined" Class="mr-auto">Cancel</MudButton>
+            <MudButton OnClick="SubmitAsync" Variant="Variant.Outlined" Color="Color.Primary"
+                Disabled="@(!_validator.Validate(CreateSchoolRequest).IsValid)">Enregistrer</MudButton>
+        </DialogActions>
+    </MudDialog>
+</MudForm>

@@ -1,0 +1,25 @@
+﻿<CurrentUserCard/>
+<MudNavMenu Rounded="true" Margin="Margin.Dense" Color="Color.Primary" Class="pa-2">
+    <MudNavLink Href="/" Icon="@Icons.Material.Filled.Home">Accueil</MudNavLink>
+    <MudNavLink Href="/account" Icon="@Icons.Material.Filled.ManageAccounts">Compte</MudNavLink>
+
+    @if (_canViewSchools)
+    {
+        <MudNavLink Href="/schools" Icon="@Icons.Material.Filled.School">Ecoles</MudNavLink>        
+    }
+
+    @if (_canViewUsers)
+    {
+        <MudNavLink Href="/users" Icon="@Icons.Material.Filled.People">Utilisateurs</MudNavLink>        
+    }
+
+    @if (_canViewRoles)
+    {
+        <MudNavLink Href="/roles" Icon="@Icons.Material.Filled.Security">Roles</MudNavLink>        
+    }
+
+    @if (_canViewTenants)
+    {
+        <MudNavLink Href="/tenants" Icon="@Icons.Material.Filled.BusinessCenter">Organisation</MudNavLink>        
+    }
+</MudNavMenu>

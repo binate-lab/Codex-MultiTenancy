@@ -1,0 +1,52 @@
+﻿@page "/schools"
+
+@using ABCShared.Library.Constants
+
+@attribute [ShouldHavePermission(SchoolAction.Read, SchoolFeature.Schools)]
+
+<Header OnReturn="Cancel" Title="Ecoles" Description="Gestion des Ecoles" />
+
+<MudTable Items="@_schoolList"
+          Loading="_isLoading"
+          LoadingProgressColor="Color.Info"
+          Elevation="25">
+    <ToolBarContent>
+        @if (_canCreateSchools)
+        {
+            <MudFab StartIcon="@Icons.Material.Filled.Add"
+                    OnClick="OnBoardNewSchoolAsync"
+                    Size="Size.Small"
+                    IconSize="Size.Medium"
+                    Class="mr-2" />
+        }
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Nom</MudTh>
+        <MudTh>Date de création</MudTh>
+        <MudTh Style="text-align:right">Actions</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd DataLabel="Nom"> @context.Name</MudTd>
+        <MudTd DataLabel="Date création"> @context.EstablishedDate.ToString("dd MMM yyyy")</MudTd>
+        <MudTd Style="text-align:right" DataLabel="Actions">
+            <MudMenu Icon="@Icons.Material.Filled.MoreVert"
+                     Size="Size.Small"
+                     Color="Color.Secondary"
+                     TransformOrigin="Origin.BottomLeft"
+                     AnchorOrigin="Origin.BottomLeft">
+                @if (_canUpdateSchools)
+                {
+                    <MudMenuItem>Mise à jour</MudMenuItem>
+                }
+                @if (_canDeleteSchools)
+                {
+                    <MudMenuItem>Supprimer</MudMenuItem>
+                }
+
+            </MudMenu>
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager RowsPerPageString="LignesParPage" InfoFormat="{first_item}-{last_item} sur {all_items}" />
+    </PagerContent>
+</MudTable>

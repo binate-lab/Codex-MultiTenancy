@@ -1,0 +1,20 @@
+﻿<MudCard Elevation="0" Square="true" Class="mt-n2">
+    @if (_isLoading)
+    {
+        <MudCardContent>
+            <MudProgressCircular Color="Color.Primary" Size="Size.Medium" Indeterminate="true"/>
+        </MudCardContent>
+    }
+    else
+    {
+        <MudCardHeader>
+            <CardHeaderAvatar>
+                <MudAvatar Style="background-color: #FF8200; color: white; font-weight: bold;">@FirstLetterOfFirstname</MudAvatar>
+            </CardHeaderAvatar>
+            <CardHeaderContent>
+                <MudText Typo="Typo.body2"> @Firstname @Lastname</MudText>
+                <MudText Typo=Typo.caption>@Email</MudText>
+            </CardHeaderContent>
+        </MudCardHeader>        
+    }
+</MudCard>
