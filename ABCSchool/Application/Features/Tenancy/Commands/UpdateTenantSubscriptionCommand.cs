@@ -19,8 +19,8 @@ namespace Application.Features.Tenancy.Commands
 
         public async Task<IResponseWrapper> Handle(UpdateTenantSubscriptionCommand request, CancellationToken cancellationToken)
         {
-            var tenantId = await _tenantService.UpdateSubscriptionAsync(request.UpdateTenantSubscription);
-            return await ResponseWrapper<string>.SuccessAsync(data: tenantId, "Mise à jour souscription de l'organisation effectuée avec succès");
+            var tenantIdentifier = await _tenantService.UpdateSubscriptionAsync(request.UpdateTenantSubscription);
+            return await ResponseWrapper<string>.SuccessAsync(data: tenantIdentifier, "Mise à jour souscription de l'organisation effectuée avec succès");
         }
     }
 }

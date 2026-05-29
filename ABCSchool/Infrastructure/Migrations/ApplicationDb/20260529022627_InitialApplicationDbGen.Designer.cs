@@ -12,8 +12,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations.ApplicationDb
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20260527170240_UpdateTenantIdentityIndexes")]
-    partial class UpdateTenantIdentityIndexes
+    [Migration("20260529022627_InitialApplicationDbGen")]
+    partial class InitialApplicationDbGen
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

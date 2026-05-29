@@ -87,7 +87,7 @@ namespace ABCSchoolApp.Pages.Auth
         private void FillRootAdminCredentialsDuringDevelopment()
         {
             _loginRequest.Tenant = "root";
-            _loginRequest.Username = "admin.root@abcschool.com";
+            _loginRequest.Username = "keita_amara@hotmail.com";
             _loginRequest.Password = "P@ssw0rd@123";
         }
     }

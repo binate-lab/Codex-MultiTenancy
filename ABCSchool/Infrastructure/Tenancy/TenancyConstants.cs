@@ -9,9 +9,15 @@
 
         public static class Root
         {
-            public const string Id = "root";
+            public const string Id = "00000000-0000-0000-0000-000000000001";
+            public const string Identifier = "root";
             public const string Name = "Root";
-            public const string Email = "admin.root@abcschool.com";
+            public const string Email = "keita_amara@hotmail.com";
+        }
+
+        public static bool IsRoot(ABCSchoolTenantInfo tenant)
+        {
+            return tenant?.Identifier == Root.Identifier;
         }
     }
 }

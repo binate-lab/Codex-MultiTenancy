@@ -36,14 +36,16 @@ namespace Infrastructure.Identity.Tokens
 
         public async Task<TokenResponse> LoginAsync(TokenRequest request)
         {
+            var currentTenant = GetCurrentTenant();
+
             #region Validations
-            if (!_tenantContextAccessor.MultiTenantContext.TenantInfo.IsActive)
+            if (!currentTenant.IsActive)
             {
-                throw new UnauthorizedException(["Tenant subscription is not active. Contact Administrator."]);
+                throw new UnauthorizedException(["La souscription de l'Ets est désactivée actuellement. Contacter Administrateur."]);
             }
 
             var userInDb = await _userManager.FindByNameAsync(request.Username)
-                ?? throw new UnauthorizedException(["Authentication not successful."]);
+                ?? throw new UnauthorizedException(["L'authentication a échoué."]);
 
             if (!await _userManager.CheckPasswordAsync(userInDb, request.Password))
             {
@@ -52,14 +54,14 @@ namespace Infrastructure.Identity.Tokens
 
             if (!userInDb.IsActive)
             {
-                throw new UnauthorizedException(["User Not Active. Contact Administrator."]);
+                throw new UnauthorizedException(["L'utilisateur est inactif actuellement. Contacter Administrateur."]);
             }
 
-            if (_tenantContextAccessor.MultiTenantContext.TenantInfo.Id is not TenancyConstants.Root.Id)
+            if (!TenancyConstants.IsRoot(currentTenant))
             {
-                if (_tenantContextAccessor.MultiTenantContext.TenantInfo.ValidUpTo < DateTime.UtcNow)
+                if (currentTenant.ValidUpTo < DateTime.UtcNow)
                 {
-                    throw new UnauthorizedException(["Tenant Subscription has expired. Contact Administrator."]);
+                    throw new UnauthorizedException(["La souscription de l'Ets a expiré. Contacter Administrateur."]);
                 }
             }
             #endregion
@@ -74,11 +76,11 @@ namespace Infrastructure.Identity.Tokens
             var userEmail = userPrincipal.GetEmail();
 
             var userInDb = await _userManager.FindByEmailAsync(userEmail)
-                ?? throw new UnauthorizedException(["Authentication failed."]);
+                ?? throw new UnauthorizedException(["L'authentication a échoué."]);
 
             if (userInDb.RefreshToken != request.CurrentRefreshToken || userInDb.RefreshTokenExpiryTime < DateTime.UtcNow)
             {
-                throw new UnauthorizedException(["Invalid token."]);
+                throw new UnauthorizedException(["Token invalide."]);
             }
 
             return await GenerateTokenAndUpdateUserAsync(userInDb);
@@ -103,7 +105,7 @@ namespace Infrastructure.Identity.Tokens
             if (securityToken is not JwtSecurityToken jwtSecurityToken
                 || !jwtSecurityToken.Header.Alg.Equals(SecurityAlgorithms.HmacSha256, StringComparison.InvariantCultureIgnoreCase))
             {
-                throw new UnauthorizedException(["Invalid token provided. Failed to generate new token."]);
+                throw new UnauthorizedException(["Le token est invalide. Echec à la generation d'un nouveau token."]);
             }
 
             return pricipal;
@@ -174,7 +176,7 @@ namespace Infrastructure.Identity.Tokens
                 new(ClaimTypes.Email, user.Email),
                 new(ClaimTypes.Name, user.FirstName),
                 new(ClaimTypes.Surname, user.LastName),
-                new(ClaimConstants.Tenant, _tenantContextAccessor.MultiTenantContext.TenantInfo.Id),
+                new(ClaimConstants.Tenant, GetCurrentTenant().Identifier),
                 new(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty)
             }
             .Union(roleClaims)
@@ -182,6 +184,12 @@ namespace Infrastructure.Identity.Tokens
             .Union(permissionClaims);
 
             return claims;
+        }
+
+        private ABCSchoolTenantInfo GetCurrentTenant()
+        {
+            return _tenantContextAccessor.MultiTenantContext?.TenantInfo
+                ?? throw new UnauthorizedException(["Organisation introuvable. Utilisez son identifiant, par exemple 'heleis', dans le header tenant."]);
         }
 
         private string GenerateRefreshToken()

@@ -7,6 +7,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <Compile Remove="Constants\RoleConstants.cs" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="Finbuckle.MultiTenant" Version="10.0.7" />
     <PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="10.0.7" />
     <PackageReference Include="Finbuckle.MultiTenant.EntityFrameworkCore" Version="10.0.7" />
@@ -28,6 +32,10 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <Folder Include="Migrations\ApplicationDb\" />
   </ItemGroup>
 
 </Project>

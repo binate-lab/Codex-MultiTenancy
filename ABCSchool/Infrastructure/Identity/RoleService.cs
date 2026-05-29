@@ -1,7 +1,8 @@
-﻿using Application.Exceptions;
+﻿using ABCShared.Library.Constants;
+using Application.Exceptions;
 using Application.Features.Identity.Roles;
 using Finbuckle.MultiTenant.Abstractions;
-using Infrastructure.Constants;
+//using Infrastructure.Constants;
 using Infrastructure.Contexts;
 using Infrastructure.Identity.Models;
 using Infrastructure.Tenancy;
@@ -139,7 +140,7 @@ namespace Infrastructure.Identity
                 throw new ConflictException([$"Not allowed to change permissions for '{roleInDb.Name}' role."]);
             }
 
-            if (_tenantInfoContextAccessor.MultiTenantContext.TenantInfo.Id != TenancyConstants.Root.Id)
+            if (!TenancyConstants.IsRoot(_tenantInfoContextAccessor.MultiTenantContext.TenantInfo))
             {
                 request.NewPermissions.RemoveAll(p => p.StartsWith("Permission.Tenants."));
             }

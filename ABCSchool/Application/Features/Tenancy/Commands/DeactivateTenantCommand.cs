@@ -5,7 +5,7 @@ namespace Application.Features.Tenancy.Commands
 {
     public class DeactivateTenantCommand : IRequest<IResponseWrapper>
     {
-        public string TenantId { get; set; }
+        public string TenantIdentifier { get; set; }
     }
 
     public class DeactivateTenantCommandHandler : IRequestHandler<DeactivateTenantCommand, IResponseWrapper>
@@ -19,9 +19,9 @@ namespace Application.Features.Tenancy.Commands
 
         public async Task<IResponseWrapper> Handle(DeactivateTenantCommand request, CancellationToken cancellationToken)
         {
-            var tenantId = await _tenantService.DeactivateAsync(request.TenantId);
+            var tenantIdentifier = await _tenantService.DeactivateAsync(request.TenantIdentifier);
 
-            return await ResponseWrapper<string>.SuccessAsync(data: tenantId, "La désactivation de l'organisation a reussi!");
+            return await ResponseWrapper<string>.SuccessAsync(data: tenantIdentifier, "La désactivation de l'organisation a reussi!");
         }
     }
 }

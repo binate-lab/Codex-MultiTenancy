@@ -19,9 +19,9 @@ namespace Application.Features.Tenancy.Commands
 
         public async Task<IResponseWrapper> Handle(CreateTenantCommand request, CancellationToken cancellationToken)
         {
-            var tenantId = await _tenantService.CreateTenantAsync(request.CreateTenant, cancellationToken);
+            var tenantIdentifier = await _tenantService.CreateTenantAsync(request.CreateTenant, cancellationToken);
 
-            return await ResponseWrapper<string>.SuccessAsync(data: tenantId, "Organisationcréée avec succès!");
+            return await ResponseWrapper<string>.SuccessAsync(data: tenantIdentifier, "Organisationcréée avec succès!");
         }
     }
 }

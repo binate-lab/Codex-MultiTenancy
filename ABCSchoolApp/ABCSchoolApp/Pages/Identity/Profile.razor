@@ -54,6 +54,11 @@
                                 Label="Prénoms"/>
                         </MudItem>
                         <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="@UpdateUserRequest.Email"
+                                          Variant="Variant.Outlined"
+                                          Label="Email" />
+                        </MudItem>
+                        <MudItem xs="12" md="6">
                             <MudTextField @bind-Value="@UpdateUserRequest.PhoneNumber" 
                                 Variant="Variant.Outlined"
                                 Label="N° Téléphone"/>

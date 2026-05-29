@@ -19,9 +19,9 @@ namespace Infrastructure.Tenancy
             _serviceProvider = serviceProvider;
         }
 
-        public async Task<string> ActivateAsync(string id)
+        public async Task<string> ActivateAsync(string identifier)
         {
-            var tenantInDb = await _tenantStore.GetByIdentifierAsync(id);
+            var tenantInDb = await _tenantStore.GetByIdentifierAsync(identifier);
             tenantInDb.IsActive = true;
 
             await _tenantStore.UpdateAsync(tenantInDb);
@@ -32,7 +32,7 @@ namespace Infrastructure.Tenancy
         {
             var newTenant = new ABCSchoolTenantInfo
             {
-                Id = createTenant.Identifier,
+                Id = Guid.NewGuid().ToString(),
                 Identifier = createTenant.Identifier,
                 Name = createTenant.Name,
                 IsActive = createTenant.IsActive,
@@ -56,18 +56,18 @@ namespace Infrastructure.Tenancy
             return newTenant.Identifier;
         }
 
-        public async Task<string> DeactivateAsync(string id)
+        public async Task<string> DeactivateAsync(string identifier)
         {
-            var tenantInDb = await _tenantStore.GetByIdentifierAsync(id);
+            var tenantInDb = await _tenantStore.GetByIdentifierAsync(identifier);
             tenantInDb.IsActive = false;
 
             await _tenantStore.UpdateAsync(tenantInDb);
             return tenantInDb.Identifier;
         }
 
-        public async Task<TenantResponse> GetTenantByIdAsync(string id)
+        public async Task<TenantResponse> GetTenantByIdentifierAsync(string identifier)
         {
-            var tenantInDb = await _tenantStore.GetByIdentifierAsync(id);
+            var tenantInDb = await _tenantStore.GetByIdentifierAsync(identifier);
 
             #region Manual Mapping
             //var tenantResponse = new TenantResponse
@@ -96,7 +96,7 @@ namespace Infrastructure.Tenancy
 
         public async Task<string> UpdateSubscriptionAsync(UpdateTenantSubscriptionRequest updateTenantSubscription)
         {
-            var tenantInDb = await _tenantStore.GetByIdentifierAsync(updateTenantSubscription.TenantId);
+            var tenantInDb = await _tenantStore.GetByIdentifierAsync(updateTenantSubscription.TenantIdentifier);
 
             tenantInDb.ValidUpTo = updateTenantSubscription.NewExpiryDate;
 

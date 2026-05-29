@@ -1,7 +1,8 @@
-﻿using Application.Exceptions;
+﻿using ABCShared.Library.Constants;
+using Application.Exceptions;
 using Application.Features.Identity.Users;
 using Finbuckle.MultiTenant.Abstractions;
-using Infrastructure.Constants;
+//using Infrastructure.Constants;
 using Infrastructure.Contexts;
 using Infrastructure.Identity.Models;
 using Infrastructure.Tenancy;
@@ -55,14 +56,14 @@ namespace Infrastructure.Identity
                 var adminUsersCount = (await _userManager.GetUsersInRoleAsync(RoleConstants.Admin)).Count;
                 if (userInDb.Email == TenancyConstants.Root.Email)
                 {
-                    if (_tenantContextAccessor.MultiTenantContext.TenantInfo.Id == TenancyConstants.Root.Id)
+                    if (TenancyConstants.IsRoot(_tenantContextAccessor.MultiTenantContext.TenantInfo))
                     {
-                        throw new ConflictException(["Not allowed to remove Admin role for a Root Tenant User."]);
+                        throw new ConflictException(["Impossible d'enlever le role Admin a une organisation."]);
                     }
                 }
                 else if(adminUsersCount <= 2)
                 {
-                    throw new ConflictException(["Not allowed. Tenant should have at least two Admin Users."]);
+                    throw new ConflictException(["Pas autorisé. Un Ets doit obligatoirement avoir au moins 2 admistrateurs."]);
                 }
             }
 
@@ -90,7 +91,7 @@ namespace Infrastructure.Identity
 
             if (request.NewPassword != request.ConfirmNewPassword)
             {
-                throw new ConflictException(["Passwords do not match."]);
+                throw new ConflictException(["Les mots de passe ne correspondent pas."]);
             }
 
             var result = await _userManager.ChangePasswordAsync(userInDb, request.CurrentPassword, request.NewPassword);
@@ -106,12 +107,12 @@ namespace Infrastructure.Identity
         {
             if (request.Password != request.ConfirmPassword)
             {
-                throw new ConflictException(["Passwords do not match."]);
+                throw new ConflictException(["Les mots de passe ne correspondent pas."]);
             }
 
             if (await IsEmailTakenAsync(request.Email))
             {
-                throw new ConflictException(["Email already taken."]);
+                throw new ConflictException(["Cet Email a déjà été utilisé."]);
             }
 
             var newUser = new ApplicationUser
@@ -141,7 +142,7 @@ namespace Infrastructure.Identity
 
             if (userInDb.Email == TenancyConstants.Root.Email)
             {
-                throw new ConflictException(["Not allowed to remove Admin User for a Root Tenant."]);
+                throw new ConflictException(["Impossible de supprimer un utilisateur Admin pour un Root Tenant."]);
             }
 
             _context.Users.Remove(userInDb);
@@ -222,6 +223,19 @@ namespace Infrastructure.Identity
         public async Task<string> UpdateAsync(UpdateUserRequest request)
         {
             var userInDb = await GetUserAsync(request.Id);
+
+            if (!string.Equals(userInDb.Email, request.Email, StringComparison.OrdinalIgnoreCase))
+            {
+                var userWithSameEmail = await _userManager.FindByEmailAsync(request.Email);
+                if (userWithSameEmail is not null && userWithSameEmail.Id != userInDb.Id)
+                {
+                    throw new ConflictException(["Cet Email a déjà été utilisé."]);
+                }
+
+                userInDb.Email = request.Email;
+                userInDb.UserName = request.Email;
+                userInDb.EmailConfirmed = true;
+            }
 
             userInDb.FirstName = request.FirstName;
             userInDb.LastName = request.LastName;

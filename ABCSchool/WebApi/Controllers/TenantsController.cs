@@ -22,11 +22,11 @@ namespace WebApi.Controllers
             return BadRequest(response);
         }
 
-        [HttpPut("{tenantId}/activate")]
+        [HttpPut("{tenantIdentifier}/activate")]
         [ShouldHavePermission(SchoolAction.Update, SchoolFeature.Tenants)]
-        public async Task<IActionResult> ActivateTenantAsync(string tenantId)
+        public async Task<IActionResult> ActivateTenantAsync(string tenantIdentifier)
         {
-            var response = await Sender.Send(new ActivateTenantCommand { TenantId = tenantId });
+            var response = await Sender.Send(new ActivateTenantCommand { TenantIdentifier = tenantIdentifier });
             if (response.IsSuccessful)
             {
                 return Ok(response);
@@ -34,11 +34,11 @@ namespace WebApi.Controllers
             return BadRequest(response);
         }
 
-        [HttpPut("{tenantId}/deactivate")]
+        [HttpPut("{tenantIdentifier}/deactivate")]
         [ShouldHavePermission(SchoolAction.Update, SchoolFeature.Tenants)]
-        public async Task<IActionResult> DeactivateTenantAsync(string tenantId)
+        public async Task<IActionResult> DeactivateTenantAsync(string tenantIdentifier)
         {
-            var response = await Sender.Send(new DeactivateTenantCommand { TenantId = tenantId });
+            var response = await Sender.Send(new DeactivateTenantCommand { TenantIdentifier = tenantIdentifier });
             if (response.IsSuccessful)
             {
                 return Ok(response);
@@ -58,11 +58,11 @@ namespace WebApi.Controllers
             return BadRequest(response);
         }
 
-        [HttpGet("{tenantId}")]
+        [HttpGet("{tenantIdentifier}")]
         [ShouldHavePermission(SchoolAction.Read, SchoolFeature.Tenants)]
-        public async Task<IActionResult> GetTenantByIdAsync(string tenantId)
+        public async Task<IActionResult> GetTenantByIdentifierAsync(string tenantIdentifier)
         {
-            var response = await Sender.Send(new GetTenantByIdQuery { TenantId = tenantId });
+            var response = await Sender.Send(new GetTenantByIdentifierQuery { TenantIdentifier = tenantIdentifier });
             if (response.IsSuccessful)
             {
                 return Ok(response);

@@ -37,13 +37,15 @@ namespace Infrastructure.Tenancy
                 }
             }
 
-            if (await _tenantDbContext.TenantInfo.FindAsync([TenancyConstants.Root.Id], ct) is null)
+            if (await _tenantDbContext.TenantInfo
+                    .SingleOrDefaultAsync(tenant => tenant.Identifier == TenancyConstants.Root.Identifier, ct)
+                is null)
             {
                 // Create tenant
                 var rootTenant = new ABCSchoolTenantInfo
                 {
                     Id = TenancyConstants.Root.Id,
-                    Identifier = TenancyConstants.Root.Id,
+                    Identifier = TenancyConstants.Root.Identifier,
                     Name = TenancyConstants.Root.Name,
                     Email = TenancyConstants.Root.Email,
                     FirstName = TenancyConstants.FirstName,

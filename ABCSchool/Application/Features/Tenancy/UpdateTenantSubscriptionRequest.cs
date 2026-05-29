@@ -2,7 +2,7 @@
 {
     public class UpdateTenantSubscriptionRequest
     {
-        public string TenantId { get; set; }
+        public string TenantIdentifier { get; set; }
         public DateTime NewExpiryDate { get; set; }
     }
 }

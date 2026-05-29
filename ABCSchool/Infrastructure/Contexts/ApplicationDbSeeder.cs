@@ -1,5 +1,6 @@
 ﻿using Finbuckle.MultiTenant.Abstractions;
-using Infrastructure.Constants;
+using ABCShared.Library.Constants;
+//using Infrastructure.Constants;
 using Infrastructure.Identity.Models;
 using Infrastructure.Tenancy;
 using Microsoft.AspNetCore.Identity;
@@ -55,7 +56,7 @@ namespace Infrastructure.Contexts
                     // Assign Admin Permissions
                     await AssignPermissionsToRoleAsync(SchoolPermissions.Admin, incomingRole, ct);
 
-                    if (_tenantInfoContextAccessor.MultiTenantContext.TenantInfo.Id == TenancyConstants.Root.Id)
+                    if (TenancyConstants.IsRoot(_tenantInfoContextAccessor.MultiTenantContext.TenantInfo))
                     {
                         await AssignPermissionsToRoleAsync(SchoolPermissions.Root, incomingRole, ct);
                     }

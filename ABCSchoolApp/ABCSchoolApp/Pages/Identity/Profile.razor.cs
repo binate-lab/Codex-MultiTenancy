@@ -35,11 +35,13 @@ namespace ABCSchoolApp.Pages.Identity
             UpdateUserRequest.Id = UserId;
             UpdateUserRequest.FirstName = Firstname;
             UpdateUserRequest.LastName = Lastname;
+            UpdateUserRequest.Email = Email;
             UpdateUserRequest.PhoneNumber = user.GetPhoneNumber();
 
             var userResult = await _userService.GetByIdAsync(UserId);
             if (userResult.IsSuccessful)
             {
+                UpdateUserRequest.Email = userResult.Data.Email;
                 UpdateUserRequest.PhoneNumber = userResult.Data.PhoneNumber;
                 UpdateUserRequest.ImageFile = userResult.Data.ImageFile;
                 _profileImageDataUrl = userResult.Data.ImageFile;
