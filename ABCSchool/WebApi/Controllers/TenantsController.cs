@@ -81,5 +81,17 @@ namespace WebApi.Controllers
             }
             return BadRequest(response);
         }
+
+        [HttpDelete("{tenantIdentifier}")]
+        [ShouldHavePermission(SchoolAction.Delete, SchoolFeature.Tenants)]
+        public async Task<IActionResult> DeleteTenantAsync(string tenantIdentifier)
+        {
+            var response = await Sender.Send(new DeleteTenantCommand { TenantIdentifier = tenantIdentifier });
+            if (response.IsSuccessful)
+            {
+                return Ok(response);
+            }
+            return BadRequest(response);
+        }
     }
 }

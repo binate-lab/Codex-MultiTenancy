@@ -33,13 +33,14 @@
     }
 
     public class TenantEndpoints
-    { 
+    {
         public string Create { get; set; }
         public string Upgrade { get; set; }
         public string All { get; set; }
         public string ById { get; set; }
         public string Activate { get; set; }
         public string DeActivate { get; set; }
+        public string Delete { get; set; }
 
         public string GetById(string tenantId)
         {
@@ -50,9 +51,15 @@
         {
             return $"{Activate}{tenantId}/activate";
         }
+
         public string FullDeActivate(string tenantId)
         {
             return $"{DeActivate}{tenantId}/deactivate";
+        }
+
+        public string GetDelete(string tenantId)
+        {
+            return $"{Delete}{tenantId}";
         }
     }
 

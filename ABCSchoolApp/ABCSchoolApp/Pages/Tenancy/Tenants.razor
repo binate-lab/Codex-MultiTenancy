@@ -52,6 +52,7 @@ Elevation="25">
                 {
                     <MudMenuItem OnClick="@(() => ActivateOrDeactivativeAsync(context))">Activation</MudMenuItem>
                 }
+                <MudMenuItem OnClick="@(() => DeleteTenantAsync(context))" Style="color: var(--mud-palette-error);">Supprimer</MudMenuItem>
 
             </MudMenu>
         </MudTd>

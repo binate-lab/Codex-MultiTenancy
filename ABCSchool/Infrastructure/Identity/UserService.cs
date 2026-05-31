@@ -58,7 +58,7 @@ namespace Infrastructure.Identity
                 {
                     if (TenancyConstants.IsRoot(_tenantContextAccessor.MultiTenantContext.TenantInfo))
                     {
-                        throw new ConflictException(["Impossible d'enlever le role Admin a une organisation."]);
+                        throw new ConflictException(["Impossible d'enlever le role Admin a un Ets."]);
                     }
                 }
                 else if(adminUsersCount <= 2)

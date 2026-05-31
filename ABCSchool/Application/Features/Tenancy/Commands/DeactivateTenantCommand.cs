@@ -21,7 +21,7 @@ namespace Application.Features.Tenancy.Commands
         {
             var tenantIdentifier = await _tenantService.DeactivateAsync(request.TenantIdentifier);
 
-            return await ResponseWrapper<string>.SuccessAsync(data: tenantIdentifier, "La désactivation de l'organisation a reussi!");
+            return await ResponseWrapper<string>.SuccessAsync(data: tenantIdentifier, "La désactivation de l'Ets a reussi!");
         }
     }
 }

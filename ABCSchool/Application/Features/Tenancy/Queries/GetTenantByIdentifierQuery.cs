@@ -24,7 +24,7 @@ namespace Application.Features.Tenancy.Queries
             {
                 return await ResponseWrapper<TenantResponse>.SuccessAsync(data: tenant);
             }
-            return await ResponseWrapper<TenantResponse>.FailAsync(message: $"Aucune organisation avec l'identifiant '{request.TenantIdentifier}' trouvée!");
+            return await ResponseWrapper<TenantResponse>.FailAsync(message: $"Aucun Ets avec l'identifiant '{request.TenantIdentifier}' trouvée!");
         }
     }
 }

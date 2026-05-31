@@ -37,6 +37,7 @@ namespace Infrastructure.Constants
             new SchoolPermission(SchoolAction.Create, SchoolFeature.Tenants, "Create Tenants", "Tenancy", IsRoot: true),
             new SchoolPermission(SchoolAction.Read, SchoolFeature.Tenants, "Read Tenants", "Tenancy", IsRoot: true),
             new SchoolPermission(SchoolAction.Update, SchoolFeature.Tenants, "Update Tenants", "Tenancy", IsRoot: true),
+            new SchoolPermission(SchoolAction.Delete, SchoolFeature.Tenants, "Delete Tenants", "Tenancy", IsRoot: true),
             new SchoolPermission(SchoolAction.UpgradeSubscription, SchoolFeature.Tenants, "Upgrade Tenant's Subscription", "Tenancy", IsRoot: true),
 
             new SchoolPermission(SchoolAction.Create, SchoolFeature.Users, "Create Users", "SystemAccess"),

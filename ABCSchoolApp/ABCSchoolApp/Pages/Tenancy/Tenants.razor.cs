@@ -65,7 +65,7 @@ namespace ABCSchoolApp.Pages.Tenancy
                     nameof(UpgradeSubscription.SubscriptionRequest),
                     new UpdateTenantSubscriptionRequest
                     {
-                        TenantId = tenant.Identifier,
+                        TenantIdentifier = tenant.Identifier,
                         NewExpiryDate = tenant.ValidUpTo,
                     }
                 }
@@ -87,6 +87,46 @@ namespace ABCSchoolApp.Pages.Tenancy
             if (!result.Canceled)
             {
                 await LoadTenantsAsync();
+            }
+        }
+
+        private async Task DeleteTenantAsync(TenantResponse tenant)
+        {
+            var parameters = new DialogParameters
+            {
+                { nameof(Confirmation.Title), "Suppression Ets" },
+                { nameof(Confirmation.Message), $"Etes vous sûr de vouloir supprimer définitivement l'Ets: {tenant.Name}? Cette action est irréversible." },
+                { nameof(Confirmation.ButtonText), "Supprimer" },
+                { nameof(Confirmation.Color), Color.Error },
+                { nameof(Confirmation.InputIcon), Icons.Material.Filled.DeleteForever }
+            };
+
+            var options = new DialogOptions
+            {
+                CloseButton = true,
+                MaxWidth = MaxWidth.Small,
+                BackdropClick = true,
+                FullWidth = true
+            };
+
+            var dialog = await _dialogService.ShowAsync<Confirmation>(title: null, parameters, options);
+            var result = await dialog.Result;
+            if (!result.Canceled)
+            {
+                var response = await _tenantService.DeleteAsync(tenant.Identifier);
+
+                if (response.IsSuccessful)
+                {
+                    _snackbar.Add(response.Messages[0], Severity.Success);
+                    await LoadTenantsAsync();
+                }
+                else
+                {
+                    foreach (var message in response.Messages)
+                    {
+                        _snackbar.Add(message, Severity.Error);
+                    }
+                }
             }
         }
 

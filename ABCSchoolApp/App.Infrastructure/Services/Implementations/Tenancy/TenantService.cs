@@ -53,5 +53,11 @@ namespace App.Infrastructure.Services.Implementations.Tenancy
             var response = await _httpClient.PutAsJsonAsync(_apiSettings.TenantEndpoints.Upgrade, request);
             return await response.WrapToResponse<string>();
         }
+
+        public async Task<IResponseWrapper<string>> DeleteAsync(string tenantId)
+        {
+            var response = await _httpClient.DeleteAsync(_apiSettings.TenantEndpoints.GetDelete(tenantId));
+            return await response.WrapToResponse<string>();
+        }
     }
 }

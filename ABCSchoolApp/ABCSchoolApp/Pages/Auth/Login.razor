@@ -21,16 +21,17 @@
 <MudForm @ref="@_form" Model="@_loginRequest">
     <MudGrid>
         <MudItem xs="12">
-            <MudTextField @bind-Value="_loginRequest.Tenant" Label="Code Ets" Variant="Variant.Outlined" Required="true"/>
+            <MudTextField @bind-Value="_loginRequest.Tenant" Label="Code Ets" Variant="Variant.Outlined" Required="true" RequiredError="Ce champ est obligatoire"/>
         </MudItem>
         <MudItem xs="12">
-            <MudTextField @bind-Value="_loginRequest.Username" Label="Nom/Email" Variant="Variant.Outlined" Required="true" />
+            <MudTextField @bind-Value="_loginRequest.Username" Label="Nom/Email" Variant="Variant.Outlined" Required="true" RequiredError="Ce champ est obligatoire" />
         </MudItem>
         <MudItem xs="12">
             <MudTextField @bind-Value="_loginRequest.Password" 
                 Label="Mot de passe" 
                 Variant="Variant.Outlined" 
                 Required="true"
+                RequiredError="Ce champ est obligatoire"
                 InputType="@_inputType"
                 Adornment="Adornment.End"
                 AdornmentIcon="@_passwordInputIcon"

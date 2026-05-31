@@ -8,5 +8,6 @@
         Task<string> UpdateSubscriptionAsync(UpdateTenantSubscriptionRequest updateTenantSubscription);
         Task<List<TenantResponse>> GetTenantsAsync();
         Task<TenantResponse> GetTenantByIdentifierAsync(string identifier);
+        Task<string> DeleteTenantAsync(string identifier);
     }
 }

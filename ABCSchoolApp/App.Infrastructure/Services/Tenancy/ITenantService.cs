@@ -12,5 +12,6 @@ namespace App.Infrastructure.Services.Tenancy
         Task<IResponseWrapper<string>> UpgradeSubscriptionAsync(UpdateTenantSubscriptionRequest request);
         Task<IResponseWrapper<string>> ActivateAsync(string tenantId);
         Task<IResponseWrapper<string>> DeActivateAsync(string tenantId);
+        Task<IResponseWrapper<string>> DeleteAsync(string tenantId);
     }
 }

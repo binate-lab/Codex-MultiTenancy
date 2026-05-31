@@ -1,7 +1,9 @@
-﻿using Application.Features.Tenancy;
+﻿using Application.Exceptions;
+using Application.Features.Tenancy;
 using Finbuckle.MultiTenant.Abstractions;
 using Infrastructure.Contexts;
 using Mapster;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure.Tenancy
@@ -96,13 +98,35 @@ namespace Infrastructure.Tenancy
 
         public async Task<string> UpdateSubscriptionAsync(UpdateTenantSubscriptionRequest updateTenantSubscription)
         {
-            var tenantInDb = await _tenantStore.GetByIdentifierAsync(updateTenantSubscription.TenantIdentifier);
+            var tenantInDb = await _tenantStore.GetByIdentifierAsync(updateTenantSubscription.TenantIdentifier)
+                ?? throw new NotFoundException(["Cet établissement n'existe pas."]);
 
             tenantInDb.ValidUpTo = updateTenantSubscription.NewExpiryDate;
 
             await _tenantStore.UpdateAsync(tenantInDb);
 
             return tenantInDb.Identifier;
+        }
+
+        public async Task<string> DeleteTenantAsync(string identifier)
+        {
+            if (identifier == TenancyConstants.Root.Identifier)
+                throw new ConflictException(["La suppression du tenant racine n'est pas autorisée."]);
+
+            var tenantInDb = await _tenantStore.GetByIdentifierAsync(identifier)
+                ?? throw new NotFoundException(["Cet établissement n'existe pas."]);
+
+            using var scope = _serviceProvider.CreateScope();
+            scope.ServiceProvider.GetRequiredService<IMultiTenantContextSetter>()
+                .MultiTenantContext = new MultiTenantContext<ABCSchoolTenantInfo>(tenantInDb);
+            var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
+            var userCount = await dbContext.Users.CountAsync();
+
+            if (userCount > 0)
+                throw new ConflictException([$"Impossible de supprimer l'Ets '{tenantInDb.Name}' car elle possède {userCount} utilisateur(s)."]);
+
+            await _tenantStore.RemoveAsync(identifier);
+            return identifier;
         }
     }
 }
