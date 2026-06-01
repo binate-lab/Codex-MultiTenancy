@@ -24,6 +24,7 @@ namespace Application.Features.Schools.Commands
 
             if (schoolInDb is not null)
             {
+                schoolInDb.CodeEts = request.UpdateSchool.CodeEts;
                 schoolInDb.Name = request.UpdateSchool.Name;
                 schoolInDb.EstablishedDate = request.UpdateSchool.EstablishedDate;
 

@@ -78,6 +78,15 @@ namespace Infrastructure.Contexts
                     .IsMultiTenant();
 
                 builder
+                    .Property(school => school.CodeEts)
+                    .IsRequired()
+                    .HasMaxLength(20);
+
+                builder
+                    .HasIndex(school => school.CodeEts)
+                    .IsUnique();
+
+                builder
                     .Property(school => school.Name)
                     .IsRequired()
                     .HasMaxLength(60);

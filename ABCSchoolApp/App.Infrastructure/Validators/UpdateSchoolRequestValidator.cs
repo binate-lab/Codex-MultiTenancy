@@ -1,11 +1,11 @@
-﻿using ABCShared.Library.Models.Requests.Schools;
+using ABCShared.Library.Models.Requests.Schools;
 using FluentValidation;
 
 namespace App.Infrastructure.Validators
 {
-    public class CreateSchoolRequestValidator : AbstractValidator<CreateSchoolRequest>
+    public class UpdateSchoolRequestValidator : AbstractValidator<UpdateSchoolRequest>
     {
-        public CreateSchoolRequestValidator()
+        public UpdateSchoolRequestValidator()
         {
             RuleFor(request => request.CodeEts)
                 .Must(code => !string.IsNullOrEmpty(code))
@@ -13,13 +13,13 @@ namespace App.Infrastructure.Validators
 
             RuleFor(request => request.Name)
                 .Must(name => !string.IsNullOrEmpty(name))
-                .WithMessage("Le nom de l'Ets est requis!");
+                .WithMessage("Le nom de l'école est requis!");
         }
 
         public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (request, propertyName) =>
         {
-            var validationResult = await ValidateAsync(ValidationContext<CreateSchoolRequest>
-                .CreateWithOptions((CreateSchoolRequest)request, vst => vst.IncludeProperties(propertyName)));
+            var validationResult = await ValidateAsync(ValidationContext<UpdateSchoolRequest>
+                .CreateWithOptions((UpdateSchoolRequest)request, vst => vst.IncludeProperties(propertyName)));
 
             if (validationResult.IsValid)
             {

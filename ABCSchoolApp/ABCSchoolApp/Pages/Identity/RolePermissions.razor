@@ -14,7 +14,7 @@ else
             var assignedRoleClaimsInGroup = RoleClaimsGroup[group].Where(rcvm => rcvm.IsSelected).ToList();
             var allRoleClaimsInGroup = RoleClaimsGroup[group].ToList();
 
-            <MudTabPanel Text="@group" BadgeData="@($"{assignedRoleClaimsInGroup.Count}/{allRoleClaimsInGroup.Count}")"
+            <MudTabPanel Text="@GetTabLabel(group)" BadgeData="@($"{assignedRoleClaimsInGroup.Count}/{allRoleClaimsInGroup.Count}")"
                          Style="padding-right: 42px;" BadgeColor="@GetGroupBadgeColor(assignedRoleClaimsInGroup.Count, allRoleClaimsInGroup.Count)">
                 <MudTable Items="@allRoleClaimsInGroup"
                           Style="margin-bottom: 0px!important"
@@ -28,14 +28,24 @@ else
                     <HeaderContent>
                         <MudTh>Nom</MudTh>
                         <MudTh>Description</MudTh>
-                        <MudTh>Est Selectionné</MudTh>
+                        <MudTh>Accordée / Retirée</MudTh>
+                        <MudTh Style="text-align:right">Actions</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd DataLabel="Nom"> @context.Name</MudTd>
                         <MudTd DataLabel="Description"> @context.Description</MudTd>
-                        <MudTd DataLabel="Est Actif">
+                        <MudTd DataLabel="Sélection">
                             <MudCheckBox @bind-Value="@context.IsSelected"
                                          Color="Color.Secondary" />
+                        </MudTd>
+                        <MudTd DataLabel="Actions" Style="text-align:right">
+                            @if (_canUpdateRolePermission)
+                            {
+                                <MudButton Size="Size.Small"
+                                           Variant="Variant.Outlined"
+                                           Color="Color.Primary"
+                                           OnClick="UpdateRolePermissionsAsync">Mettre à jour</MudButton>
+                            }
                         </MudTd>
                     </RowTemplate>
                     <PagerContent>

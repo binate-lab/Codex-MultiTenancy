@@ -1,23 +1,23 @@
-﻿<MudForm @ref="_form" Model="CreateSchoolRequest" Validation="@(_validator.ValidateValue)" ValidationDelay="0">
+<MudForm @ref="_form" Model="UpdateSchoolRequest" Validation="@(_validator.ValidateValue)" ValidationDelay="0">
     <MudDialog>
         <TitleContent>
             <MudText>
-                <MudIcon Icon="@Icons.Material.Filled.Add" Class="mr-3 mb-n1" />
-                Ajouter une nouvelle école
+                <MudIcon Icon="@Icons.Material.Filled.Edit" Class="mr-3 mb-n1" />
+                Modifier l'école
             </MudText>
         </TitleContent>
         <DialogContent>
             <MudGrid>
                 <MudItem xs="12" md="4">
-                    <MudTextField @bind-Value="CreateSchoolRequest.CodeEts"
-                                  For="@(() => CreateSchoolRequest.CodeEts)"
+                    <MudTextField @bind-Value="UpdateSchoolRequest.CodeEts"
+                                  For="@(() => UpdateSchoolRequest.CodeEts)"
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
                                   Label="Code Ets" />
                 </MudItem>
                 <MudItem xs="12" md="4">
-                    <MudTextField @bind-Value="CreateSchoolRequest.Name"
-                                  For="@(() => CreateSchoolRequest.Name)"
+                    <MudTextField @bind-Value="UpdateSchoolRequest.Name"
+                                  For="@(() => UpdateSchoolRequest.Name)"
                                   Variant="Variant.Outlined"
                                   Margin="Margin.Dense"
                                   Label="Nom Ecole" />
@@ -35,7 +35,7 @@
         <DialogActions>
             <MudButton OnClick="CancelDialog" Variant="Variant.Outlined" Class="mr-auto">Annuler</MudButton>
             <MudButton OnClick="SubmitAsync" Variant="Variant.Outlined" Color="Color.Primary"
-                Disabled="@(!_validator.Validate(CreateSchoolRequest).IsValid)">Enregistrer</MudButton>
+                Disabled="@(!_validator.Validate(UpdateSchoolRequest).IsValid)">Enregistrer</MudButton>
         </DialogActions>
     </MudDialog>
 </MudForm>

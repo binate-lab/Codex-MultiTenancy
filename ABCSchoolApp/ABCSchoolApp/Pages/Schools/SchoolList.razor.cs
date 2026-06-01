@@ -1,4 +1,5 @@
-﻿using ABCSchoolApp.Pages.Tenancy;
+﻿using ABCSchoolApp.Components;
+using ABCSchoolApp.Pages.Tenancy;
 using ABCShared.Library.Constants;
 using ABCShared.Library.Models.Responses.Schools;
 using App.Infrastructure.Extensions;
@@ -71,6 +72,70 @@ namespace ABCSchoolApp.Pages.Schools
             if (!result.Canceled)
             {
                 await LoadSchoolsAsync();
+            }
+        }
+
+        private async Task UpdateSchoolAsync(SchoolResponse school)
+        {
+            var parameters = new DialogParameters
+            {
+                { nameof(UpdateSchool.School), school }
+            };
+
+            var options = new DialogOptions
+            {
+                CloseButton = true,
+                MaxWidth = MaxWidth.Small,
+                FullWidth = true,
+                BackdropClick = false
+            };
+
+            var dialog = await _dialogService.ShowAsync<UpdateSchool>("Modifier l'école", parameters, options);
+            var result = await dialog.Result;
+
+            if (!result.Canceled)
+            {
+                await LoadSchoolsAsync();
+            }
+        }
+
+        private async Task DeleteSchoolAsync(SchoolResponse school)
+        {
+            var parameters = new DialogParameters
+            {
+                { nameof(Confirmation.Title), "Suppression école" },
+                { nameof(Confirmation.Message), $"Êtes-vous sûr de vouloir supprimer l'école : {school.Name} ?" },
+                { nameof(Confirmation.ButtonText), "Supprimer" },
+                { nameof(Confirmation.Color), Color.Error },
+                { nameof(Confirmation.InputIcon), Icons.Material.Filled.DeleteForever }
+            };
+
+            var options = new DialogOptions
+            {
+                CloseButton = true,
+                MaxWidth = MaxWidth.Small,
+                BackdropClick = true,
+                FullWidth = true
+            };
+
+            var dialog = await _dialogService.ShowAsync<Confirmation>(title: null, parameters, options);
+            var result = await dialog.Result;
+
+            if (!result.Canceled)
+            {
+                var response = await _schoolService.DeleteAsync(school.Id.ToString());
+                if (response.IsSuccessful)
+                {
+                    _snackbar.Add("École supprimée avec succès.", Severity.Success);
+                    await LoadSchoolsAsync();
+                }
+                else
+                {
+                    foreach (var message in response.Messages)
+                    {
+                        _snackbar.Add(message, Severity.Error);
+                    }
+                }
             }
         }
 

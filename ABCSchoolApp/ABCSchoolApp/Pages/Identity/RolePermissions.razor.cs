@@ -111,6 +111,18 @@ namespace ABCSchoolApp.Pages.Identity
             }
         }
 
+        private static string GetTabLabel(string feature) => feature switch
+        {
+            "Users"      => "Utilisateurs",
+            "Tenants"    => "Organisations",
+            "Roles"      => "Rôles",
+            "UserRoles"  => "Rôles Utilisateurs",
+            "RoleClaims" => "Permissions",
+            "Schools"    => "Ecoles",
+            "Tokens"     => "Tokens",
+            _            => feature
+        };
+
         private Color GetGroupBadgeColor(int selected, int all)
         {
             if (selected == 0)

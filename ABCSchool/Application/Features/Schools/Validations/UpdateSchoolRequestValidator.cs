@@ -12,6 +12,12 @@ namespace Application.Features.Schools.Validations
                 .MustAsync(async (id, ct) => await schoolService.GetByIdAsync(id) is School schoolInDb && schoolInDb.Id == id)
                 .WithMessage("Cette structure '{PropertyValue}' n'existe pas!");
 
+            RuleFor(request => request.CodeEts)
+                .NotEmpty()
+                    .WithMessage("Le code établissement est obligatoire!")
+                .MaximumLength(20)
+                    .WithMessage("Le code établissement ne peut pas dépasser 20 caractères.");
+
             RuleFor(request => request.Name)
                 .NotEmpty()
                     .WithMessage("Le nom de la structure est obligatoire!")

@@ -21,11 +21,13 @@
         }
     </ToolBarContent>
     <HeaderContent>
+        <MudTh>Code Ets</MudTh>
         <MudTh>Nom</MudTh>
         <MudTh>Date de création</MudTh>
         <MudTh Style="text-align:right">Actions</MudTh>
     </HeaderContent>
     <RowTemplate>
+        <MudTd DataLabel="Code Ets"> @context.CodeEts</MudTd>
         <MudTd DataLabel="Nom"> @context.Name</MudTd>
         <MudTd DataLabel="Date création"> @context.EstablishedDate.ToString("dd MMM yyyy")</MudTd>
         <MudTd Style="text-align:right" DataLabel="Actions">
@@ -36,11 +38,11 @@
                      AnchorOrigin="Origin.BottomLeft">
                 @if (_canUpdateSchools)
                 {
-                    <MudMenuItem>Mise à jour</MudMenuItem>
+                    <MudMenuItem OnClick="@(() => UpdateSchoolAsync(context))">Mise à jour</MudMenuItem>
                 }
                 @if (_canDeleteSchools)
                 {
-                    <MudMenuItem>Supprimer</MudMenuItem>
+                    <MudMenuItem OnClick="@(() => DeleteSchoolAsync(context))" Style="color: var(--mud-palette-error);">Supprimer</MudMenuItem>
                 }
 
             </MudMenu>
