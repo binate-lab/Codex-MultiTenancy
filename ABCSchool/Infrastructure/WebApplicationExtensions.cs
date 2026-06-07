@@ -1,6 +1,7 @@
 using Finbuckle.MultiTenant;
 using Finbuckle.MultiTenant.AspNetCore.Extensions;
 using Infrastructure.Identity;
+using Infrastructure.Pki;
 using Microsoft.AspNetCore.Builder;
 
 namespace Infrastructure
@@ -9,6 +10,7 @@ namespace Infrastructure
     {
         public static IApplicationBuilder UseInfrastructure(this IApplicationBuilder app)
         {
+            app.UseMiddleware<CertificatAppareilMiddleware>();
             app.UseAuthentication();
             app.UseMiddleware<CurrentUserMiddleware>();
             app.UseMultiTenant();

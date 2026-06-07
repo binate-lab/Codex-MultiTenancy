@@ -21,6 +21,7 @@ namespace Infrastructure.Constants
         public const string RoleClaims = nameof(RoleClaims);
         public const string Schools = nameof(Schools);
         public const string Tokens = nameof(Tokens);
+        public const string Certificats = nameof(Certificats);
     }
 
     public record SchoolPermission(string Action, string Feature, string Description, string Group, bool IsBasic = false, bool IsRoot = false)
@@ -61,7 +62,15 @@ namespace Infrastructure.Constants
             new SchoolPermission(SchoolAction.Update, SchoolFeature.Schools, "Mis à jour Ecoles", "Academics"),
             new SchoolPermission(SchoolAction.Delete, SchoolFeature.Schools, "Supprimer Ecoles", "Academics"),
 
-            new SchoolPermission(SchoolAction.RefreshToken, SchoolFeature.Tokens, "Generate Refresh Token", "SystemAccess", IsBasic: true)
+            new SchoolPermission(SchoolAction.RefreshToken, SchoolFeature.Tokens, "Generate Refresh Token", "SystemAccess", IsBasic: true),
+
+            // Certificats appareils — Root uniquement (Keita & équipe)
+            new SchoolPermission(SchoolAction.Create, SchoolFeature.Certificats, "Approuver demande certificat", "Certificats", IsRoot: true),
+            new SchoolPermission(SchoolAction.Delete, SchoolFeature.Certificats, "Révoquer certificat", "Certificats", IsRoot: true),
+            new SchoolPermission(SchoolAction.Read, SchoolFeature.Certificats, "Lire demandes en attente", "Certificats", IsRoot: true),
+
+            // Certificats appareils — Admin tenant (Update couvre soumettre + lire ses propres données)
+            new SchoolPermission(SchoolAction.Update, SchoolFeature.Certificats, "Gérer ses demandes et certificats", "Certificats"),
         ];
 
         public static IReadOnlyList<SchoolPermission> All { get; } 

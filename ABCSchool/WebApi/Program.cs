@@ -1,10 +1,18 @@
 using Application;
 using Infrastructure;
+using Microsoft.AspNetCore.Server.Kestrel.Https;
 using WebApi;
 
 const string BlazorClientCorsPolicy = "BlazorClient";
 
 var builder = WebApplication.CreateBuilder(args);
+
+builder.WebHost.ConfigureKestrel(options =>
+    options.ConfigureHttpsDefaults(https =>
+    {
+        https.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
+        https.AllowAnyClientCertificate();
+    }));
 
 builder.Services.AddControllers();
 

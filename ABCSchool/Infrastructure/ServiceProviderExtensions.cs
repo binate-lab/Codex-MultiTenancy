@@ -1,4 +1,6 @@
+using Infrastructure.Pki;
 using Infrastructure.Tenancy;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 
 namespace Infrastructure
@@ -11,6 +13,10 @@ namespace Infrastructure
 
             await scope.ServiceProvider.GetRequiredService<ITenantDbSeeder>()
                 .InitializeDatabaseAsync(ct);
+
+            var pkiDb = scope.ServiceProvider.GetRequiredService<PkiDbContext>();
+            if ((await pkiDb.Database.GetPendingMigrationsAsync(ct)).Any())
+                await pkiDb.Database.MigrateAsync(ct);
         }
     }
 }

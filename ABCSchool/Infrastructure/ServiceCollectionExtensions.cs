@@ -1,4 +1,5 @@
 using Application;
+using Application.Features.Certificats;
 using Application.Features.Chat;
 using Application.Features.Identity.Roles;
 using Application.Features.Identity.Tokens;
@@ -7,6 +8,7 @@ using Application.Features.Schools;
 using Application.Features.Tenancy;
 using Application.Wrappers;
 using Infrastructure.Chat;
+using Infrastructure.Pki;
 using MassTransit;
 using Finbuckle.MultiTenant;
 using Finbuckle.MultiTenant.AspNetCore.Extensions;
@@ -43,6 +45,8 @@ namespace Infrastructure
     {
         public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration config)
         {
+            services.Configure<PkiSettings>(config.GetSection(nameof(PkiSettings)));
+
             return services
                 .AddDbContext<TenantDbContext>(options => options
                     .UseSqlServer(config.GetConnectionString("DefaultConnection")))
@@ -53,10 +57,14 @@ namespace Infrastructure
                     .Services
                 .AddDbContext<ApplicationDbContext>(options => options
                     .UseSqlServer(config.GetConnectionString("DefaultConnection")))
+                .AddDbContext<PkiDbContext>(options => options
+                    .UseSqlServer(config.GetConnectionString("DefaultConnection")))
                 .AddTransient<ITenantDbSeeder, TenantDbSeeder>()
                 .AddTransient<ApplicationDbSeeder>()
                 .AddTransient<ITenantService, TenantService>()
                 .AddTransient<ISchoolService, SchoolService>()
+                .AddTransient<ICertificatService, CertificatService>()
+                .AddScoped<CertificatAppareilMiddleware>()
                 .AddChatService(config)
                 .AddMessaging(config)
                 .AddIdentityService()
