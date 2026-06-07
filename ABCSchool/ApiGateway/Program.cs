@@ -1,8 +1,8 @@
 var builder = WebApplication.CreateBuilder(args);
 
-builder.Services.AddHttpClient("ABCSchool", client =>
+builder.Services.AddHttpClient("TrajanEcole", client =>
 {
-    var baseUrl = builder.Configuration["Services:ABCSchool:BaseUrl"]
+    var baseUrl = builder.Configuration["Services:TrajanEcole:BaseUrl"]
         ?? "http://localhost:5067/";
 
     client.BaseAddress = new Uri(baseUrl);
@@ -10,7 +10,7 @@ builder.Services.AddHttpClient("ABCSchool", client =>
 
 var app = builder.Build();
 
-app.MapGet("/", () => Results.Redirect("/abcschool/swagger"));
+app.MapGet("/", () => Results.Redirect("/trajanecole/swagger"));
 
 app.Map("/{service}/{**path}", async (
     string service,
@@ -18,14 +18,14 @@ app.Map("/{service}/{**path}", async (
     HttpContext context,
     IHttpClientFactory httpClientFactory) =>
 {
-    if (!service.Equals("abcschool", StringComparison.OrdinalIgnoreCase))
+    if (!service.Equals("trajanecole", StringComparison.OrdinalIgnoreCase))
     {
         context.Response.StatusCode = StatusCodes.Status404NotFound;
         await context.Response.WriteAsync("Unknown service.");
         return;
     }
 
-    var client = httpClientFactory.CreateClient("ABCSchool");
+    var client = httpClientFactory.CreateClient("TrajanEcole");
     var targetPath = string.IsNullOrWhiteSpace(path) ? string.Empty : path;
     var targetUri = new Uri(targetPath + context.Request.QueryString, UriKind.Relative);
 

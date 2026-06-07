@@ -22,7 +22,7 @@ namespace Infrastructure.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
-            modelBuilder.Entity("Infrastructure.Tenancy.ABCSchoolTenantInfo", b =>
+            modelBuilder.Entity("Infrastructure.Tenancy.TrajanEcoleTenantInfo", b =>
                 {
                     b.Property<string>("Id")
                         .HasColumnType("nvarchar(450)");

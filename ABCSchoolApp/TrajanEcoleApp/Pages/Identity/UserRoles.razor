@@ -1,0 +1,36 @@
+﻿@page "/user-roles/{UserId}"
+@using TrajanEcole.Shared.Library.Constants
+
+@attribute [ShouldHavePermission(SchoolAction.Read, SchoolFeature.UserRoles)]
+
+<Header OnReturn="Cancel" Title="@_title" Description="@_description"/>
+
+<MudTable Items="_userRoleList"
+          Loading="_isLoading"
+          LoadingProgressColor="Color.Info"
+          Elevation="25">
+    <ToolBarContent>
+    @if(_canUpdateUserRoles){
+        <MudButton Variant="Variant.Filled"
+            OnClick="UpdateUserRolesAsync"
+            Color="Color.Primary">Mise à jour Roles utilisateur</MudButton>
+    }
+    </ToolBarContent>
+    <HeaderContent>
+        <MudTh>Nom</MudTh>
+        <MudTh>Description</MudTh>
+        <MudTh>Attribut</MudTh>
+    </HeaderContent>
+    <RowTemplate>
+        <MudTd> @context.Name</MudTd>
+        <MudTd> @context.Description</MudTd>
+        <MudTd>
+            <MudCheckBox @bind-Value="@context.IsAssigned"
+                Disabled="@(!_canUpdateUserRoles)"
+                         Color="Color.Secondary" />
+        </MudTd>
+    </RowTemplate>
+    <PagerContent>
+        <MudTablePager RowsPerPageString="LignesParPage" InfoFormat="{first_item}-{last_item} sur {all_items}" />
+    </PagerContent>
+</MudTable>

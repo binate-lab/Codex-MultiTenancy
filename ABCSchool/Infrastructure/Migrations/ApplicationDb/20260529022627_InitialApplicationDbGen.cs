@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
@@ -41,7 +41,13 @@ namespace Infrastructure.Migrations.ApplicationDb
                 {
                     Id = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
+                    CodeEts = table.Column<string>(type: "nvarchar(20)", maxLength: 20, nullable: false),
+                    NomCourtEts = table.Column<string>(type: "nvarchar(11)", maxLength: 11, nullable: false),
                     Name = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: false),
+                    Email = table.Column<string>(type: "nvarchar(256)", maxLength: 256, nullable: true),
+                    Telephone = table.Column<string>(type: "nvarchar(32)", maxLength: 32, nullable: true),
+                    Ville = table.Column<string>(type: "nvarchar(60)", maxLength: 60, nullable: true),
+                    Statut = table.Column<int>(type: "int", nullable: false),
                     EstablishedDate = table.Column<DateTime>(type: "datetime2", nullable: false),
                     TenantId = table.Column<string>(type: "nvarchar(max)", nullable: false)
                 },
@@ -220,6 +226,13 @@ namespace Infrastructure.Migrations.ApplicationDb
                 columns: new[] { "NormalizedName", "TenantId" },
                 unique: true,
                 filter: "[NormalizedName] IS NOT NULL");
+
+            migrationBuilder.CreateIndex(
+                name: "IX_Schools_CodeEts",
+                schema: "Academics",
+                table: "Schools",
+                column: "CodeEts",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_UserClaims_UserId",

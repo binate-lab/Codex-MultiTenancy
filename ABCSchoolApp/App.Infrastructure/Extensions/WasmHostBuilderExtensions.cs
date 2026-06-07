@@ -1,8 +1,10 @@
-﻿using ABCShared.Library.Constants;
+﻿using TrajanEcole.Shared.Library.Constants;
 using App.Infrastructure.Services.Auth;
 using App.Infrastructure.Services.Identity;
 using App.Infrastructure.Services.Implementations.Identity;
 using App.Infrastructure.Services.Implementations.Interceptors;
+using App.Infrastructure.Services.Chat;
+using App.Infrastructure.Services.Implementations.Chat;
 using App.Infrastructure.Services.Implementations.Schools;
 using App.Infrastructure.Services.Implementations.Tenancy;
 using App.Infrastructure.Services.Interceptors;
@@ -44,6 +46,7 @@ namespace App.Infrastructure.Extensions
                 .AddScoped<ITenantService, TenantService>()
                 .AddScoped<IRoleService, RoleService>()
                 .AddScoped<ISchoolService, SchoolService>()
+                .AddScoped<IChatService, ChatService>()
                 .AddScoped<IHttpRefreshTokenInterceptorService, HttpRefreshTokenInterceptorService>()
                 .AddScoped(sp => sp
                     .GetRequiredService<IHttpClientFactory>()

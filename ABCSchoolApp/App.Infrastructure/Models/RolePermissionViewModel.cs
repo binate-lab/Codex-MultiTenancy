@@ -1,4 +1,4 @@
-﻿using ABCShared.Library.Constants;
+﻿using TrajanEcole.Shared.Library.Constants;
 
 namespace App.Infrastructure.Models
 {

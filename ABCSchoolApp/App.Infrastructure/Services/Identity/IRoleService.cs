@@ -1,6 +1,6 @@
-﻿using ABCShared.Library.Models.Requests.Identity;
-using ABCShared.Library.Models.Responses.Identity;
-using ABCShared.Library.Wrappers;
+﻿using TrajanEcole.Shared.Library.Models.Requests.Identity;
+using TrajanEcole.Shared.Library.Models.Responses.Identity;
+using TrajanEcole.Shared.Library.Wrappers;
 
 namespace App.Infrastructure.Services.Identity
 {

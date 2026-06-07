@@ -1,4 +1,4 @@
-using ABCShared.Library.Models.Requests.Schools;
+using TrajanEcole.Shared.Library.Models.Requests.Schools;
 using FluentValidation;
 
 namespace App.Infrastructure.Validators
@@ -10,6 +10,10 @@ namespace App.Infrastructure.Validators
             RuleFor(request => request.CodeEts)
                 .Must(code => !string.IsNullOrEmpty(code))
                 .WithMessage("Le code établissement est requis!");
+
+            RuleFor(request => request.NomCourtEts)
+                .Must(nom => !string.IsNullOrEmpty(nom))
+                .WithMessage("Le nom court est requis!");
 
             RuleFor(request => request.Name)
                 .Must(name => !string.IsNullOrEmpty(name))

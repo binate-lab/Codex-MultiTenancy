@@ -21,9 +21,9 @@ namespace Infrastructure.Contexts
             IdentityUserToken<string>,
             IdentityUserPasskey<string>>
     {
-        private new ABCSchoolTenantInfo TenantInfo { get; set; }
+        private new TrajanEcoleTenantInfo TenantInfo { get; set; }
 
-        protected BaseDbContext(IMultiTenantContextAccessor<ABCSchoolTenantInfo> tenantInfoContextAccessor, DbContextOptions options)
+        protected BaseDbContext(IMultiTenantContextAccessor<TrajanEcoleTenantInfo> tenantInfoContextAccessor, DbContextOptions options)
             : base(tenantInfoContextAccessor, options)
         {
             TenantInfo = tenantInfoContextAccessor.MultiTenantContext.TenantInfo;

@@ -14,7 +14,7 @@
   </ItemGroup>
 
   <ItemGroup>
-    <ProjectReference Include="..\..\ABCShared.Library\ABCShared.Library.csproj" />
+    <ProjectReference Include="..\..\TrajanEcole.Shared.Library\TrajanEcole.Shared.Library.csproj" />
     <ProjectReference Include="..\Domain\Domain.csproj" />
   </ItemGroup>
 

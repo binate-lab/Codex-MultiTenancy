@@ -31,9 +31,9 @@ var app = builder.Build();
 
 await app.Services.AddDatabaseInitializerAsync();
 
-app.UseHttpsRedirection();
-
 app.UseCors(BlazorClientCorsPolicy);
+
+app.UseHttpsRedirection();
 
 app.UseInfrastructure();
 

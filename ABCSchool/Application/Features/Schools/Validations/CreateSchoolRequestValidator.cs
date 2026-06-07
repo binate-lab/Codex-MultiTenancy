@@ -12,6 +12,12 @@ namespace Application.Features.Schools.Validations
                 .MaximumLength(20)
                     .WithMessage("Le code établissement ne peut pas dépasser 20 caractères.");
 
+            RuleFor(request => request.NomCourtEts)
+                .NotEmpty()
+                    .WithMessage("Le nom court de l'établissement est obligatoire!")
+                .MaximumLength(11)
+                    .WithMessage("Le nom court ne peut pas dépasser 11 caractères.");
+
             RuleFor(request => request.Name)
                 .NotEmpty()
                     .WithMessage("Le nom de la structure est obligatoire!")

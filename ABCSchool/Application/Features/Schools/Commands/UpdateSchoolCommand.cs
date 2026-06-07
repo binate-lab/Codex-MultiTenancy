@@ -25,7 +25,12 @@ namespace Application.Features.Schools.Commands
             if (schoolInDb is not null)
             {
                 schoolInDb.CodeEts = request.UpdateSchool.CodeEts;
+                schoolInDb.NomCourtEts = request.UpdateSchool.NomCourtEts;
                 schoolInDb.Name = request.UpdateSchool.Name;
+                schoolInDb.Email = request.UpdateSchool.Email;
+                schoolInDb.Telephone = request.UpdateSchool.Telephone;
+                schoolInDb.Ville = request.UpdateSchool.Ville;
+                schoolInDb.Statut = request.UpdateSchool.Statut;
                 schoolInDb.EstablishedDate = request.UpdateSchool.EstablishedDate;
 
                 var updatedSchoolId = await _schoolService.UpdateAsync(schoolInDb);

@@ -1,5 +1,5 @@
 ﻿using Finbuckle.MultiTenant.Abstractions;
-using ABCShared.Library.Constants;
+using TrajanEcole.Shared.Library.Constants;
 //using Infrastructure.Constants;
 using Infrastructure.Identity.Models;
 using Infrastructure.Tenancy;
@@ -9,12 +9,12 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Contexts
 {
     public class ApplicationDbSeeder(
-        IMultiTenantContextAccessor<ABCSchoolTenantInfo> tenantInfoContextAccessor,
+        IMultiTenantContextAccessor<TrajanEcoleTenantInfo> tenantInfoContextAccessor,
         RoleManager<ApplicationRole> roleManager,
         UserManager<ApplicationUser> userManager,
         ApplicationDbContext applicationDbContext)
     {
-        private readonly IMultiTenantContextAccessor<ABCSchoolTenantInfo> _tenantInfoContextAccessor = tenantInfoContextAccessor;
+        private readonly IMultiTenantContextAccessor<TrajanEcoleTenantInfo> _tenantInfoContextAccessor = tenantInfoContextAccessor;
         private readonly RoleManager<ApplicationRole> _roleManager = roleManager;
         private readonly UserManager<ApplicationUser> _userManager = userManager;
         private readonly ApplicationDbContext _applicationDbContext = applicationDbContext;

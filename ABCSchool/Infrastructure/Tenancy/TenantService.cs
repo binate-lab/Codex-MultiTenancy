@@ -10,11 +10,11 @@ namespace Infrastructure.Tenancy
 {
     public class TenantService : ITenantService
     {
-        private readonly IMultiTenantStore<ABCSchoolTenantInfo> _tenantStore;
+        private readonly IMultiTenantStore<TrajanEcoleTenantInfo> _tenantStore;
         private readonly ApplicationDbSeeder _dbSeeder;
         private readonly IServiceProvider _serviceProvider;
 
-        public TenantService(IMultiTenantStore<ABCSchoolTenantInfo> tenantStore, ApplicationDbSeeder dbSeeder, IServiceProvider serviceProvider)
+        public TenantService(IMultiTenantStore<TrajanEcoleTenantInfo> tenantStore, ApplicationDbSeeder dbSeeder, IServiceProvider serviceProvider)
         {
             _tenantStore = tenantStore;
             _dbSeeder = dbSeeder;
@@ -32,7 +32,7 @@ namespace Infrastructure.Tenancy
 
         public async Task<string> CreateTenantAsync(CreateTenantRequest createTenant, CancellationToken ct)
         {
-            var newTenant = new ABCSchoolTenantInfo
+            var newTenant = new TrajanEcoleTenantInfo
             {
                 Id = Guid.NewGuid().ToString(),
                 Identifier = createTenant.Identifier,
@@ -51,7 +51,7 @@ namespace Infrastructure.Tenancy
             using var scope = _serviceProvider.CreateScope();
 
             scope.ServiceProvider.GetRequiredService<IMultiTenantContextSetter>()
-                .MultiTenantContext = new MultiTenantContext<ABCSchoolTenantInfo>(newTenant);
+                .MultiTenantContext = new MultiTenantContext<TrajanEcoleTenantInfo>(newTenant);
             await scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>()
                 .InitializeDatabaseAsync(ct);
 
@@ -118,7 +118,7 @@ namespace Infrastructure.Tenancy
 
             using var scope = _serviceProvider.CreateScope();
             scope.ServiceProvider.GetRequiredService<IMultiTenantContextSetter>()
-                .MultiTenantContext = new MultiTenantContext<ABCSchoolTenantInfo>(tenantInDb);
+                .MultiTenantContext = new MultiTenantContext<TrajanEcoleTenantInfo>(tenantInDb);
             var dbContext = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
             var userCount = await dbContext.Users.CountAsync();
 

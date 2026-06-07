@@ -8,6 +8,12 @@
         public TenantEndpoints TenantEndpoints { get; set; }
         public RoleEndpoints RoleEndpoints { get; set; }
         public SchoolEndpoints SchoolEndpoints { get; set; }
+        public ChatEndpoints ChatEndpoints { get; set; }
+    }
+
+    public class ChatEndpoints
+    {
+        public string Send { get; set; }
     }
 
     public class TokenEndpoints

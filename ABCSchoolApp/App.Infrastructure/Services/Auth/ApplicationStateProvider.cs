@@ -1,4 +1,4 @@
-﻿using ABCShared.Library.Constants;
+﻿using TrajanEcole.Shared.Library.Constants;
 using App.Infrastructure.Constants;
 using Blazored.LocalStorage;
 using Microsoft.AspNetCore.Components.Authorization;

@@ -90,6 +90,28 @@ namespace Infrastructure.Contexts
                     .Property(school => school.Name)
                     .IsRequired()
                     .HasMaxLength(60);
+
+                builder
+                    .Property(school => school.NomCourtEts)
+                    .IsRequired()
+                    .HasMaxLength(11);
+
+                builder
+                    .Property(school => school.Email)
+                    .HasMaxLength(256);
+
+                builder
+                    .Property(school => school.Telephone)
+                    .HasMaxLength(32);
+
+                builder
+                    .Property(school => school.Ville)
+                    .HasMaxLength(60);
+
+                builder
+                    .Property(school => school.Statut)
+                    .IsRequired()
+                    .HasConversion<int>();
             }
         }
     }

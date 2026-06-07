@@ -1,4 +1,4 @@
-﻿using ABCShared.Library.Constants;
+﻿using TrajanEcole.Shared.Library.Constants;
 using Microsoft.AspNetCore.Authorization;
 
 namespace App.Infrastructure.Services.Auth

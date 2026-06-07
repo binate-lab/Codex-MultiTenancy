@@ -19,12 +19,12 @@ namespace Infrastructure.Identity.Tokens
     {
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
-        private readonly IMultiTenantContextAccessor<ABCSchoolTenantInfo> _tenantContextAccessor;
+        private readonly IMultiTenantContextAccessor<TrajanEcoleTenantInfo> _tenantContextAccessor;
         private readonly JwtSettings _jwtSettings;
 
         public TokenService(
             UserManager<ApplicationUser> userManager,
-            IMultiTenantContextAccessor<ABCSchoolTenantInfo> tenantContextAccessor,
+            IMultiTenantContextAccessor<TrajanEcoleTenantInfo> tenantContextAccessor,
             RoleManager<ApplicationRole> roleManager,
             IOptions<JwtSettings> jwtSettings)
         {
@@ -186,7 +186,7 @@ namespace Infrastructure.Identity.Tokens
             return claims;
         }
 
-        private ABCSchoolTenantInfo GetCurrentTenant()
+        private TrajanEcoleTenantInfo GetCurrentTenant()
         {
             return _tenantContextAccessor.MultiTenantContext?.TenantInfo
                 ?? throw new UnauthorizedException(["Organisation introuvable. Utilisez son identifiant, par exemple 'heleis', dans le header tenant."]);

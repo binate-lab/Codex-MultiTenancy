@@ -1,7 +1,9 @@
-﻿using ABCShared.Library.Constants;
+﻿using TrajanEcole.Shared.Library.Constants;
 using Application.Exceptions;
 using Application.Features.Identity.Users;
 using Finbuckle.MultiTenant.Abstractions;
+using MassTransit;
+using SharedContracts.Events;
 //using Infrastructure.Constants;
 using Infrastructure.Contexts;
 using Infrastructure.Identity.Models;
@@ -17,18 +19,21 @@ namespace Infrastructure.Identity
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly ApplicationDbContext _context;
-        private readonly IMultiTenantContextAccessor<ABCSchoolTenantInfo> _tenantContextAccessor;
+        private readonly IMultiTenantContextAccessor<TrajanEcoleTenantInfo> _tenantContextAccessor;
+        private readonly IPublishEndpoint _publishEndpoint;
 
         public UserService(
-            UserManager<ApplicationUser> userManager, 
-            RoleManager<ApplicationRole> roleManager, 
-            ApplicationDbContext context, 
-            IMultiTenantContextAccessor<ABCSchoolTenantInfo> tenantContextAccessor)
+            UserManager<ApplicationUser> userManager,
+            RoleManager<ApplicationRole> roleManager,
+            ApplicationDbContext context,
+            IMultiTenantContextAccessor<TrajanEcoleTenantInfo> tenantContextAccessor,
+            IPublishEndpoint publishEndpoint)
         {
-            _userManager = userManager;
-            _roleManager = roleManager;
-            _context = context;
+            _userManager           = userManager;
+            _roleManager           = roleManager;
+            _context               = context;
             _tenantContextAccessor = tenantContextAccessor;
+            _publishEndpoint       = publishEndpoint;
         }
 
         public async Task<string> ActivateOrDeactivateAsync(string userId, bool activation)
@@ -132,6 +137,21 @@ namespace Infrastructure.Identity
             {
                 throw new IdentityException(IdentityHelper.GetIdentityResultErrorDescriptions(result));
             }
+
+            // Publication de l'événement vers RabbitMQ — le microservice Messaging se charge du SMS.
+            var tenant = _tenantContextAccessor.MultiTenantContext?.TenantInfo;
+
+            await _publishEndpoint.Publish(new UserCreatedEvent(
+                UserId:            newUser.Id,
+                FirstName:         request.FirstName,
+                LastName:          request.LastName,
+                Email:             request.Email,
+                PhoneNumber:       request.PhoneNumber,
+                TemporaryPassword: request.Password,
+                TenantName:        tenant?.Name       ?? "ABCSchool",
+                TenantIdentifier:  tenant?.Identifier ?? string.Empty,
+                OccurredOn:        DateTime.UtcNow
+            ));
 
             return newUser.Id;
         }

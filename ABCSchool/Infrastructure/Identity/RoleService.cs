@@ -1,4 +1,4 @@
-﻿using ABCShared.Library.Constants;
+﻿using TrajanEcole.Shared.Library.Constants;
 using Application.Exceptions;
 using Application.Features.Identity.Roles;
 using Finbuckle.MultiTenant.Abstractions;
@@ -17,13 +17,13 @@ namespace Infrastructure.Identity
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly UserManager<ApplicationUser> _userManager;
         private readonly ApplicationDbContext _context;
-        private readonly IMultiTenantContextAccessor<ABCSchoolTenantInfo> _tenantInfoContextAccessor;
+        private readonly IMultiTenantContextAccessor<TrajanEcoleTenantInfo> _tenantInfoContextAccessor;
 
         public RoleService(
             RoleManager<ApplicationRole> roleManager, 
             UserManager<ApplicationUser> userManager, 
             ApplicationDbContext context, 
-            IMultiTenantContextAccessor<ABCSchoolTenantInfo> tenantInfoContextAccessor)
+            IMultiTenantContextAccessor<TrajanEcoleTenantInfo> tenantInfoContextAccessor)
         {
             _roleManager = roleManager;
             _userManager = userManager;

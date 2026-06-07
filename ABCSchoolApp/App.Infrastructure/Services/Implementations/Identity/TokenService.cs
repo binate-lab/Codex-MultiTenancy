@@ -1,6 +1,6 @@
-﻿using ABCShared.Library.Models.Requests.Token;
-using ABCShared.Library.Models.Responses.Token;
-using ABCShared.Library.Wrappers;
+﻿using TrajanEcole.Shared.Library.Models.Requests.Token;
+using TrajanEcole.Shared.Library.Models.Responses.Token;
+using TrajanEcole.Shared.Library.Wrappers;
 using App.Infrastructure.Constants;
 using App.Infrastructure.Extensions;
 using App.Infrastructure.Services.Auth;

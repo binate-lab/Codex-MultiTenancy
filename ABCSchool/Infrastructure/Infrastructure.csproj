@@ -11,10 +11,12 @@
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Anthropic" Version="12.24.1" />
     <PackageReference Include="Finbuckle.MultiTenant" Version="10.0.7" />
     <PackageReference Include="Finbuckle.MultiTenant.AspNetCore" Version="10.0.7" />
     <PackageReference Include="Finbuckle.MultiTenant.EntityFrameworkCore" Version="10.0.7" />
     <PackageReference Include="Finbuckle.MultiTenant.Identity.EntityFrameworkCore" Version="10.0.7" />
+    <PackageReference Include="MassTransit.RabbitMQ" Version="*" />
     <PackageReference Include="Microsoft.AspNetCore.Authentication.JwtBearer" Version="10.0.8" />
     <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.8" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.8">
@@ -32,6 +34,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\Application\Application.csproj" />
+    <ProjectReference Include="..\..\..\..\SharedContracts\SharedContracts\SharedContracts.csproj" />
   </ItemGroup>
 
   <ItemGroup>

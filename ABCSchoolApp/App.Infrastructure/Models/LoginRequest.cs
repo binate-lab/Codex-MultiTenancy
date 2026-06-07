@@ -1,4 +1,4 @@
-﻿using ABCShared.Library.Models.Requests.Token;
+﻿using TrajanEcole.Shared.Library.Models.Requests.Token;
 
 namespace App.Infrastructure.Models
 {

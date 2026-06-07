@@ -4,13 +4,13 @@ using Microsoft.EntityFrameworkCore;
 namespace Infrastructure.Tenancy
 {
     public class TenantDbContext(DbContextOptions<TenantDbContext> options)
-        : EFCoreStoreDbContext<ABCSchoolTenantInfo>(options)
+        : EFCoreStoreDbContext<TrajanEcoleTenantInfo>(options)
     {
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);
 
-            modelBuilder.Entity<ABCSchoolTenantInfo>()
+            modelBuilder.Entity<TrajanEcoleTenantInfo>()
                 .ToTable("Tenants", "Multitenancy");
         }
     }

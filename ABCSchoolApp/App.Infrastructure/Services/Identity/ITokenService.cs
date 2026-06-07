@@ -1,5 +1,5 @@
-﻿using ABCShared.Library.Models.Requests.Token;
-using ABCShared.Library.Wrappers;
+﻿using TrajanEcole.Shared.Library.Models.Requests.Token;
+using TrajanEcole.Shared.Library.Wrappers;
 
 namespace App.Infrastructure.Services.Identity
 {

@@ -15,7 +15,7 @@
             public const string Email = "keita_amara@hotmail.com";
         }
 
-        public static bool IsRoot(ABCSchoolTenantInfo tenant)
+        public static bool IsRoot(TrajanEcoleTenantInfo tenant)
         {
             return tenant?.Identifier == Root.Identifier;
         }

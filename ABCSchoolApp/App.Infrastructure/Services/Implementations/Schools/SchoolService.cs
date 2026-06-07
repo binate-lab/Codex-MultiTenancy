@@ -1,6 +1,6 @@
-﻿using ABCShared.Library.Models.Requests.Schools;
-using ABCShared.Library.Models.Responses.Schools;
-using ABCShared.Library.Wrappers;
+﻿using TrajanEcole.Shared.Library.Models.Requests.Schools;
+using TrajanEcole.Shared.Library.Models.Responses.Schools;
+using TrajanEcole.Shared.Library.Wrappers;
 using App.Infrastructure.Extensions;
 using App.Infrastructure.Services.Schools;
 using System.Net.Http.Json;

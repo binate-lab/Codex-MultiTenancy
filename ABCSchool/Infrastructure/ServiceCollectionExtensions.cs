@@ -1,10 +1,13 @@
 using Application;
+using Application.Features.Chat;
 using Application.Features.Identity.Roles;
 using Application.Features.Identity.Tokens;
 using Application.Features.Identity.Users;
 using Application.Features.Schools;
 using Application.Features.Tenancy;
 using Application.Wrappers;
+using Infrastructure.Chat;
+using MassTransit;
 using Finbuckle.MultiTenant;
 using Finbuckle.MultiTenant.AspNetCore.Extensions;
 using Finbuckle.MultiTenant.EntityFrameworkCore.Extensions;
@@ -43,10 +46,10 @@ namespace Infrastructure
             return services
                 .AddDbContext<TenantDbContext>(options => options
                     .UseSqlServer(config.GetConnectionString("DefaultConnection")))
-                .AddMultiTenant<ABCSchoolTenantInfo>()
+                .AddMultiTenant<TrajanEcoleTenantInfo>()
                     .WithHeaderStrategy(TenancyConstants.TenantIdName)
                     .WithClaimStrategy(TenancyConstants.TenantIdName)
-                    .WithEFCoreStore<TenantDbContext, ABCSchoolTenantInfo>()
+                    .WithEFCoreStore<TenantDbContext, TrajanEcoleTenantInfo>()
                     .Services
                 .AddDbContext<ApplicationDbContext>(options => options
                     .UseSqlServer(config.GetConnectionString("DefaultConnection")))
@@ -54,6 +57,8 @@ namespace Infrastructure
                 .AddTransient<ApplicationDbSeeder>()
                 .AddTransient<ITenantService, TenantService>()
                 .AddTransient<ISchoolService, SchoolService>()
+                .AddChatService(config)
+                .AddMessaging(config)
                 .AddIdentityService()
                 .AddPermissions()
                 .AddOpenApiDocumentation(config);
@@ -157,6 +162,14 @@ namespace Infrastructure
             return services;
         }
 
+        internal static IServiceCollection AddChatService(this IServiceCollection services, IConfiguration config)
+        {
+            services.Configure<ChatSettings>(config.GetSection(nameof(ChatSettings)));
+            return services.AddTransient<IChatService, ChatService>();
+        }
+
+
+
         internal static IServiceCollection AddIdentityService(this IServiceCollection services)
         {
             return services
@@ -176,6 +189,27 @@ namespace Infrastructure
                 .AddScoped<IUserService, UserService>()
                 .AddScoped<ICurrentUserService, CurrentUserService>()
                 .AddScoped<CurrentUserMiddleware>();
+        }
+
+        internal static IServiceCollection AddMessaging(this IServiceCollection services, IConfiguration config)
+        {
+            services.AddMassTransit(x =>
+            {
+                // ABCSchool est uniquement publisher — aucun consumer enregistré ici.
+                x.UsingRabbitMq((_, cfg) =>
+                {
+                    cfg.Host(
+                        config["MessageBroker:Host"]        ?? "localhost",
+                        config["MessageBroker:VirtualHost"] ?? "/",
+                        h =>
+                        {
+                            h.Username(config["MessageBroker:UserName"] ?? "guest");
+                            h.Password(config["MessageBroker:Password"] ?? "guest");
+                        });
+                });
+            });
+
+            return services;
         }
 
         internal static IServiceCollection AddPermissions(this IServiceCollection services)

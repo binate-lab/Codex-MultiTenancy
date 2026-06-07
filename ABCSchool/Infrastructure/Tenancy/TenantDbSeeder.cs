@@ -42,7 +42,7 @@ namespace Infrastructure.Tenancy
                 is null)
             {
                 // Create tenant
-                var rootTenant = new ABCSchoolTenantInfo
+                var rootTenant = new TrajanEcoleTenantInfo
                 {
                     Id = TenancyConstants.Root.Id,
                     Identifier = TenancyConstants.Root.Identifier,
@@ -59,12 +59,12 @@ namespace Infrastructure.Tenancy
             } 
         }
 
-        private async Task InitializeApplicationDbForTenantAsync(ABCSchoolTenantInfo currentTenant,  CancellationToken ct)
+        private async Task InitializeApplicationDbForTenantAsync(TrajanEcoleTenantInfo currentTenant,  CancellationToken ct)
         {
             using var scope = _serviceProvider.CreateScope();
 
             scope.ServiceProvider.GetRequiredService<IMultiTenantContextSetter>()
-                .MultiTenantContext = new MultiTenantContext<ABCSchoolTenantInfo>(currentTenant);
+                .MultiTenantContext = new MultiTenantContext<TrajanEcoleTenantInfo>(currentTenant);
 
             await scope.ServiceProvider.GetRequiredService<ApplicationDbSeeder>()
                 .InitializeDatabaseAsync(ct);

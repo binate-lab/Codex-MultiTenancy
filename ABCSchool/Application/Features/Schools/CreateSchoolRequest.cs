@@ -1,9 +1,16 @@
-﻿namespace Application.Features.Schools
+using Domain.Enums;
+
+namespace Application.Features.Schools
 {
     public class CreateSchoolRequest
     {
         public string CodeEts { get; set; }
+        public string NomCourtEts { get; set; }
         public string Name { get; set; }
+        public string Email { get; set; }
+        public string Telephone { get; set; }
+        public string Ville { get; set; }
+        public StatutEcole Statut { get; set; }
         public DateTime EstablishedDate { get; set; }
     }
 }

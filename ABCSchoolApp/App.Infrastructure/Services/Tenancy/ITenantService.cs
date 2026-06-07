@@ -1,6 +1,6 @@
-﻿using ABCShared.Library.Models.Requests.Tenancy;
-using ABCShared.Library.Models.Responses.Tenancy;
-using ABCShared.Library.Wrappers;
+﻿using TrajanEcole.Shared.Library.Models.Requests.Tenancy;
+using TrajanEcole.Shared.Library.Models.Responses.Tenancy;
+using TrajanEcole.Shared.Library.Wrappers;
 
 namespace App.Infrastructure.Services.Tenancy
 {

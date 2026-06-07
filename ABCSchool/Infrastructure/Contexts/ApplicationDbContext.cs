@@ -8,7 +8,7 @@ namespace Infrastructure.Contexts
     public class ApplicationDbContext : BaseDbContext
     {
         public ApplicationDbContext(
-            IMultiTenantContextAccessor<ABCSchoolTenantInfo> tenantInfoContextAccessor, 
+            IMultiTenantContextAccessor<TrajanEcoleTenantInfo> tenantInfoContextAccessor, 
             DbContextOptions<ApplicationDbContext> options) 
             : base(tenantInfoContextAccessor, options)
         {
