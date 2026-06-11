@@ -77,6 +77,15 @@ namespace Infrastructure.Pki
             };
         }
 
+        public async Task SupprimerDemandeAsync(Guid demandeId)
+        {
+            var demande = await _context.DemandesCertificats.FindAsync(demandeId)
+                ?? throw new InvalidOperationException($"Demande {demandeId} introuvable.");
+
+            _context.DemandesCertificats.Remove(demande);
+            await _context.SaveChangesAsync();
+        }
+
         public async Task RejeterDemandeAsync(Guid demandeId, string raison)
         {
             var demande = await _context.DemandesCertificats.FindAsync(demandeId)
@@ -95,6 +104,17 @@ namespace Infrastructure.Pki
 
         public async Task<CertificatAppareil> GetCertificatByIdAsync(Guid certificatId)
             => await _context.CertificatsAppareils.FindAsync(certificatId);
+
+        public async Task ReactiverCertificatAsync(Guid certificatId)
+        {
+            var certificat = await _context.CertificatsAppareils.FindAsync(certificatId)
+                ?? throw new InvalidOperationException($"Certificat {certificatId} introuvable.");
+
+            certificat.Statut = StatutCertificat.Actif;
+            certificat.RevoqueLe = null;
+            certificat.RaisonRevocation = null;
+            await _context.SaveChangesAsync();
+        }
 
         public async Task RevoquerCertificatAsync(Guid certificatId, string raison)
         {

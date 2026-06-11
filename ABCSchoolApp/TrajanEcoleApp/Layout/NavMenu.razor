@@ -20,6 +20,12 @@
 
     @if (_canViewTenants)
     {
-        <MudNavLink Href="/tenants" Icon="@Icons.Material.Filled.BusinessCenter">Organisation</MudNavLink>        
+        <MudNavLink Href="/tenants" Icon="@Icons.Material.Filled.BusinessCenter">Organisation</MudNavLink>
+    }
+
+    @if (_canViewCertificats)
+    {
+        <MudDivider Class="my-2" />
+        <MudNavLink Href="/certificats" Icon="@Icons.Material.Filled.VerifiedUser">Certificats</MudNavLink>
     }
 </MudNavMenu>

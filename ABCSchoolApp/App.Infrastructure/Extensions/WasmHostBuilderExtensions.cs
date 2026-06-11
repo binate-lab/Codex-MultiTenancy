@@ -3,7 +3,9 @@ using App.Infrastructure.Services.Auth;
 using App.Infrastructure.Services.Identity;
 using App.Infrastructure.Services.Implementations.Identity;
 using App.Infrastructure.Services.Implementations.Interceptors;
+using App.Infrastructure.Services.Certificats;
 using App.Infrastructure.Services.Chat;
+using App.Infrastructure.Services.Implementations.Certificats;
 using App.Infrastructure.Services.Implementations.Chat;
 using App.Infrastructure.Services.Implementations.Schools;
 using App.Infrastructure.Services.Implementations.Tenancy;
@@ -46,6 +48,7 @@ namespace App.Infrastructure.Extensions
                 .AddScoped<ITenantService, TenantService>()
                 .AddScoped<IRoleService, RoleService>()
                 .AddScoped<ISchoolService, SchoolService>()
+                .AddScoped<ICertificatService, CertificatService>()
                 .AddScoped<IChatService, ChatService>()
                 .AddScoped<IHttpRefreshTokenInterceptorService, HttpRefreshTokenInterceptorService>()
                 .AddScoped(sp => sp

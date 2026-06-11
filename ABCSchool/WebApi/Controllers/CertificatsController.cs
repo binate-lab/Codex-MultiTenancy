@@ -4,6 +4,7 @@ using Application.Features.Certificats.Queries;
 using Application.Features.Identity.Users;
 using Infrastructure.Constants;
 using Infrastructure.Identity.Auth;
+using Infrastructure.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers
@@ -77,6 +78,20 @@ namespace WebApi.Controllers
             return response.IsSuccessful ? Ok(response) : BadRequest(response);
         }
 
+        [HttpDelete("demandes/{demandeId}")]
+        [ShouldHavePermission(SchoolAction.Update, SchoolFeature.Certificats)]
+        public async Task<IActionResult> SupprimerDemandeAsync(Guid demandeId)
+        {
+            var tenantId = _currentUser.GetUserTenant();
+            var response = await Sender.Send(new SupprimerDemandeCommand
+            {
+                DemandeId = demandeId,
+                TenantId = tenantId,
+                EstRoot = tenantId == TenancyConstants.Root.Identifier
+            });
+            return response.IsSuccessful ? Ok(response) : BadRequest(response);
+        }
+
         [HttpPut("demandes/{demandeId}/rejeter")]
         [ShouldHavePermission(SchoolAction.Create, SchoolFeature.Certificats)]
         public async Task<IActionResult> RejeterDemandeAsync(Guid demandeId, [FromBody] string raison)
@@ -86,6 +101,14 @@ namespace WebApi.Controllers
                 DemandeId = demandeId,
                 Raison = raison
             });
+            return response.IsSuccessful ? Ok(response) : BadRequest(response);
+        }
+
+        [HttpPut("{certificatId}/reactiver")]
+        [ShouldHavePermission(SchoolAction.Create, SchoolFeature.Certificats)]
+        public async Task<IActionResult> ReactiverCertificatAsync(Guid certificatId)
+        {
+            var response = await Sender.Send(new ReactiverCertificatCommand { CertificatId = certificatId });
             return response.IsSuccessful ? Ok(response) : BadRequest(response);
         }
 
