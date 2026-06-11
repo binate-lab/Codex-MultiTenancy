@@ -1,5 +1,6 @@
 using Application;
 using Infrastructure;
+using Infrastructure.Pki;
 using Microsoft.AspNetCore.Server.Kestrel.Https;
 using WebApi;
 
@@ -7,11 +8,18 @@ const string BlazorClientCorsPolicy = "BlazorClient";
 
 var builder = WebApplication.CreateBuilder(args);
 
+// Demander un certificat client uniquement si la validation PKI est activée.
+// En dev (ValiderCertificatAppareil: false) → pas de boîte de dialogue dans le navigateur.
+var pkiSettings = builder.Configuration.GetSection("PkiSettings").Get<PkiSettings>();
+
 builder.WebHost.ConfigureKestrel(options =>
     options.ConfigureHttpsDefaults(https =>
     {
-        https.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
-        https.AllowAnyClientCertificate();
+        if (pkiSettings?.ValiderCertificatAppareil == true)
+        {
+            https.ClientCertificateMode = ClientCertificateMode.AllowCertificate;
+            https.AllowAnyClientCertificate();
+        }
     }));
 
 builder.Services.AddControllers();
