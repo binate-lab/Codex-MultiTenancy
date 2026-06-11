@@ -10,9 +10,11 @@ namespace Application.Features.Certificats
         Task<List<DemandeCertificat>> GetDemandesPendantesAsync();
         Task<CertificatEmisResult> ApprouverDemandeAsync(Guid demandeId, int dureeValiditeJours);
         Task RejeterDemandeAsync(Guid demandeId, string raison);
+        Task SupprimerDemandeAsync(Guid demandeId);
         Task<List<CertificatAppareil>> GetCertificatsByTenantAsync(string tenantId);
         Task<CertificatAppareil> GetCertificatByIdAsync(Guid certificatId);
         Task RevoquerCertificatAsync(Guid certificatId, string raison);
+        Task ReactiverCertificatAsync(Guid certificatId);
         Task<CertificatAppareil> GetByEmpreinteAsync(string empreinte);
     }
 }

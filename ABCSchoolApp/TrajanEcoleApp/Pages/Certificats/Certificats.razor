@@ -1,0 +1,230 @@
+@page "/certificats"
+@using TrajanEcole.Shared.Library.Constants
+
+@attribute [ShouldHavePermission(SchoolAction.Create, SchoolFeature.Certificats)]
+
+<Header Title="Certificats appareils" Description="Gestion des certificats d'authentification" OnReturn="ReturnClicked" />
+
+<MudTabs Elevation="2" Rounded="true" ApplyEffectsToContainer="true" PanelClass="pa-4" Class="mt-4"
+         ActivePanelIndexChanged="OnTabChangedAsync">
+
+    @* ── Onglet 1 : Soumettre une demande ── *@
+    <MudTabPanel Text="Nouvelle demande" Icon="@Icons.Material.Filled.AddCircleOutline">
+        <MudCard Elevation="0">
+            <MudCardContent Class="pb-0">
+                <MudText Typo="Typo.subtitle1" Class="mb-3">
+                    Soumettre une demande d'autorisation pour un appareil
+                </MudText>
+                <MudForm @ref="_form" @bind-IsValid="_formIsValid">
+                    <MudGrid Spacing="2">
+                        <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="_request.NomAppareil"
+                                          Label="Nom de l'appareil"
+                                          Variant="Variant.Outlined"
+                                          Required="true"
+                                          RequiredError="Le nom de l'appareil est obligatoire"
+                                          MaxLength="200"
+                                          HelperText="Ex: PC-SECRETARIAT-01" />
+                        </MudItem>
+                        <MudItem xs="12" md="6">
+                            <MudTextField @bind-Value="_request.UtilisateurId"
+                                          Label="ID Utilisateur (optionnel)"
+                                          Variant="Variant.Outlined"
+                                          HelperText="Laisser vide si non attribué" />
+                        </MudItem>
+                        <MudItem xs="12">
+                            <MudTextField @bind-Value="_request.Description"
+                                          Label="Description"
+                                          Variant="Variant.Outlined"
+                                          Required="true"
+                                          RequiredError="La description est obligatoire"
+                                          MaxLength="500"
+                                          Lines="2"
+                                          HelperText="Localisation, usage, responsable…" />
+                        </MudItem>
+                    </MudGrid>
+                </MudForm>
+                <MudButton Variant="Variant.Filled"
+                           Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.Send"
+                           OnClick="SoumettreDemandeAsync"
+                           Disabled="_isSubmitting"
+                           Class="mt-3">
+                    @if (_isSubmitting)
+                    {
+                        <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="mr-2" />
+                        <span>Envoi en cours…</span>
+                    }
+                    else
+                    {
+                        <span>Soumettre la demande</span>
+                    }
+                </MudButton>
+                @if (_jsonSoumission is not null)
+                {
+                    <MudPaper Elevation="0" Class="mt-3 pa-3" Style="background:#1e1e1e; border-radius:6px;">
+                        <pre style="margin:0; color:#d4d4d4; font-size:0.8rem; white-space:pre-wrap;">@_jsonSoumission</pre>
+                    </MudPaper>
+                }
+            </MudCardContent>
+        </MudCard>
+    </MudTabPanel>
+
+    @* ── Onglet 2 : Mes demandes ── *@
+    <MudTabPanel Text="Mes demandes" Icon="@Icons.Material.Filled.ListAlt">
+        <MudTable Items="_mesDemandes"
+                  Loading="_isLoadingDemandes"
+                  LoadingProgressColor="Color.Info"
+                  Elevation="0" Striped="true" Dense="true">
+            <ToolBarContent>
+                <MudText Typo="Typo.subtitle1">Demandes soumises par ce compte</MudText>
+                <MudSpacer />
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Primary"
+                               OnClick="ChargerMesDemandesAsync" Title="Actualiser" />
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Appareil</MudTh>
+                <MudTh>Description</MudTh>
+                <MudTh>Statut</MudTh>
+                <MudTh>Date demande</MudTh>
+                <MudTh>Certificat</MudTh>
+                <MudTh Style="text-align:right">Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.NomAppareil</MudTd>
+                <MudTd>@context.Description</MudTd>
+                <MudTd>
+                    <MudChip T="string" Color="@StatutDemandeColor(context.Statut)" Size="Size.Small">
+                        @context.StatutLibelle
+                    </MudChip>
+                </MudTd>
+                <MudTd>@context.DemandeeLe.ToString("dd MMM yyyy HH:mm")</MudTd>
+                <MudTd>
+                    @if (context.CertificatId.HasValue)
+                    {
+                        <MudText Typo="Typo.caption">@context.CertificatId.Value.ToString()[..8]…</MudText>
+                    }
+                    else
+                    {
+                        <MudText Typo="Typo.caption" Color="Color.Default">—</MudText>
+                    }
+                </MudTd>
+                <MudTd Style="text-align:right">
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small"
+                             Color="Color.Secondary"
+                             TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
+                        <MudMenuItem OnClick="@(() => ApprouverDemandeAsync(context))">Approuver</MudMenuItem>
+                        <MudMenuItem OnClick="@(() => RejeterDemandeAsync(context))">Rejeter</MudMenuItem>
+                        <MudMenuItem OnClick="@(() => SupprimerDemandeAsync(context))">Supprimer</MudMenuItem>
+                        @if (context.CertificatId.HasValue)
+                        {
+                            <MudMenuItem OnClick="@(() => RevoquerCertificatAsync(context.CertificatId.Value))"
+                                         Style="color: var(--mud-palette-error);">Révoquer</MudMenuItem>
+                        }
+                    </MudMenu>
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent><MudText>Aucune demande trouvée.</MudText></NoRecordsContent>
+            <PagerContent>
+                <MudTablePager RowsPerPageString="Lignes" InfoFormat="{first_item}-{last_item} sur {all_items}" />
+            </PagerContent>
+        </MudTable>
+    </MudTabPanel>
+
+    @* ── Onglet 3 : Demandes en attente (Root) ── *@
+    <MudTabPanel Text="En attente" Icon="@Icons.Material.Filled.HourglassTop">
+        <MudTable Items="_demandesPendantes"
+                  Loading="_isLoadingPendantes"
+                  LoadingProgressColor="Color.Info"
+                  Elevation="0" Striped="true" Dense="true">
+            <ToolBarContent>
+                <MudText Typo="Typo.subtitle1">Toutes les demandes en attente de validation</MudText>
+                <MudSpacer />
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Primary"
+                               OnClick="ChargerDemandesPendantesAsync" Title="Actualiser" />
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Appareil</MudTh>
+                <MudTh>Description</MudTh>
+                <MudTh>Tenant</MudTh>
+                <MudTh>Date demande</MudTh>
+                <MudTh Style="text-align:right">Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.NomAppareil</MudTd>
+                <MudTd>@context.Description</MudTd>
+                <MudTd>
+                    <MudText Typo="Typo.caption">@context.TenantId</MudText>
+                </MudTd>
+                <MudTd>@context.DemandeeLe.ToString("dd MMM yyyy HH:mm")</MudTd>
+                <MudTd Style="text-align:right">
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small"
+                             Color="Color.Secondary"
+                             TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
+                        <MudMenuItem OnClick="@(() => ApprouverDemandeAsync(context))">Approuver</MudMenuItem>
+                        <MudMenuItem OnClick="@(() => RejeterDemandeAsync(context))">Rejeter</MudMenuItem>
+                        <MudMenuItem OnClick="@(() => SupprimerDemandeAsync(context))">Supprimer</MudMenuItem>
+                    </MudMenu>
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent><MudText>Aucune demande en attente.</MudText></NoRecordsContent>
+            <PagerContent>
+                <MudTablePager RowsPerPageString="Lignes" InfoFormat="{first_item}-{last_item} sur {all_items}" />
+            </PagerContent>
+        </MudTable>
+    </MudTabPanel>
+
+    @* ── Onglet 4 : Mes appareils ── *@
+    <MudTabPanel Text="Mes appareils" Icon="@Icons.Material.Filled.Devices">
+        <MudTable Items="_mesAppareils"
+                  Loading="_isLoadingAppareils"
+                  LoadingProgressColor="Color.Info"
+                  Elevation="0" Striped="true" Dense="true">
+            <ToolBarContent>
+                <MudText Typo="Typo.subtitle1">Appareils autorisés</MudText>
+                <MudSpacer />
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Primary"
+                               OnClick="ChargerMesAppareilsAsync" Title="Actualiser" />
+            </ToolBarContent>
+            <HeaderContent>
+                <MudTh>Appareil</MudTh>
+                <MudTh>Description</MudTh>
+                <MudTh>Statut</MudTh>
+                <MudTh>Émis le</MudTh>
+                <MudTh>Expire le</MudTh>
+                <MudTh Style="text-align:right">Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd>@context.NomAppareil</MudTd>
+                <MudTd>@context.Description</MudTd>
+                <MudTd>
+                    <MudChip T="string" Color="@StatutCertificatColor(context.Statut)" Size="Size.Small">
+                        @context.StatutLibelle
+                    </MudChip>
+                </MudTd>
+                <MudTd>@context.EmisLe.ToString("dd MMM yyyy")</MudTd>
+                <MudTd>@context.ExpireLe.ToString("dd MMM yyyy")</MudTd>
+                <MudTd Style="text-align:right">
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small"
+                             Color="Color.Secondary"
+                             TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
+                        @if (context.Statut == 1)
+                        {
+                            <MudMenuItem OnClick="@(() => RevoquerCertificatAsync(context.Id))"
+                                         Style="color: var(--mud-palette-error);">Révoquer</MudMenuItem>
+                        }
+                        else if (context.Statut == 2)
+                        {
+                            <MudMenuItem OnClick="@(() => ReactiverCertificatAsync(context.Id))">Approuver</MudMenuItem>
+                        }
+                    </MudMenu>
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent><MudText>Aucun appareil autorisé.</MudText></NoRecordsContent>
+            <PagerContent>
+                <MudTablePager RowsPerPageString="Lignes" InfoFormat="{first_item}-{last_item} sur {all_items}" />
+            </PagerContent>
+        </MudTable>
+    </MudTabPanel>
+
+</MudTabs>

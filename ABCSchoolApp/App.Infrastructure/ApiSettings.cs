@@ -9,11 +9,30 @@
         public RoleEndpoints RoleEndpoints { get; set; }
         public SchoolEndpoints SchoolEndpoints { get; set; }
         public ChatEndpoints ChatEndpoints { get; set; }
+        public CertificatEndpoints CertificatEndpoints { get; set; }
     }
 
     public class ChatEndpoints
     {
         public string Send { get; set; }
+    }
+
+    public class CertificatEndpoints
+    {
+        public string SoumettreDemandeUrl { get; set; }
+        public string MesDemandesUrl { get; set; }
+        public string MesAppareilsUrl { get; set; }
+        public string DemandesPendantesUrl { get; set; }
+        public string ApprouverUrl { get; set; }
+        public string RejeterUrl { get; set; }
+        public string RevoquerUrl { get; set; }
+
+        public string SupprimerUrl { get; set; }
+        public string GetApprouver(Guid demandeId) => $"{ApprouverUrl}{demandeId}/approuver";
+        public string GetRejeter(Guid demandeId) => $"{RejeterUrl}{demandeId}/rejeter";
+        public string GetRevoquer(Guid certificatId) => $"{RevoquerUrl}{certificatId}/revoquer";
+        public string GetReactiver(Guid certificatId) => $"{RevoquerUrl}{certificatId}/reactiver";
+        public string GetSupprimer(Guid demandeId) => $"{SupprimerUrl}{demandeId}";
     }
 
     public class TokenEndpoints

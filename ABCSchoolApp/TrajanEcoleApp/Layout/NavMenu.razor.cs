@@ -18,6 +18,7 @@ namespace TrajanEcoleApp.Layout
         private bool _canViewUsers;
         private bool _canViewRoles;
         private bool _canViewSchools;
+        private bool _canViewCertificats;
 
         protected override async Task OnParametersSetAsync()
         {
@@ -27,6 +28,7 @@ namespace TrajanEcoleApp.Layout
             _canViewUsers = await AuthService.HasPermissionAsync(user, SchoolFeature.Users, SchoolAction.Read);
             _canViewRoles = await AuthService.HasPermissionAsync(user, SchoolFeature.Roles, SchoolAction.Read);
             _canViewSchools = await AuthService.HasPermissionAsync(user, SchoolFeature.Schools, SchoolAction.Read);
+            _canViewCertificats = await AuthService.HasPermissionAsync(user, SchoolFeature.Certificats, SchoolAction.Create);
         }
     }
 }
