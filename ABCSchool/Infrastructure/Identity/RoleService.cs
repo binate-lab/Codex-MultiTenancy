@@ -142,7 +142,10 @@ namespace Infrastructure.Identity
 
             if (!TenancyConstants.IsRoot(_tenantInfoContextAccessor.MultiTenantContext.TenantInfo))
             {
-                request.NewPermissions.RemoveAll(p => p.StartsWith("Permission.Tenants."));
+                // Un tenant non-Root ne peut jamais accorder de permissions réservées au Root
+                // (Tenants.*, Certificats.Create/Read/Delete, etc.).
+                var rootPermissions = SchoolPermissions.Root.Select(p => p.Name).ToHashSet();
+                request.NewPermissions.RemoveAll(p => rootPermissions.Contains(p));
             }
 
 

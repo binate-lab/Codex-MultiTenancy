@@ -4,6 +4,7 @@ using Application.Features.Certificats.Queries;
 using Application.Features.Identity.Users;
 using Infrastructure.Constants;
 using Infrastructure.Identity.Auth;
+using Infrastructure.Tenancy;
 using Microsoft.AspNetCore.Mvc;
 
 namespace WebApi.Controllers
@@ -81,7 +82,13 @@ namespace WebApi.Controllers
         [ShouldHavePermission(SchoolAction.Update, SchoolFeature.Certificats)]
         public async Task<IActionResult> SupprimerDemandeAsync(Guid demandeId)
         {
-            var response = await Sender.Send(new SupprimerDemandeCommand { DemandeId = demandeId });
+            var tenantId = _currentUser.GetUserTenant();
+            var response = await Sender.Send(new SupprimerDemandeCommand
+            {
+                DemandeId = demandeId,
+                TenantId = tenantId,
+                EstRoot = tenantId == TenancyConstants.Root.Identifier
+            });
             return response.IsSuccessful ? Ok(response) : BadRequest(response);
         }
 
