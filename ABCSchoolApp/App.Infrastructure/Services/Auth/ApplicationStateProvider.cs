@@ -29,9 +29,20 @@ namespace App.Infrastructure.Services.Auth
                 return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
             }
 
+            var claims = GetClaimsFromJwt(savedToken).ToList();
+
+            // Token expiré (claim "exp", secondes Unix) : on le purge et on repasse en
+            // anonyme pour forcer le passage par la page d'identification.
+            if (EstTokenExpire(claims))
+            {
+                await _localStorageService.RemoveItemAsync(StorageConstants.AuthToken);
+                _httpClient.DefaultRequestHeaders.Authorization = null;
+                return new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity()));
+            }
+
             _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", savedToken);
 
-            var state = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(GetClaimsFromJwt(savedToken), "jwt")));
+            var state = new AuthenticationState(new ClaimsPrincipal(new ClaimsIdentity(claims, "jwt")));
             AuthenticationStateUser = state.User;
             return state;
         }
@@ -57,6 +68,18 @@ namespace App.Infrastructure.Services.Auth
         }
 
         #region Helpers
+        private static bool EstTokenExpire(IEnumerable<Claim> claims)
+        {
+            var expClaim = claims.FirstOrDefault(c => c.Type == "exp")?.Value;
+
+            // Pas de claim exp lisible : par sécurité, on considère le token comme invalide.
+            if (string.IsNullOrEmpty(expClaim) || !long.TryParse(expClaim, out var expSeconds))
+                return true;
+
+            var expiration = DateTimeOffset.FromUnixTimeSeconds(expSeconds);
+            return expiration <= DateTimeOffset.UtcNow;
+        }
+
         private IEnumerable<Claim> GetClaimsFromJwt(string jwt)
         {
             var claims = new List<Claim>();
