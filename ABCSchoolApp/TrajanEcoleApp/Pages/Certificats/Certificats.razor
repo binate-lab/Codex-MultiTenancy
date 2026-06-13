@@ -41,6 +41,11 @@
                                           MaxLength="500"
                                           Lines="2"
                                           HelperText="Localisation, usage, responsable…" />
+                            <MudText Typo="Typo.caption" Color="Color.Primary">
+                                Ex : Localisation : Collège HELEIS, Yakro<br />
+                                Usage : Comptabilité<br />
+                                Responsable : Denis
+                            </MudText>
                         </MudItem>
                     </MudGrid>
                 </MudForm>
@@ -80,7 +85,7 @@
                 <MudText Typo="Typo.subtitle1">Demandes soumises par ce compte</MudText>
                 <MudSpacer />
                 <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Primary"
-                               OnClick="ChargerMesDemandesAsync" Title="Actualiser" />
+                               OnClick="ChargerMesDemandesAsync" title="Actualiser" />
             </ToolBarContent>
             <HeaderContent>
                 <MudTh>Appareil</MudTh>
@@ -141,7 +146,7 @@
                 <MudText Typo="Typo.subtitle1">Toutes les demandes en attente de validation</MudText>
                 <MudSpacer />
                 <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Primary"
-                               OnClick="ChargerDemandesPendantesAsync" Title="Actualiser" />
+                               OnClick="ChargerDemandesPendantesAsync" title="Actualiser" />
             </ToolBarContent>
             <HeaderContent>
                 <MudTh>Appareil</MudTh>
@@ -184,7 +189,7 @@
                 <MudText Typo="Typo.subtitle1">Appareils autorisés</MudText>
                 <MudSpacer />
                 <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Primary"
-                               OnClick="ChargerMesAppareilsAsync" Title="Actualiser" />
+                               OnClick="ChargerMesAppareilsAsync" title="Actualiser" />
             </ToolBarContent>
             <HeaderContent>
                 <MudTh>Appareil</MudTh>

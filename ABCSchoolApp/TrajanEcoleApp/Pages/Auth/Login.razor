@@ -46,8 +46,16 @@
                 Disabled="@_isSubmitting"
                 OnClick="@(() => SubmitAsync())">Connexion</MudButton>
         </MudItem>
+        <MudItem xs="12" Class="py-0">
+            <MudCheckBox T="bool"
+                Value="_rememberMe"
+                ValueChanged="OnRememberMeChangedAsync"
+                Label="Se souvenir de moi"
+                Color="Color.Primary"
+                Dense="true" />
+        </MudItem>
         <MudItem xs="12">
-            <MudButton Color="Color.Primary" 
+            <MudButton Color="Color.Primary"
                 Variant="Variant.Filled"
                 Size="Size.Large" 
                 Style="width: 100%"

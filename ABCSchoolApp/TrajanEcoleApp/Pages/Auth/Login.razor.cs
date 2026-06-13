@@ -1,10 +1,15 @@
-﻿using App.Infrastructure.Models;
+﻿using App.Infrastructure.Constants;
+using App.Infrastructure.Models;
+using Blazored.LocalStorage;
+using Microsoft.AspNetCore.Components;
 using MudBlazor;
 
 namespace TrajanEcoleApp.Pages.Auth
 {
     public partial class Login
     {
+        [Inject] private ILocalStorageService _localStorage { get; set; } = default!;
+
         private LoginRequest _loginRequest = new();
 
         private InputType _inputType = InputType.Password;
@@ -12,6 +17,7 @@ namespace TrajanEcoleApp.Pages.Auth
         private string _loginImagePath = "images/img1.png";
         private bool _isPasswordVisisble;
         private bool _isSubmitting;
+        private bool _rememberMe;
         private MudForm _form = default;
 
         protected override async Task OnInitializedAsync()
@@ -23,7 +29,41 @@ namespace TrajanEcoleApp.Pages.Auth
             if (state.User.Identity?.IsAuthenticated is true)
             {
                 _navigation.NavigateTo("/");
+                return;
             }
+
+            // Pré-remplissage si « Se souvenir de moi » était actif (jamais le mot de passe).
+            if (await _localStorage.GetItemAsync<bool>(StorageConstants.RememberMe))
+            {
+                _rememberMe = true;
+                _loginRequest.Tenant = await _localStorage.GetItemAsync<string>(StorageConstants.RememberedTenant);
+                _loginRequest.Username = await _localStorage.GetItemAsync<string>(StorageConstants.RememberedUsername);
+            }
+        }
+
+        private async Task OnRememberMeChangedAsync(bool value)
+        {
+            _rememberMe = value;
+
+            // Décoché : on efface immédiatement les informations sauvegardées.
+            if (!value)
+            {
+                await EffacerInfosMemoriseesAsync();
+            }
+        }
+
+        private async Task SauvegarderInfosMemoriseesAsync()
+        {
+            await _localStorage.SetItemAsync(StorageConstants.RememberMe, true);
+            await _localStorage.SetItemAsync(StorageConstants.RememberedTenant, _loginRequest.Tenant);
+            await _localStorage.SetItemAsync(StorageConstants.RememberedUsername, _loginRequest.Username);
+        }
+
+        private async Task EffacerInfosMemoriseesAsync()
+        {
+            await _localStorage.RemoveItemAsync(StorageConstants.RememberMe);
+            await _localStorage.RemoveItemAsync(StorageConstants.RememberedTenant);
+            await _localStorage.RemoveItemAsync(StorageConstants.RememberedUsername);
         }
 
         private async Task SubmitAsync()
@@ -48,6 +88,11 @@ namespace TrajanEcoleApp.Pages.Auth
 
                 if (result.IsSuccessful)
                 {
+                    if (_rememberMe)
+                        await SauvegarderInfosMemoriseesAsync();
+                    else
+                        await EffacerInfosMemoriseesAsync();
+
                     _navigation.NavigateTo("/");
                 }
                 else
