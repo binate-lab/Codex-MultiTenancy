@@ -27,6 +27,20 @@ namespace WebApi.Controllers
             return BadRequest(response);
         }
 
+        [HttpPost("select-school")]
+        [Authorize]
+        [OpenApiOperation("Émet un JWT école-scoped pour l'école choisie (clic sur une carte d'école).")]
+        public async Task<IActionResult> SelectSchoolAsync([FromBody] SelectSchoolRequest selectSchoolRequest)
+        {
+            var response = await Sender.Send(new SelectSchoolQuery { SelectSchool = selectSchoolRequest });
+
+            if (response.IsSuccessful)
+            {
+                return Ok(response);
+            }
+            return BadRequest(response);
+        }
+
         [HttpPost("refresh-token")]
         [OpenApiOperation("Utilisé pour un nouveau jwt de refresh token.")]
         [ShouldHavePermission(action: SchoolAction.RefreshToken, feature: SchoolFeature.Tokens)]

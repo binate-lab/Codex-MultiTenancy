@@ -20,6 +20,7 @@ namespace Infrastructure.Constants
         public const string UserRoles = nameof(UserRoles);
         public const string RoleClaims = nameof(RoleClaims);
         public const string Schools = nameof(Schools);
+        public const string SchoolMemberships = nameof(SchoolMemberships);
         public const string Tokens = nameof(Tokens);
         public const string Certificats = nameof(Certificats);
     }
@@ -61,6 +62,10 @@ namespace Infrastructure.Constants
             new SchoolPermission(SchoolAction.Create, SchoolFeature.Schools, "Créer Ecoles", "Academics"),
             new SchoolPermission(SchoolAction.Update, SchoolFeature.Schools, "Mis à jour Ecoles", "Academics"),
             new SchoolPermission(SchoolAction.Delete, SchoolFeature.Schools, "Supprimer Ecoles", "Academics"),
+
+            new SchoolPermission(SchoolAction.Read, SchoolFeature.SchoolMemberships, "Lire Affectations Ecole", "SystemAccess"),
+            new SchoolPermission(SchoolAction.Create, SchoolFeature.SchoolMemberships, "Affecter Utilisateur à une Ecole", "SystemAccess"),
+            new SchoolPermission(SchoolAction.Delete, SchoolFeature.SchoolMemberships, "Retirer Affectation Ecole", "SystemAccess"),
 
             new SchoolPermission(SchoolAction.RefreshToken, SchoolFeature.Tokens, "Generate Refresh Token", "SystemAccess", IsBasic: true),
 

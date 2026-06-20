@@ -10,5 +10,6 @@ namespace Application.Features.Schools
         Task<School> GetByIdAsync(int schoolId);
         Task<List<School>> GetAllAsync();
         Task<School> GetByNameAsync(string name);
+        Task<School> GetByCodeEtsAsync(string codeEts);
     }
 }

@@ -47,6 +47,13 @@ namespace Infrastructure.Schools
                 .FirstOrDefaultAsync();
         }
 
+        public async Task<School> GetByCodeEtsAsync(string codeEts)
+        {
+            return await _context.Schools
+                .Where(school => school.CodeEts == codeEts)
+                .FirstOrDefaultAsync();
+        }
+
         public async Task<int> UpdateAsync(School school)
         {
             _context.Schools.Update(school);

@@ -114,5 +114,50 @@ namespace Infrastructure.Contexts
                     .HasConversion<int>();
             }
         }
+
+        internal class SchoolMembershipConfig : IEntityTypeConfiguration<SchoolMembership>
+        {
+            public void Configure(EntityTypeBuilder<SchoolMembership> builder)
+            {
+                builder
+                    .ToTable("SchoolMemberships", "Academics")
+                    .IsMultiTenant();
+
+                builder.HasKey(membership => membership.Id);
+
+                builder
+                    .Property(membership => membership.UserId)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                builder
+                    .Property(membership => membership.RoleId)
+                    .IsRequired()
+                    .HasMaxLength(450);
+
+                // Une même affectation (user, école, rôle) ne peut exister qu'une fois.
+                builder
+                    .HasIndex(membership => new { membership.UserId, membership.SchoolId, membership.RoleId })
+                    .IsUnique();
+
+                builder
+                    .HasOne(membership => membership.School)
+                    .WithMany()
+                    .HasForeignKey(membership => membership.SchoolId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                builder
+                    .HasOne<ApplicationUser>()
+                    .WithMany()
+                    .HasForeignKey(membership => membership.UserId)
+                    .OnDelete(DeleteBehavior.Cascade);
+
+                builder
+                    .HasOne<ApplicationRole>()
+                    .WithMany()
+                    .HasForeignKey(membership => membership.RoleId)
+                    .OnDelete(DeleteBehavior.Restrict);
+            }
+        }
     }
 }

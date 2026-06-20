@@ -1,6 +1,9 @@
 ﻿using Application;
 using Application.Exceptions;
 using Application.Features.Identity.Tokens;
+using Application.Features.Identity.Users;
+using Application.Features.Schools;
+using Application.Features.Schools.Memberships;
 using Finbuckle.MultiTenant.Abstractions;
 using Infrastructure.Constants;
 using Infrastructure.Identity.Models;
@@ -21,17 +24,26 @@ namespace Infrastructure.Identity.Tokens
         private readonly RoleManager<ApplicationRole> _roleManager;
         private readonly IMultiTenantContextAccessor<TrajanEcoleTenantInfo> _tenantContextAccessor;
         private readonly JwtSettings _jwtSettings;
+        private readonly ICurrentUserService _currentUserService;
+        private readonly ISchoolService _schoolService;
+        private readonly ISchoolMembershipService _membershipService;
 
         public TokenService(
             UserManager<ApplicationUser> userManager,
             IMultiTenantContextAccessor<TrajanEcoleTenantInfo> tenantContextAccessor,
             RoleManager<ApplicationRole> roleManager,
-            IOptions<JwtSettings> jwtSettings)
+            IOptions<JwtSettings> jwtSettings,
+            ICurrentUserService currentUserService,
+            ISchoolService schoolService,
+            ISchoolMembershipService membershipService)
         {
             _userManager = userManager;
             _tenantContextAccessor = tenantContextAccessor;
             _roleManager = roleManager;
             _jwtSettings = jwtSettings.Value;
+            _currentUserService = currentUserService;
+            _schoolService = schoolService;
+            _membershipService = membershipService;
         }
 
         public async Task<TokenResponse> LoginAsync(TokenRequest request)
@@ -84,6 +96,103 @@ namespace Infrastructure.Identity.Tokens
             }
 
             return await GenerateTokenAndUpdateUserAsync(userInDb);
+        }
+
+        public async Task<TokenResponse> SelectSchoolAsync(SelectSchoolRequest request)
+        {
+            var currentTenant = GetCurrentTenant();
+
+            var userId = _currentUserService.GetUserId();
+            var userInDb = await _userManager.FindByIdAsync(userId)
+                ?? throw new UnauthorizedException(["L'authentification a échoué."]);
+
+            if (!userInDb.IsActive)
+            {
+                throw new UnauthorizedException(["L'utilisateur est inactif actuellement. Contacter Administrateur."]);
+            }
+
+            var school = await _schoolService.GetByCodeEtsAsync(request.CodeEts)
+                ?? throw new NotFoundException([$"École '{request.CodeEts}' introuvable."]);
+
+            // admin/root (rôle tenant-wide Admin) : accès à toutes les écoles du tenant,
+            // avec toutes ses permissions tenant-wide (Root incluses si tenant racine).
+            var isTenantAdmin = await _userManager.IsInRoleAsync(userInDb, TrajanEcole.Shared.Library.Constants.RoleConstants.Admin);
+
+            List<string> roleNames;
+            if (isTenantAdmin)
+            {
+                roleNames = [.. await _userManager.GetRolesAsync(userInDb)];
+            }
+            else
+            {
+                // Sinon : il faut une affectation (SchoolMembership) à cette école précise.
+                var roleIds = await _membershipService.GetUserRoleIdsInSchoolAsync(userId, school.Id);
+
+                if (roleIds.Count == 0)
+                {
+                    throw new UnauthorizedException(["Vous n'avez pas accès à cette école."]);
+                }
+
+                roleNames = [];
+                foreach (var roleId in roleIds)
+                {
+                    var role = await _roleManager.FindByIdAsync(roleId);
+                    if (role is not null)
+                    {
+                        roleNames.Add(role.Name);
+                    }
+                }
+            }
+
+            var claims = await GetSchoolScopedClaims(userInDb, school.CodeEts, roleNames);
+            var jwt = GenerateEncryptedToken(GenerateSigningCredentials(), claims);
+
+            userInDb.RefreshToken = GenerateRefreshToken();
+            userInDb.RefreshTokenExpiryTime = DateTime.UtcNow.AddDays(_jwtSettings.RefreshTokenExpiryTimeInDays);
+            await _userManager.UpdateAsync(userInDb);
+
+            return new TokenResponse
+            {
+                Jwt = jwt,
+                RefreshToken = userInDb.RefreshToken,
+                RefreshTokenExpiryDate = userInDb.RefreshTokenExpiryTime
+            };
+        }
+
+        private async Task<IEnumerable<Claim>> GetSchoolScopedClaims(
+            ApplicationUser user, string codeEts, List<string> roleNames)
+        {
+            var userClaims = await _userManager.GetClaimsAsync(user);
+
+            var roleClaims = new List<Claim>();
+            var permissionClaims = new List<Claim>();
+
+            foreach (var roleName in roleNames)
+            {
+                roleClaims.Add(new Claim(ClaimTypes.Role, roleName));
+
+                var currentRole = await _roleManager.FindByNameAsync(roleName);
+                if (currentRole is not null)
+                {
+                    permissionClaims.AddRange(await _roleManager.GetClaimsAsync(currentRole));
+                }
+            }
+
+            var claims = new List<Claim>
+            {
+                new(ClaimTypes.NameIdentifier, user.Id),
+                new(ClaimTypes.Email, user.Email),
+                new(ClaimTypes.Name, user.FirstName ?? string.Empty),
+                new(ClaimTypes.Surname, user.LastName ?? string.Empty),
+                new(ClaimConstants.Tenant, GetCurrentTenant().Identifier),
+                new(ClaimConstants.School, codeEts),
+                new(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty)
+            }
+            .Union(roleClaims)
+            .Union(permissionClaims)
+            .Union(userClaims);
+
+            return claims;
         }
 
         private ClaimsPrincipal GetClaimsPrincipalFromExpiringToken(string expiringToken)
