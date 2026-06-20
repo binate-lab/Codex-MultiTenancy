@@ -7,6 +7,8 @@ using App.Infrastructure.Services.Certificats;
 using App.Infrastructure.Services.Chat;
 using App.Infrastructure.Services.Implementations.Certificats;
 using App.Infrastructure.Services.Implementations.Chat;
+using App.Infrastructure.Services.Eleves;
+using App.Infrastructure.Services.Implementations.Eleves;
 using App.Infrastructure.Services.Implementations.Schools;
 using App.Infrastructure.Services.Implementations.Tenancy;
 using App.Infrastructure.Services.Interceptors;
@@ -57,6 +59,14 @@ namespace App.Infrastructure.Extensions
                 .AddHttpClient(_clientName, client =>
                 {
                     client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:BaseApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
+            // Client typie dedie au microservice Eleves.Api (base address propre + JWT propage).
+            builder.Services
+                .AddHttpClient<IEleveService, EleveService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ElevesApiUrl").Get<string>());
                 })
                 .AddHttpMessageHandler<AuthenticationHeaderHandler>();
 

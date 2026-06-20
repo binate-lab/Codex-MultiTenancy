@@ -3,6 +3,8 @@
     public class ApiSettings
     {
         public string BaseApiUrl { get; set; }
+        // Base address du microservice Eleves.Api (distinct du WebApi ABCSchool).
+        public string ElevesApiUrl { get; set; }
         public TokenEndpoints TokenEndpoints { get; set; }
         public UserEndpoints UserEndpoints { get; set; }
         public TenantEndpoints TenantEndpoints { get; set; }
@@ -10,6 +12,12 @@
         public SchoolEndpoints SchoolEndpoints { get; set; }
         public ChatEndpoints ChatEndpoints { get; set; }
         public CertificatEndpoints CertificatEndpoints { get; set; }
+        public EleveEndpoints EleveEndpoints { get; set; }
+    }
+
+    public class EleveEndpoints
+    {
+        public string Create { get; set; }
     }
 
     public class ChatEndpoints
