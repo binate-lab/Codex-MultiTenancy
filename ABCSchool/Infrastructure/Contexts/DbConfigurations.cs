@@ -112,6 +112,45 @@ namespace Infrastructure.Contexts
                     .Property(school => school.Statut)
                     .IsRequired()
                     .HasConversion<int>();
+
+                builder
+                    .Property(school => school.Logo)
+                    .HasMaxLength(256);
+
+                builder
+                    .Property(school => school.Devise)
+                    .HasMaxLength(150);
+            }
+        }
+
+        internal class AnneeScolaireConfig : IEntityTypeConfiguration<AnneeScolaire>
+        {
+            public void Configure(EntityTypeBuilder<AnneeScolaire> builder)
+            {
+                builder
+                    .ToTable("AnneesScolaires", "Academics")
+                    .IsMultiTenant();
+
+                // Clé primaire métier : le libellé de l'année scolaire (ex : "2025-2026").
+                builder.HasKey(annee => annee.Libelle);
+
+                builder
+                    .Property(annee => annee.Libelle)
+                    .HasColumnName("AnneeScolaire")
+                    .IsRequired()
+                    .HasMaxLength(20);
+
+                // Dates métier sans composante horaire : type SQL "date".
+                builder.Property(annee => annee.DebutAnneeScolaire).HasColumnType("date");
+                builder.Property(annee => annee.FinAnneeScolaire).HasColumnType("date");
+                builder.Property(annee => annee.FinSemestre1).HasColumnType("date");
+                builder.Property(annee => annee.FinSemestre2).HasColumnType("date");
+                builder.Property(annee => annee.FinTrimestre1).HasColumnType("date");
+                builder.Property(annee => annee.FinTrimestre2).HasColumnType("date");
+
+                builder
+                    .Property(annee => annee.FinEncaissement)
+                    .HasMaxLength(20);
             }
         }
 

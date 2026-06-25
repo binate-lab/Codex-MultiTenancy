@@ -4,6 +4,7 @@ using Infrastructure.Contexts;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace Infrastructure.Migrations.ApplicationDb
 {
     [DbContext(typeof(ApplicationDbContext))]
-    partial class ApplicationDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260621063324_AddSchoolLogoAndDevise")]
+    partial class AddSchoolLogoAndDevise
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -21,52 +24,6 @@ namespace Infrastructure.Migrations.ApplicationDb
                 .HasAnnotation("Relational:MaxIdentifierLength", 128);
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
-
-            modelBuilder.Entity("Domain.Entities.AnneeScolaire", b =>
-                {
-                    b.Property<string>("Libelle")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)")
-                        .HasColumnName("AnneeScolaire");
-
-                    b.Property<bool>("AnneeEnCours")
-                        .HasColumnType("bit");
-
-                    b.Property<DateTime>("DebutAnneeScolaire")
-                        .HasColumnType("date");
-
-                    b.Property<int>("DelaiExclusion")
-                        .HasColumnType("int");
-
-                    b.Property<DateTime>("FinAnneeScolaire")
-                        .HasColumnType("date");
-
-                    b.Property<string>("FinEncaissement")
-                        .HasMaxLength(20)
-                        .HasColumnType("nvarchar(20)");
-
-                    b.Property<DateTime?>("FinSemestre1")
-                        .HasColumnType("date");
-
-                    b.Property<DateTime?>("FinSemestre2")
-                        .HasColumnType("date");
-
-                    b.Property<DateTime?>("FinTrimestre1")
-                        .HasColumnType("date");
-
-                    b.Property<DateTime?>("FinTrimestre2")
-                        .HasColumnType("date");
-
-                    b.Property<string>("TenantId")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.HasKey("Libelle");
-
-                    b.ToTable("AnneesScolaires", "Academics");
-
-                    b.HasAnnotation("Finbuckle:MultiTenant", true);
-                });
 
             modelBuilder.Entity("Domain.Entities.CertificatAppareil", b =>
                 {

@@ -17,5 +17,7 @@ namespace Infrastructure.Contexts
         public DbSet<School> Schools => Set<School>();
 
         public DbSet<SchoolMembership> SchoolMemberships => Set<SchoolMembership>();
+
+        public DbSet<AnneeScolaire> AnneesScolaires => Set<AnneeScolaire>();
     }
 }
