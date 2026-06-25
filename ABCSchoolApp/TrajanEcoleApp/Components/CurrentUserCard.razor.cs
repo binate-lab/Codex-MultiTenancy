@@ -26,7 +26,7 @@ namespace TrajanEcoleApp.Components
             Lastname = user.GetLastname();
             Email = user.GetEmail();
 
-            if (Firstname.Length > 0)
+            if (!string.IsNullOrEmpty(Firstname))
             {
                 FirstLetterOfFirstname = Firstname[0];
             }
