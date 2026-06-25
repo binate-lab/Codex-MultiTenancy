@@ -1,10 +1,5 @@
 ﻿@inherits LayoutComponentBase
 
-<MudThemeProvider/>
-<MudPopoverProvider/>
-<MudDialogProvider/>
-<MudSnackbarProvider/>
-
 <AuthorizeView>
     <NotAuthorized>
         <MudContainer MaxWidth="MaxWidth.Small" Class="d-flex align-center" Style="height: 100vh">
@@ -24,17 +19,17 @@
                     Class="ml-2" 
                     Edge="Edge.Start"/>
                 <MudSpacer/>
-                <MudMenu Icon="@Icons.Material.Outlined.Person" 
+                <MudText Typo="Typo.body2" Class="mr-3 d-none d-sm-flex">@(context.User.FindFirst(System.Security.Claims.ClaimTypes.Email)?.Value)</MudText>
+                <MudMenu Icon="@Icons.Material.Outlined.Person"
                     Color="Color.Inherit" 
-                    TransformOrigin="Origin.BottomLeft" 
+                    AnchorOrigin="Origin.BottomLeft"
+                    TransformOrigin="Origin.TopLeft" 
                     Dense="true"
                     Class="mt-1 ml-4">
                     <ChildContent>
                         <CurrentUserCard/>
                         <MudDivider/>
-                        <MudList T="string">
-                            <MudListItem OnClick="LogoutDialog" Text="Quitter" Icon="@Icons.Material.Filled.Logout" />
-                        </MudList>
+                        <MudMenuItem OnClick="LogoutDialog" Icon="@Icons.Material.Filled.Logout">Quitter</MudMenuItem>
                     </ChildContent>
                 </MudMenu>
             </MudAppBar>
