@@ -16,14 +16,9 @@ namespace App.Infrastructure.Validators
             RuleFor(e => e.Prenom)
                 .NotEmpty().WithMessage("Le prenom est requis!");
 
-            RuleFor(e => e.Niveau)
-                .NotEmpty().WithMessage("Le niveau est requis!");
-
-            RuleFor(e => e.Classe)
-                .NotEmpty().WithMessage("La classe est requise!");
-
-            RuleFor(e => e.AnneeScolaire)
-                .NotEmpty().WithMessage("L'annee scolaire est requise!");
+            // #4 : seuls Matricule National + Nom + Prenoms sont obligatoires.
+            // Niveau, Classe, Annee scolaire (et tout le reste) sont facultatifs a la
+            // creation et pourront etre completes/mis a jour plus tard.
         }
 
         public Func<object, string, Task<IEnumerable<string>>> ValidateValue => async (model, propertyName) =>

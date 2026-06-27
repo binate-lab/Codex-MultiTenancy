@@ -1,0 +1,120 @@
+/* Reproduction de la fenetre Access "Creation eleve".
+   Palette gris-bleu, libelles a gauche en gras, champs compacts. */
+
+.acc-window {
+    background: #d9e2e8;
+    border: 1px solid #9fb0bb;
+    padding: 10px 14px 14px;
+    color: #1c2b36;
+    font-size: 0.8rem;
+}
+
+/* Bandeau superieur : titre + bouton Fermer */
+.acc-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.acc-title {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #1c2b36;
+}
+
+.acc-year {
+    border: 2px solid #3c7d7d;
+    border-radius: 4px;
+    padding: 2px 16px;
+    font-weight: 700;
+    font-style: italic;
+    color: #2f7d7d;
+    background: #cfd9df;
+    letter-spacing: 1px;
+}
+
+/* Lignes libelle + champ */
+.acc-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-bottom: 1px;
+    min-height: 22px;
+}
+
+.acc-label {
+    flex: 0 0 130px;
+    text-align: right;
+    font-weight: 700;
+    font-size: 0.78rem;
+    color: #243b4a;
+    white-space: nowrap;
+}
+
+.acc-label.narrow {
+    flex: 0 0 90px;
+}
+
+.acc-field {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+/* Champs compacts facon Access : fond blanc, bord fin */
+.acc-field ::deep .mud-input-slot,
+.acc-field ::deep .mud-select-input {
+    font-size: 0.78rem;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    background: #ffffff;
+}
+
+.acc-field ::deep .mud-input.mud-input-outlined .mud-input-slot {
+    min-height: 22px;
+    height: 22px;
+}
+
+/* NB : le fond jaune du champ Matricule (.acc-yellow) est défini globalement
+   dans le <style> de wwwroot/index.html (un ::deep scopé n'atteint pas la racine
+   MudBlazor, et css/app.css n'est pas chargé par index.html). */
+
+/* Sections parents */
+.acc-section-title {
+    text-align: center;
+    font-weight: 700;
+    color: #0d6e9c;
+    border-top: 2px solid #1c2b36;
+    border-bottom: 2px solid #1c2b36;
+    margin: 8px 0 6px;
+    padding: 1px 0;
+}
+
+.acc-section-title.correspondant {
+    color: #c0392b;
+}
+
+/* Colonne de boutons d'action */
+.acc-actionbar {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    align-items: stretch;
+}
+
+.acc-photo {
+    background: #2f4fd0;
+    color: #ffffff;
+    text-align: center;
+    font-size: 0.75rem;
+    padding: 14px 6px;
+    border-radius: 2px;
+}
+
+.acc-inscrire {
+    background: #fff79a;
+    text-align: center;
+    font-weight: 700;
+    color: #1c2b36;
+    padding: 2px 0;
+}

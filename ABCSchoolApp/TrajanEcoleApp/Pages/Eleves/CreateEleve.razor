@@ -1,92 +1,274 @@
 @page "/eleves/create"
+@layout SchoolLayout
+@using TrajanEcole.Shared.Library.Models.Requests.Eleves
 
-<MudCard Elevation="25" Class="pa-4">
-    <MudCardHeader>
-        <CardHeaderContent>
-            <MudText Typo="Typo.h6">
-                <MudIcon Icon="@Icons.Material.Filled.PersonAdd" Class="mr-2 mb-n1" />
-                Nouvel eleve
-            </MudText>
-            <MudText Typo="Typo.body2" Class="mud-text-secondary">
-                Cree un eleve via le microservice Eleves.Api (propage l'evenement aux autres services).
-            </MudText>
-        </CardHeaderContent>
-    </MudCardHeader>
-    <MudCardContent>
+<MudPaper Elevation="6" Class="ma-2">
+    <div class="acc-window">
+
+        <!-- Bandeau : titre + actions + Fermer -->
+        <div class="acc-titlebar">
+            <div class="d-flex align-center gap-3">
+                <span class="acc-title">Création élève</span>
+                <span class="acc-year">@Eleve.AnneeScolaire</span>
+            </div>
+            <div class="d-flex align-center gap-2">
+                <MudButton OnClick="Nouveau" Variant="Variant.Outlined" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.NoteAdd">Nouveau</MudButton>
+                <MudButton OnClick="SubmitAsync" Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                           Disabled="_isSaving">
+                    @if (_isSaving)
+                    {
+                        <MudProgressCircular Class="mr-2" Size="Size.Small" Indeterminate="true" />
+                    }
+                    Saisir/Modifier
+                </MudButton>
+                <MudButton Variant="Variant.Text" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Close"
+                           OnClick="Cancel">Fermer</MudButton>
+            </div>
+        </div>
+
         <MudForm @ref="_form" Model="Eleve" Validation="@(_validator.ValidateValue)" ValidationDelay="0">
-            <MudGrid>
-                <MudItem xs="12" md="4">
-                    <MudTextField @bind-Value="Eleve.NumeroMatricule" For="@(() => Eleve.NumeroMatricule)"
-                                  Variant="Variant.Outlined" Margin="Margin.Dense" Label="Matricule" />
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudTextField @bind-Value="Eleve.MatriculeInterne" For="@(() => Eleve.MatriculeInterne)"
-                                  Variant="Variant.Outlined" Margin="Margin.Dense" Label="Matricule interne" />
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudTextField @bind-Value="Eleve.AnneeScolaire" For="@(() => Eleve.AnneeScolaire)"
-                                  Variant="Variant.Outlined" Margin="Margin.Dense" Label="Annee scolaire" />
-                </MudItem>
+            <MudTabs Elevation="0" Rounded="true" Border="true" ApplyEffectsToContainer="true" PanelClass="pa-2">
 
-                <MudItem xs="12" md="6">
-                    <MudTextField @bind-Value="Eleve.Nom" For="@(() => Eleve.Nom)"
-                                  Variant="Variant.Outlined" Margin="Margin.Dense" Label="Nom" />
-                </MudItem>
-                <MudItem xs="12" md="6">
-                    <MudTextField @bind-Value="Eleve.Prenom" For="@(() => Eleve.Prenom)"
-                                  Variant="Variant.Outlined" Margin="Margin.Dense" Label="Prenom" />
-                </MudItem>
+                <!-- ============ Onglet ÉLÈVE ============ -->
+                <MudTabPanel Text="Élève" Icon="@Icons.Material.Filled.Person">
+                    <MudGrid Spacing="3">
 
-                <MudItem xs="12" md="4">
-                    <MudSelect @bind-Value="Eleve.Cycle" For="@(() => Eleve.Cycle)"
-                               Variant="Variant.Outlined" Margin="Margin.Dense" Label="Cycle">
-                        <MudSelectItem Value="1">1 - College</MudSelectItem>
-                        <MudSelectItem Value="2">2 - Lycee</MudSelectItem>
-                    </MudSelect>
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudSelect @bind-Value="Eleve.Niveau" For="@(() => Eleve.Niveau)"
-                               Variant="Variant.Outlined" Margin="Margin.Dense" Label="Niveau">
-                        @foreach (var niveau in _niveaux)
-                        {
-                            <MudSelectItem Value="@niveau">@niveau</MudSelectItem>
-                        }
-                    </MudSelect>
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudTextField @bind-Value="Eleve.Classe" For="@(() => Eleve.Classe)"
-                                  Variant="Variant.Outlined" Margin="Margin.Dense" Label="Classe" />
-                </MudItem>
+                        <!-- Colonne identité -->
+                        <MudItem xs="12" md="6">
+                            <div class="acc-row">
+                                <label class="acc-label">Matricule National:</label>
+                                <MudTextField @bind-Value="Eleve.NumeroMatricule" For="@(() => Eleve.NumeroMatricule)"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense"
+                                              Class="acc-field acc-yellow" />
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Nom:</label>
+                                <MudTextField @bind-Value="Eleve.Nom" For="@(() => Eleve.Nom)"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Prénoms:</label>
+                                <MudTextField @bind-Value="Eleve.Prenom" For="@(() => Eleve.Prenom)"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Cycle:</label>
+                                <MudSelect @bind-Value="Eleve.Cycle" For="@(() => Eleve.Cycle)"
+                                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
+                                    <MudSelectItem Value="1">1</MudSelectItem>
+                                    <MudSelectItem Value="2">2</MudSelectItem>
+                                </MudSelect>                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Niveau:</label>
+                                <MudSelect @bind-Value="Eleve.Niveau" For="@(() => Eleve.Niveau)"
+                                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
+                                    @foreach (var niveau in _niveaux)
+                                    {
+                                        <MudSelectItem Value="@niveau">@niveau</MudSelectItem>
+                                    }
+                                </MudSelect>                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Classe:</label>
+                                <MudTextField @bind-Value="Eleve.Classe" For="@(() => Eleve.Classe)"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Sexe:</label>
+                                <MudSelect @bind-Value="Eleve.Sexe" For="@(() => Eleve.Sexe)"
+                                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
+                                    <MudSelectItem Value="@("M")">M</MudSelectItem>
+                                    <MudSelectItem Value="@("F")">F</MudSelectItem>
+                                </MudSelect>                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Date de Naissance:</label>
+                                <MudDatePicker @bind-Date="Eleve.DateNaissance"
+                                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Lieu de Naissance:</label>
+                                <MudTextField @bind-Value="Eleve.LieuDeNaissance" For="@(() => Eleve.LieuDeNaissance)"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Bureau état civil:</label>
+                                <MudTextField @bind-Value="Eleve.BureauEtatCivil"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Sous prefecture:</label>
+                                <MudTextField @bind-Value="Eleve.SousPrefecture"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">N° de l'extrait:</label>
+                                <MudTextField @bind-Value="Eleve.NumExtrait"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                                <label class="acc-label narrow">Du:</label>
+                                <MudTextField @bind-Value="Eleve.DateExtrait"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Nationalité:</label>
+                                <MudTextField @bind-Value="Eleve.Nationalite"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                            </div>
+                        </MudItem>
 
-                <MudItem xs="12" md="4">
-                    <MudDatePicker @bind-Date="Eleve.DateNaissance"
-                                   Variant="Variant.Outlined" Margin="Margin.Dense" Label="Date de naissance" />
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudTextField @bind-Value="Eleve.Sexe" For="@(() => Eleve.Sexe)"
-                                  Variant="Variant.Outlined" Margin="Margin.Dense" Label="Sexe" />
-                </MudItem>
-                <MudItem xs="12" md="4">
-                    <MudTextField @bind-Value="Eleve.LieuDeNaissance" For="@(() => Eleve.LieuDeNaissance)"
-                                  Variant="Variant.Outlined" Margin="Margin.Dense" Label="Lieu de naissance" />
-                </MudItem>
+                        <!-- Colonne scolarité -->
+                        <MudItem xs="12" md="6">
+                            <div class="acc-row">
+                                <label class="acc-label">N° Inscription:</label>
+                                <MudNumericField @bind-Value="Eleve.MatriculeInterne" For="@(() => Eleve.MatriculeInterne)"
+                                                 Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field"
+                                                 HideSpinButtons="true" />                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Transfert Ou Reaffect:</label>
+                                <MudTextField @bind-Value="Eleve.TransfertOuReaffect"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Classe Précédente:</label>
+                                <MudTextField @bind-Value="Eleve.ClassePrecedente"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Ets d'Origine:</label>
+                                <MudTextField @bind-Value="Eleve.EtsOrigine"
+                                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Redouble:</label>
+                                <MudSelect @bind-Value="Eleve.Red" T="string"
+                                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
+                                    <MudSelectItem Value="@("NR")">NR</MudSelectItem>
+                                    <MudSelectItem Value="@("R")">R</MudSelectItem>
+                                </MudSelect>
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Statut:</label>
+                                <MudSelect @bind-Value="Eleve.Statut" T="StatutEleve"
+                                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
+                                    <MudSelectItem Value="StatutEleve.Naff">Naff</MudSelectItem>
+                                    <MudSelectItem Value="StatutEleve.Aff">Aff</MudSelectItem>
+                                </MudSelect>
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Interne:</label>
+                                <MudSelect @bind-Value="Eleve.Interne" T="string"
+                                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
+                                    <MudSelectItem Value="@("Non")">Non</MudSelectItem>
+                                    <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
+                                </MudSelect>
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Regime:</label>
+                                <MudSelect @bind-Value="Eleve.Regime" T="string"
+                                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
+                                    <MudSelectItem Value="@("NB")">NB</MudSelectItem>
+                                    <MudSelectItem Value="@("DP")">DP</MudSelectItem>
+                                </MudSelect>
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">L V1:</label>
+                                <MudSelect @bind-Value="Eleve.LangueVivante1" T="string"
+                                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
+                                    <MudSelectItem Value="@("Anglais")">Anglais</MudSelectItem>
+                                    <MudSelectItem Value="@("Espagnol")">Espagnol</MudSelectItem>
+                                    <MudSelectItem Value="@("Allemand")">Allemand</MudSelectItem>
+                                </MudSelect>
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">L V2:</label>
+                                <MudSelect @bind-Value="Eleve.LangueVivante2" T="string"
+                                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
+                                    <MudSelectItem Value="@("Anglais")">Anglais</MudSelectItem>
+                                    <MudSelectItem Value="@("Espagnol")">Espagnol</MudSelectItem>
+                                    <MudSelectItem Value="@("Allemand")">Allemand</MudSelectItem>
+                                </MudSelect>
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Série:</label>
+                                <MudSelect @bind-Value="Eleve.Serie" T="string"
+                                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
+                                    <MudSelectItem Value="@("A")">A</MudSelectItem>
+                                    <MudSelectItem Value="@("C")">C</MudSelectItem>
+                                    <MudSelectItem Value="@("D")">D</MudSelectItem>
+                                </MudSelect>
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Dispensé en EPS:</label>
+                                <MudSelect @bind-Value="Eleve.DispenseEps" T="string"
+                                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
+                                    <MudSelectItem Value="@("Non")">Non</MudSelectItem>
+                                    <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
+                                </MudSelect>
+                            </div>
+                            <div class="acc-row">
+                                <label class="acc-label">Date Inscription:</label>
+                                <MudDatePicker @bind-Date="Eleve.DateInscription"
+                                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                            </div>
+                        </MudItem>
+                    </MudGrid>
+                </MudTabPanel>
 
-                <MudItem xs="12" md="6">
-                    <MudTextField @bind-Value="Eleve.CodeEts" For="@(() => Eleve.CodeEts)"
-                                  Variant="Variant.Outlined" Margin="Margin.Dense" Label="Code Ets (ecole)" />
-                </MudItem>
-            </MudGrid>
+                <!-- ============ Onglet PARENTS ============ -->
+                <MudTabPanel Text="Parents" Icon="@Icons.Material.Filled.People">
+                    @RenderPersonne("Père :", false, Eleve.Pere)
+                    @RenderPersonne("Mère :", false, Eleve.Mere)
+                    @RenderPersonne("Correspondant :", true, Eleve.Tuteur)
+                </MudTabPanel>
+            </MudTabs>
         </MudForm>
-    </MudCardContent>
-    <MudCardActions>
-        <MudButton OnClick="Cancel" Variant="Variant.Outlined" Class="mr-auto">Annuler</MudButton>
-        <MudButton OnClick="SubmitAsync" Variant="Variant.Filled" Color="Color.Primary"
-                   Disabled="_isSaving">
-            @if (_isSaving)
-            {
-                <MudProgressCircular Class="mr-2" Size="Size.Small" Indeterminate="true" />
-            }
-            Enregistrer
-        </MudButton>
-    </MudCardActions>
-</MudCard>
+    </div>
+</MudPaper>
+
+@code {
+    // Bloc Père / Mère / Correspondant : champs calques sur ParentDto (backend Eleves.Api).
+    // « Correspondant » = Tuteur. Telephone2 est libelle « WhatsApp ».
+    private RenderFragment RenderPersonne(string titre, bool correspondant, ParentRequestDto parent) =>@<text>
+        <div class="acc-section-title @(correspondant ? "correspondant" : "")">@titre</div>
+        <MudGrid Spacing="3">
+            <MudItem xs="12" md="6">
+                <div class="acc-row">
+                    <label class="acc-label">Nom:</label>
+                    <MudTextField @bind-Value="parent.Nom" Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                </div>
+                <div class="acc-row">
+                    <label class="acc-label">Prénom:</label>
+                    <MudTextField @bind-Value="parent.Prenom" Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                </div>
+                <div class="acc-row">
+                    <label class="acc-label">Profession:</label>
+                    <MudTextField @bind-Value="parent.Profession" Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                </div>
+                <div class="acc-row">
+                    <label class="acc-label">Fonction:</label>
+                    <MudTextField @bind-Value="parent.Fonction" Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                </div>
+            </MudItem>
+            <MudItem xs="12" md="6">
+                <div class="acc-row">
+                    <label class="acc-label">Téléphone 1:</label>
+                    <MudTextField @bind-Value="parent.Telephone1" Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                </div>
+                <div class="acc-row">
+                    <label class="acc-label">WhatsApp:</label>
+                    <MudTextField @bind-Value="parent.Telephone2" Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                </div>
+                <div class="acc-row">
+                    <label class="acc-label">Téléphone 3:</label>
+                    <MudTextField @bind-Value="parent.Telephone3" Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                </div>
+                <div class="acc-row">
+                    <label class="acc-label">Statut:</label>
+                    <MudSelect @bind-Value="parent.Statut" T="ParentStatut" Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
+                        <MudSelectItem Value="ParentStatut.Actif">Actif</MudSelectItem>
+                        <MudSelectItem Value="ParentStatut.Inactif">Inactif</MudSelectItem>
+                        <MudSelectItem Value="ParentStatut.Decede">Décédé</MudSelectItem>
+                        <MudSelectItem Value="ParentStatut.Retraite">Retraité</MudSelectItem>
+                    </MudSelect>
+                </div>
+            </MudItem>
+        </MudGrid>
+    </text>;
+}

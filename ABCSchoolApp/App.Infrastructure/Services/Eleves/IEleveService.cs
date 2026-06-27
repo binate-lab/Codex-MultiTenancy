@@ -8,5 +8,5 @@ namespace App.Infrastructure.Services.Eleves
     }
 
     // Resultat simple : Eleves.Api renvoie 201 + { id }, sans ResponseWrapper.
-    public record EleveCreationResult(bool IsSuccessful, Guid Id, string? Error);
+    public record EleveCreationResult(bool IsSuccessful, Guid Id, string Error);
 }

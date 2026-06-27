@@ -9,6 +9,8 @@ using App.Infrastructure.Services.Implementations.Certificats;
 using App.Infrastructure.Services.Implementations.Chat;
 using App.Infrastructure.Services.Eleves;
 using App.Infrastructure.Services.Implementations.Eleves;
+using App.Infrastructure.Services.AnneesScolaires;
+using App.Infrastructure.Services.Implementations.AnneesScolaires;
 using App.Infrastructure.Services.Implementations.Schools;
 using App.Infrastructure.Services.Implementations.Tenancy;
 using App.Infrastructure.Services.Interceptors;
@@ -50,6 +52,7 @@ namespace App.Infrastructure.Extensions
                 .AddScoped<ITenantService, TenantService>()
                 .AddScoped<IRoleService, RoleService>()
                 .AddScoped<ISchoolService, SchoolService>()
+                .AddScoped<IAnneeScolaireService, AnneeScolaireService>()
                 .AddScoped<ICertificatService, CertificatService>()
                 .AddScoped<IChatService, ChatService>()
                 .AddScoped<IHttpRefreshTokenInterceptorService, HttpRefreshTokenInterceptorService>()
@@ -67,6 +70,14 @@ namespace App.Infrastructure.Extensions
                 .AddHttpClient<IEleveService, EleveService>(client =>
                 {
                     client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ElevesApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
+            // #5 : client typie dedie au microservice Scolarite.Api (compteur N° Inscription par ecole).
+            builder.Services
+                .AddHttpClient<IInscriptionService, InscriptionService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
                 })
                 .AddHttpMessageHandler<AuthenticationHeaderHandler>();
 

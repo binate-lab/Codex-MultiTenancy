@@ -5,11 +5,14 @@
         public string BaseApiUrl { get; set; }
         // Base address du microservice Eleves.Api (distinct du WebApi ABCSchool).
         public string ElevesApiUrl { get; set; }
+        // Base address du microservice Scolarite.Api (#5 : compteur N° Inscription par ecole).
+        public string ScolariteApiUrl { get; set; }
         public TokenEndpoints TokenEndpoints { get; set; }
         public UserEndpoints UserEndpoints { get; set; }
         public TenantEndpoints TenantEndpoints { get; set; }
         public RoleEndpoints RoleEndpoints { get; set; }
         public SchoolEndpoints SchoolEndpoints { get; set; }
+        public AnneeScolaireEndpoints AnneeScolaireEndpoints { get; set; }
         public ChatEndpoints ChatEndpoints { get; set; }
         public CertificatEndpoints CertificatEndpoints { get; set; }
         public EleveEndpoints EleveEndpoints { get; set; }
@@ -18,6 +21,13 @@
     public class EleveEndpoints
     {
         public string Create { get; set; }
+        // #5 : GET compteur N° Inscription par ecole (sur Scolarite.Api).
+        public string NextMatriculeInterne { get; set; }
+    }
+
+    public class AnneeScolaireEndpoints
+    {
+        public string EnCours { get; set; }
     }
 
     public class ChatEndpoints
@@ -47,6 +57,7 @@
     {
         public string Login { get; set; }
         public string RefreshToken { get; set; }
+        public string SelectSchool { get; set; }
     }
 
     public class UserEndpoints
@@ -124,6 +135,7 @@
         public string ById { get; set; }
         public string ByName { get; set; }
         public string All { get; set; }
+        public string Mine { get; set; }
 
         public string GetById(string schoolId)
             => $"{ById}{schoolId}";
