@@ -38,28 +38,33 @@
                 <SchoolNavMenu />
             </MudDrawer>
             <MudMainContent>
-                <!-- Barre de menus / outils horizontale, fine, sous le bandeau.
-                     Ajouter ici les futurs menus et outils de l'espace école. -->
-                <MudToolBar Dense="true" Class="school-submenu px-2 gap-1">
-                    <MudButton StartIcon="@Icons.Material.Outlined.Apps"
-                               Size="Size.Small"
-                               Color="Color.Inherit">Structure</MudButton>
-                    <MudButton StartIcon="@Icons.Material.Outlined.Print"
-                               Size="Size.Small"
-                               Color="Color.Inherit">Imprimer</MudButton>
-                    <MudButton StartIcon="@Icons.Material.Outlined.Hub"
-                               Size="Size.Small"
-                               Color="Color.Inherit">Réseau</MudButton>
-                    <MudMenu Label="Outils"
-                             StartIcon="@Icons.Material.Outlined.Build"
-                             Size="Size.Small"
-                             Color="Color.Inherit"
-                             Dense="true">
-                        <MudMenuItem>Paramètres</MudMenuItem>
-                        <MudMenuItem>Exporter</MudMenuItem>
-                    </MudMenu>
-                    <MudSpacer />
-                </MudToolBar>
+                @* Barre de menus / outils horizontale, fine, sous le bandeau.
+                   Affichée UNIQUEMENT sur la page principale de l'espace école (/ecole).
+                   Quand une page s'ouvre (ex. Création élève), elle disparaît et le
+                   contenu remonte à sa place. *@
+                @if (IsSchoolHome)
+                {
+                    <MudToolBar Dense="true" Class="school-submenu px-2 gap-1">
+                        <MudButton StartIcon="@Icons.Material.Outlined.Apps"
+                                   Size="Size.Small"
+                                   Color="Color.Inherit">Structure</MudButton>
+                        <MudButton StartIcon="@Icons.Material.Outlined.Print"
+                                   Size="Size.Small"
+                                   Color="Color.Inherit">Imprimer</MudButton>
+                        <MudButton StartIcon="@Icons.Material.Outlined.Hub"
+                                   Size="Size.Small"
+                                   Color="Color.Inherit">Réseau</MudButton>
+                        <MudMenu Label="Outils"
+                                 StartIcon="@Icons.Material.Outlined.Build"
+                                 Size="Size.Small"
+                                 Color="Color.Inherit"
+                                 Dense="true">
+                            <MudMenuItem>Paramètres</MudMenuItem>
+                            <MudMenuItem>Exporter</MudMenuItem>
+                        </MudMenu>
+                        <MudSpacer />
+                    </MudToolBar>
+                }
                 @Body
             </MudMainContent>
             <ChatWidget />

@@ -1,0 +1,13 @@
+/* Barre de menus / outils horizontale, sous le bandeau.
+   Fine (hauteur réduite), fond clair discret, séparée du contenu par une
+   bordure basse. Les boutons restent compacts. */
+::deep .school-submenu {
+    min-height: 30px;
+    height: 30px;
+    background-color: #F5F5F5;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.10);
+}
+
+::deep .school-submenu .mud-button-root {
+    text-transform: none;
+}

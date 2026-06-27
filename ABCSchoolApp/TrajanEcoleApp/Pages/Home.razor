@@ -1,127 +1,137 @@
-﻿@page "/"
+@page "/"
 @using MudBlazor
+@using TrajanEcole.Shared.Library.Models.Responses.Schools
 
 <MudContainer MaxWidth="MaxWidth.False" Class="px-0">
-    <!-- ---------- FEATURES ---------- -->
+    <!-- ---------- ECOLES ---------- -->
     <MudContainer MaxWidth="MaxWidth.Large" Class="py-1">
 
         <MudText Typo="Typo.h4" Align="Align.Center" GutterBottom="true">
-            <!--Trajan <span class="font-weight-bold text-success">Tranquilité&nbsp;Assurance&nbsp;Souplesse</span> -->
             Trajan: <span class="font-weight-bold text-success">Tranquilité&nbsp;Et&nbsp;Souplesse</span>
         </MudText>
 
+        @if (_isLoading)
+        {
+            <div class="d-flex justify-center my-8">
+                <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+            </div>
+        }
+        else if (_schools.Count == 0)
+        {
+            <MudText Typo="Typo.subtitle1" Align="Align.Center" Class="my-8 mud-text-secondary">
+                Aucune école pour le moment. Créez-en une depuis le menu « Écoles ».
+            </MudText>
+        }
+        else
+        {
+            <!-- 3-up on desktop, 2-up on tablet, 1-up on mobile -->
+            <MudGrid Spacing="3" Class="mt-4">
+                @foreach (var school in _schools)
+                {
+                    <MudItem xs="12" sm="6" md="4">
+                        <MudCard Elevation="3" Class="h-100">
+                            <div @onclick="@(() => SelectSchoolAsync(school))"
+                                 class="school-card-hover"
+                                 style="cursor: pointer; height: 100%;">
+                            <MudCardContent Class="d-flex flex-column align-center text-center pa-5">
 
-        <!-- 3-up on desktop, 2-up on tablet, 1-up on mobile -->
-        <MudGrid Spacing="3" Class="mt-4">
-            @foreach (var feature in _features)
-            {
-                <MudItem xs="12" sm="6" md="4">
-                    <MudCard Elevation="3" Class="h-100">
-                        <MudCardContent Class="d-flex flex-column align-center text-center pa-5">
+                                @if (!string.IsNullOrWhiteSpace(school.Logo))
+                                {
+                                    <MudImage Src="@school.Logo"
+                                              Style="width: 64px; height: 64px; object-fit: contain;" />
+                                }
+                                else
+                                {
+                                    <MudAvatar Color="Color.Primary" Size="Size.Large">
+                                        @GetInitials(school)
+                                    </MudAvatar>
+                                }
 
-                            <MudImage Src="@feature.ImageSrc"
-                                      Style="width: 64px; height: 64px; object-fit: contain;" />
+                                <MudText Typo="Typo.h6" Class="mt-3 mb-1">
+                                    @school.Name
+                                </MudText>
 
-                            <MudText Typo="Typo.h6" Class="mt-3 mb-1">
-                                @feature.Title
-                            </MudText>
-
-                            <MudText Typo="Typo.body2">
-                                @feature.Description
-                            </MudText>
-                        </MudCardContent>
-                    </MudCard>
-                </MudItem>
-            }
-        </MudGrid>
+                                @if (!string.IsNullOrWhiteSpace(school.Devise))
+                                {
+                                    <MudText Typo="Typo.body2">
+                                        @school.Devise
+                                    </MudText>
+                                }
+                            </MudCardContent>
+                            </div>
+                        </MudCard>
+                    </MudItem>
+                }
+            </MudGrid>
+        }
     </MudContainer>
 
 </MudContainer>
 
 @code {
-    private readonly FeatureCardImg[] _features =
+    private bool _isLoading = true;
+    private bool _selecting;
+    private List<SchoolResponse> _schools = [];
+
+    protected override async Task OnInitializedAsync()
     {
-        // new FeatureCard(Icons.Material.Filled.Domain,
-        //     "Strategies Ets",
-        //     "Base de données-par-Ets ou Base de données partagé -> basculez à tout moment."),
+        // Écoles de l'utilisateur connecté uniquement (Admin tenant-wide => toutes).
+        var result = await _schoolService.GetMineAsync();
+        if (result.IsSuccessful && result.Data is not null)
+        {
+            _schools = result.Data;
+        }
+        // En l'absence d'école associée : liste vide => état vide affiché, sans erreur bloquante.
 
-        new FeatureCardImg("/images/LogoCouleurOrion.png",
-            "COLLEGE ORION",
-            "L'expérience au service de la population."),
-
-        new FeatureCardImg("/images/LogoCouleurAvogadro.png",
-            "COLLEGE AVOGADRO.",
-            "L'effort fait les forts."),
-
-        new FeatureCardImg("/images/LogoEcoleHeleis.png",
-            "COLLEGE HELEIS.",
-            "Le collège des enseignants."),
-
-        new FeatureCardImg("/images/LogoEcoleCAMA.png",
-            "COLLEGE CAMA.",
-            "Le collège des enseignants."),
-
-        new FeatureCardImg("/images/LogoEcoleEDEN.png",
-            "COLLEGE EDEN",
-            "Le collège des enseignants."),
-
-        new FeatureCardImg("/images/LogoEcolePEROUSE.png",
-            "COLLEGE LA PEROUSE",
-            "Le collège des enseignants."),
-
-        new FeatureCardImg("/images/LogoEcoleGARRETT.png",
-            "COLLEGE MORGAN GARRETT",
-            "Le collège des enseignants."),
-
-        new FeatureCardImg("/images/LogoEcoleDJEDRI.png",
-            "GROUPE DJEDRI",
-            "Le collège des enseignants."),
-
-        new FeatureCardImg("/images/LogoEcoleCSP.png",
-            "COLLEGE CSP",
-            "Cours Secodaire Protestant."),
-
-
-        // new FeatureCard(Icons.Material.Filled.Subscriptions,
-        //     "Gestion de la Souscription Ets.",
-        //     "Chaque Ets aura sa propre date d'expiration."),
-
-
-        // new FeatureCard(Icons.Material.Filled.AccountCircle,
-        //     "Gestion des Utilisateurs",
-        //     "Créer dynamiquement des comptes Utilisateur pour votre Ets. Activer ou désactiver les à la demande"),
-
-        // new FeatureCard(Icons.Material.Filled.Shield,
-        //     "Control Role & Permission",
-        //     "Créez des roles, assignez permissions/autorisations à des roles de façon granulaire."),
-
-        // new FeatureCard(Icons.Material.Filled.GppGood,
-        //     "Composant Authorisation",
-        //     "Route guards, menu trimming and Authorize View powered by live user claims."),
-
-        // new FeatureCard(Icons.Material.Filled.VerifiedUser,
-        //     "Gestion etat des Authorisation. (Blazor)",
-        //     "Custom AuthenticationStateProvider keeps UI in sync with silent token refreshes."),
-
-        // new FeatureCard(Icons.Material.Filled.Autorenew,
-        //     "Silent Token Refresh",
-        //     "HTTP interceptor renews JWTs in the background for uninterrupted sessions."),
-
-        // new FeatureCard(Icons.Material.Filled.Dns,
-        //     "Dependency Injection Ready",
-        //     "Learn about how to register services into DI container."),
-
-        // new FeatureCard(Icons.Material.Filled.EventBusy,
-        //     "Blazor Component LifeCycle Hooks",
-        //     "Learn about all Blazor component lifecycle hooks - demo provided")
-    };
-
-    private record FeatureCard(string Icon, string Title, string Description);
-    private record FeatureCardImg(string ImageSrc, string Title, string Description);
-
-    private void OnImageClick()
-    {
-        // Ton action ici
+        _isLoading = false;
     }
 
+    private async Task SelectSchoolAsync(SchoolResponse school)
+    {
+        if (_selecting)
+        {
+            return;
+        }
+
+        _selecting = true;
+        try
+        {
+            // Échange le JWT courant contre un JWT école-scoped (claim school = CodeEts),
+            // puis ouvre la page d'accueil de l'école sélectionnée.
+            var result = await _tokenService.SelectSchoolAsync(school.CodeEts);
+            if (result.IsSuccessful)
+            {
+                _navigation.NavigateTo("/ecole");
+            }
+            else
+            {
+                foreach (var message in result.Messages)
+                {
+                    _snackbar.Add(message, Severity.Error);
+                }
+            }
+        }
+        finally
+        {
+            _selecting = false;
+        }
+    }
+
+    private static string GetInitials(SchoolResponse school)
+    {
+        var source = !string.IsNullOrWhiteSpace(school.NomCourtEts) ? school.NomCourtEts : school.Name;
+        if (string.IsNullOrWhiteSpace(source))
+        {
+            return "?";
+        }
+
+        var parts = source.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+        {
+            return string.Concat(parts[0][0], parts[1][0]).ToUpperInvariant();
+        }
+
+        var trimmed = source.Trim();
+        return trimmed[..Math.Min(2, trimmed.Length)].ToUpperInvariant();
+    }
 }

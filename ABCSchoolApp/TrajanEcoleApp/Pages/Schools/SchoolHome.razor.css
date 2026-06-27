@@ -1,0 +1,31 @@
+/* Fond de la page d'accueil d'école : photo de paysage en plein écran.
+   Pour changer d'image, remplacer 'landscape1.png' (ex. 'terre.png' + voile sombre).
+   Un voile blanc dégradé (::before) adoucit le haut de l'image pour garder
+   lisibles le nom de l'école (rouge) et la ville (bleu). */
+.school-home-bg {
+    position: relative;
+    min-height: calc(100vh - 179.33px);
+    background-image: url('/images/landscape1.png');
+    background-size: cover;
+    background-position: center;
+    background-attachment: fixed;
+}
+
+/* Voile de lisibilité : plus opaque en haut (zone du titre), transparent en bas. */
+.school-home-bg::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: linear-gradient(to bottom,
+        rgba(255, 255, 255, 0.78) 0%,
+        rgba(255, 255, 255, 0.45) 30%,
+        rgba(255, 255, 255, 0.10) 60%,
+        rgba(255, 255, 255, 0) 100%);
+}
+
+/* Le contenu passe au-dessus du voile. */
+.school-home-bg > * {
+    position: relative;
+    z-index: 1;
+}

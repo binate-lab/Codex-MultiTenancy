@@ -1,0 +1,56 @@
+@page "/ecole"
+@layout SchoolLayout
+@using MudBlazor
+@using TrajanEcole.Shared.Library.Models.Responses.Schools
+
+<div class="school-home-bg">
+    @if (_isLoading)
+    {
+        <div class="d-flex justify-center pt-16">
+            <MudProgressCircular Color="Color.Primary" Indeterminate="true" />
+        </div>
+    }
+    else
+    {
+        <div style="text-align: center; padding-top: 2rem;">
+            <MudText Typo="Typo.h3" Style="color: #C62828; font-weight: 700;">
+                @(_school?.Name ?? "École")
+            </MudText>
+
+            @if (!string.IsNullOrWhiteSpace(_school?.Ville))
+            {
+                <MudText Typo="Typo.h5" Style="color: #1565C0; text-decoration: underline;" Class="mt-2">
+                    @_school.Ville
+                </MudText>
+            }
+        </div>
+
+        <MudText Typo="Typo.body2"
+                 Class="mud-text-secondary"
+                 Style="position: absolute; bottom: 16px; right: 24px;">
+            @DateTime.Now.ToString("dd/MM/yyyy")
+        </MudText>
+    }
+</div>
+
+@code {
+    private bool _isLoading = true;
+    private SchoolResponse _school;
+
+    protected override async Task OnInitializedAsync()
+    {
+        var user = await _applicationStateProvider.GetAuthenticationStateProviderUserAsync();
+        var codeEts = user.FindFirst("school")?.Value;
+
+        if (!string.IsNullOrWhiteSpace(codeEts))
+        {
+            var result = await _schoolService.GetMineAsync();
+            if (result.IsSuccessful && result.Data is not null)
+            {
+                _school = result.Data.FirstOrDefault(s => s.CodeEts == codeEts);
+            }
+        }
+
+        _isLoading = false;
+    }
+}

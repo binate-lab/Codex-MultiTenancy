@@ -8,6 +8,122 @@
     <base href="/" />
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400,500,700&display=swap" rel="stylesheet" />
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
+    <link href="TrajanEcoleApp.styles.css" rel="stylesheet" />
+    <style>
+        /* AppBar de l'espace école (.school-shell) : barre FLOTTANTE arrondie.
+           Hauteur = nombre d'or (phi ≈ 1.618) × 3 × 32px ≈ 155.33px.
+           Marge 12px tout autour + 12px de jeu sous la barre => le tiroir et le
+           contenu démarrent à 12 + 155.33 + 12 = 179.33px (via --mud-appbar-height,
+           ce qui décale aussi le tiroir : logo + menu ne sont plus recouverts).
+           Le MainLayout (TrajanTenancy) garde la hauteur par défaut. */
+        .school-shell {
+            --mud-appbar-height: 179.33px;
+            --mud-appbar-min-height: 155.33px;
+        }
+
+        .school-shell .mud-appbar {
+            top: 12px;
+            left: 12px;
+            right: 12px;
+            width: auto;
+            border-radius: 18px;
+            background-image: url('/images/appbar.png');
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .school-shell .mud-appbar .mud-toolbar {
+            min-height: 155.33px;
+            height: 155.33px;
+        }
+
+        .school-shell .mud-main-content {
+            padding-top: 179.33px !important;
+        }
+
+        /* Menu latéral (tiroir) : image de fond menu.png. */
+        .school-shell .mud-drawer {
+            background-image: url('/images/menu.png');
+            background-size: 100% 100%;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        .school-shell .mud-drawer .mud-typography,
+        .school-shell .mud-drawer .mud-nav-link {
+            color: #ffffff !important;
+        }
+
+        .school-shell .mud-drawer .mud-nav-link.mud-nav-link-disabled {
+            color: rgba(255, 255, 255, 0.65) !important;
+        }
+
+        .school-shell .mud-drawer .mud-nav-link .mud-icon-root {
+            color: inherit !important;
+        }
+
+        .school-shell .mud-drawer .mud-divider {
+            border-color: rgba(255, 255, 255, 0.3) !important;
+            margin: 0 !important;
+            /* CAUSE RACINE du « menu têtu » : dans le tiroir (flex column) le <hr>
+               MudDivider a flex-grow:1 et ABSORBE tout l'espace vertical libre — espace
+               qui variait avec la hauteur de l'en-tête (chargement async logo/nom/année),
+               d'où un menu qui « redescendait ». On fige le séparateur à 1px. */
+            flex: 0 0 auto !important;
+            height: 1px !important;
+        }
+
+        /* Menu resserré juste sous « Tâches courantes » : on neutralise marge et
+           padding haut sur toutes les variantes possibles du conteneur de menu
+           (nav / ul / liste) et sur la première entrée. */
+        .school-shell .mud-drawer .mud-navmenu,
+        .school-shell .mud-drawer nav,
+        .school-shell .mud-drawer .mud-navmenu ul,
+        .school-shell .mud-drawer .mud-navmenu .mud-list,
+        .school-shell .mud-drawer .mud-navmenu .mud-list-padding {
+            padding-top: 0 !important;
+        }
+
+        /* Position du menu : on laisse ~1 cm d'air entre le séparateur (« Tâches
+           courantes ») et la première entrée. On utilise transform (et pas margin)
+           car la mise en page flex du tiroir ignore margin-top. Ajustable. */
+        .school-shell .mud-drawer .mud-navmenu {
+            transform: translateY(4px) !important;
+        }
+
+        .school-shell .mud-drawer .mud-navmenu > :first-child,
+        .school-shell .mud-drawer .mud-navmenu ul > :first-child,
+        .school-shell .mud-drawer .mud-navmenu .mud-list > :first-child {
+            margin-top: 0 !important;
+            padding-top: 0 !important;
+        }
+
+        .school-shell .mud-drawer .mud-nav-link {
+            min-height: 38px;
+            pointer-events: auto;
+            border-radius: 6px;
+            transition: background-color .2s ease, transform .15s ease, box-shadow .15s ease;
+        }
+
+        /* Survol de TOUTES les entrées du menu : fond renforcé, texte demi-gras
+           et légère ÉLÉVATION (l'entrée se soulève). */
+        .school-shell .mud-drawer .mud-nav-link:hover {
+            font-weight: 600;
+            background-color: rgba(255, 255, 255, 0.15);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.25);
+        }
+
+        /* Champ « Matricule National » (formulaire Création élève) : fond jaune façon
+           Access. Règle globale car la classe .acc-yellow est posée sur un composant
+           MudBlazor dont la racine ne reçoit pas l'attribut de scope ; un ::deep
+           scopé ne l'atteindrait pas. */
+        .acc-yellow .mud-input-slot,
+        .acc-yellow input {
+            background-color: #fff79a !important;
+        }
+    </style>
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
 </head>
@@ -132,6 +248,52 @@
     </div>
     <script src="_framework/blazor.webassembly.js"></script>
     <script src="_content/MudBlazor/MudBlazor.min.js"></script>
+
+    <!-- Ergonomie clavier du formulaire Création élève (façon Access) :
+         - Entrée / Tab : passer au champ suivant
+         - Ctrl+S ou F2 : exécuter Saisir/Modifier (enregistrer)
+         - F8 : exécuter Nouveau (vider)
+         Enregistré/désenregistré par le composant CreateEleve (interop .NET). -->
+    <script>
+        window.trajanCreateEleve = {
+            _onKey: null,
+            register: function (dotNetRef) {
+                if (this._onKey) { document.removeEventListener('keydown', this._onKey, true); }
+                this._onKey = function (e) {
+                    // Raccourcis d'action (actifs sur toute la page Création élève)
+                    if ((e.ctrlKey && (e.key === 's' || e.key === 'S')) || e.key === 'F2') {
+                        e.preventDefault();
+                        dotNetRef.invokeMethodAsync('SaveFromShortcut');
+                        return;
+                    }
+                    if (e.key === 'F8') {
+                        e.preventDefault();
+                        dotNetRef.invokeMethodAsync('NewFromShortcut');
+                        return;
+                    }
+                    // Entrée : passer au champ suivant (comme Tab), dans le formulaire
+                    if (e.key === 'Enter') {
+                        var el = e.target;
+                        if (!el || !el.closest) { return; }
+                        var form = el.closest('.acc-window');
+                        if (!form) { return; }
+                        var tag = el.tagName;
+                        if (tag === 'TEXTAREA' || tag === 'BUTTON') { return; }
+                        e.preventDefault();
+                        var fields = Array.prototype.slice
+                            .call(form.querySelectorAll('input, select, textarea'))
+                            .filter(function (n) { return !n.disabled && n.tabIndex !== -1 && n.offsetParent !== null; });
+                        var i = fields.indexOf(el);
+                        if (i > -1 && i < fields.length - 1) { fields[i + 1].focus(); }
+                    }
+                };
+                document.addEventListener('keydown', this._onKey, true);
+            },
+            unregister: function () {
+                if (this._onKey) { document.removeEventListener('keydown', this._onKey, true); this._onKey = null; }
+            }
+        };
+    </script>
 </body>
 
 </html>

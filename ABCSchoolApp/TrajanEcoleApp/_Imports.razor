@@ -19,6 +19,7 @@
 @using TrajanEcoleApp.Components
 @using global::App.Infrastructure.Services.Interceptors
 @using global::App.Infrastructure.Services.Schools
+@using global::App.Infrastructure.Services.AnneesScolaires
 @using global::App.Infrastructure.Services.Eleves
 @using global::App.Infrastructure.Services.Tenancy
 @using global::App.Infrastructure.Services.Certificats
@@ -34,6 +35,7 @@
 @inject ITenantService _tenantService
 @inject IRoleService _roleService
 @inject ISchoolService _schoolService
+@inject IAnneeScolaireService _anneeScolaireService
 @inject IEleveService _eleveService
 @inject ICertificatService _certificatService
 @inject IChatService _chatService

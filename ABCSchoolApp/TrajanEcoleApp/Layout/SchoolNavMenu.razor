@@ -1,0 +1,106 @@
+@using TrajanEcole.Shared.Library.Models.Responses.Schools
+
+@* Hauteur FIXE de l'en-tête : indispensable pour que la position du menu (sous le
+   séparateur) reste STABLE malgré le chargement asynchrone du logo/nom/année — sans
+   ça, l'en-tête grandit après coup et le menu « redescend ». La zone logo/avatar est
+   forcée à 64px et la ligne du nom réserve sa place même vide. *@
+<div class="d-flex flex-column align-center px-3 pt-1 pb-0" style="min-height: 132px;">
+    <div style="width: 64px; height: 64px; display: flex; align-items: center; justify-content: center;">
+        @if (_school is not null && !string.IsNullOrWhiteSpace(_school.Logo))
+        {
+            <MudImage Src="@_school.Logo"
+                      Style="width: 64px; height: 64px; object-fit: contain;" />
+        }
+        else
+        {
+            <MudAvatar Style="width: 64px; height: 64px; background-color: #FF8200; color: white; font-weight: bold;">
+                @_initials
+            </MudAvatar>
+        }
+    </div>
+
+    <div style="border: 2px solid rgba(255, 255, 255, 0.85); border-radius: 6px; padding: 4px 20px; margin-top: 10px; font-weight: 700; font-size: 1.45rem; color: #ffffff; letter-spacing: 1px;">
+        @_anneeScolaire
+    </div>
+
+    <MudText Typo="Typo.caption" Align="Align.Center" Class="mt-1 mud-text-secondary" Style="min-height: 1.1em;">
+        @(_school?.Name)
+    </MudText>
+</div>
+
+<MudText Typo="Typo.subtitle1"
+         Align="Align.Center"
+         Class="px-4 pt-1 pb-0"
+         Style="display: block; font-weight: 600;">
+    Tâches courantes
+</MudText>
+<MudDivider Class="mb-0" />
+
+<MudNavMenu Rounded="true" Margin="Margin.Dense" Color="Color.Primary" Class="px-2 pb-2 pt-0">
+    <MudNavLink Href="/eleves/create" Icon="@Icons.Material.Filled.PersonAdd">Création Elève</MudNavLink>
+    <MudNavLink Disabled="true" Icon="@Icons.Material.Filled.HowToReg">Reinscriptions</MudNavLink>
+    <MudNavLink Disabled="true" Icon="@Icons.Material.Filled.Groups">Listes de Classes</MudNavLink>
+    <MudNavLink Disabled="true" Icon="@Icons.Material.Filled.Payments">Versements</MudNavLink>
+    <MudNavLink Disabled="true" Icon="@Icons.Material.Filled.Assessment">Rapports</MudNavLink>
+    <MudNavLink Disabled="true" Icon="@Icons.Material.Filled.Search">Rechercher</MudNavLink>
+    <MudNavLink Disabled="true" Icon="@Icons.Material.Filled.Badge">Personnel</MudNavLink>
+    <MudNavLink Disabled="true" Icon="@Icons.Material.Filled.Grading">Notes et Bulletins</MudNavLink>
+    <MudNavLink Disabled="true" Icon="@Icons.Material.Filled.Storefront">Economat</MudNavLink>
+    <MudNavLink Disabled="true" Icon="@Icons.Material.Filled.Sms">Envoi SMS</MudNavLink>
+
+    <MudDivider Class="my-2" />
+    <MudNavLink Href="/" Icon="@Icons.Material.Filled.SwapHoriz">Changer d'école</MudNavLink>
+</MudNavMenu>
+
+@code {
+    // Année scolaire en cours, chargée depuis l'API (table AnneesScolaires).
+    private string _anneeScolaire = "—";
+
+    private SchoolResponse _school;
+    private string _initials = "EC";
+
+    protected override async Task OnInitializedAsync()
+    {
+        // École active = claim "school" (= CodeEts) du JWT école-scoped.
+        var user = await _applicationStateProvider.GetAuthenticationStateProviderUserAsync();
+        var codeEts = user.FindFirst("school")?.Value;
+
+        if (!string.IsNullOrWhiteSpace(codeEts))
+        {
+            var result = await _schoolService.GetMineAsync();
+            if (result.IsSuccessful && result.Data is not null)
+            {
+                _school = result.Data.FirstOrDefault(s => s.CodeEts == codeEts);
+                if (_school is not null)
+                {
+                    _initials = GetInitials(_school);
+                }
+            }
+        }
+
+        // Année scolaire en cours (lue dans la table AnneesScolaires du tenant).
+        var anneeResult = await _anneeScolaireService.GetAnneeEnCoursAsync();
+        if (anneeResult.IsSuccessful && anneeResult.Data is not null)
+        {
+            _anneeScolaire = anneeResult.Data.Libelle;
+        }
+    }
+
+    private static string GetInitials(SchoolResponse school)
+    {
+        var source = !string.IsNullOrWhiteSpace(school.NomCourtEts) ? school.NomCourtEts : school.Name;
+        if (string.IsNullOrWhiteSpace(source))
+        {
+            return "EC";
+        }
+
+        var parts = source.Split(' ', StringSplitOptions.RemoveEmptyEntries);
+        if (parts.Length >= 2)
+        {
+            return string.Concat(parts[0][0], parts[1][0]).ToUpperInvariant();
+        }
+
+        var trimmed = source.Trim();
+        return trimmed[..Math.Min(2, trimmed.Length)].ToUpperInvariant();
+    }
+}

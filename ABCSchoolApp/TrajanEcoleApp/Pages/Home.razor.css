@@ -1,0 +1,24 @@
+/* Survol des cartes d'école : un dégradé blanc→orange apparaît en douceur
+   dans l'angle inférieur droit. L'overlay est en pointer-events:none pour
+   ne pas intercepter le clic de sélection d'école. */
+.school-card-hover {
+    position: relative;
+    overflow: hidden;
+}
+
+.school-card-hover::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity .35s ease;
+    background: radial-gradient(circle at 100% 100%,
+        rgba(255, 140, 0, 0.55) 0%,
+        rgba(255, 224, 178, 0.55) 22%,
+        rgba(255, 255, 255, 0) 58%);
+}
+
+.school-card-hover:hover::after {
+    opacity: 1;
+}
