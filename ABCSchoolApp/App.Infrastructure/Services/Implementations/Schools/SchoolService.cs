@@ -36,6 +36,12 @@ namespace App.Infrastructure.Services.Implementations.Schools
             return await response.WrapToResponse<List<SchoolResponse>>();
         }
 
+        public async Task<IResponseWrapper<List<SchoolResponse>>> GetMineAsync()
+        {
+            var response = await _httpClient.GetAsync(_apiSettings.SchoolEndpoints.Mine);
+            return await response.WrapToResponse<List<SchoolResponse>>();
+        }
+
         public async Task<IResponseWrapper<SchoolResponse>> GetByIdAsync(string schoolId)
         {
             var response = await _httpClient.GetAsync(_apiSettings.SchoolEndpoints.GetById(schoolId));

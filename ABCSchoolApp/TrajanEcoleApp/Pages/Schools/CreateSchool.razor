@@ -68,6 +68,20 @@
                                    @ref="_datePicker"
                                    Label="Date Création" />
                 </MudItem>
+                <MudItem xs="12" md="8">
+                    <MudTextField @bind-Value="CreateSchoolRequest.Logo"
+                                  For="@(() => CreateSchoolRequest.Logo)"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Label="Logo (URL ou /images/...)" />
+                </MudItem>
+                <MudItem xs="12" md="4">
+                    <MudTextField @bind-Value="CreateSchoolRequest.Devise"
+                                  For="@(() => CreateSchoolRequest.Devise)"
+                                  Variant="Variant.Outlined"
+                                  Margin="Margin.Dense"
+                                  Label="Devise" />
+                </MudItem>
             </MudGrid>
         </DialogContent>
         <DialogActions>

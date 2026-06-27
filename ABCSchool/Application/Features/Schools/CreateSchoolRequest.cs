@@ -12,5 +12,7 @@ namespace Application.Features.Schools
         public string Ville { get; set; }
         public StatutEcole Statut { get; set; }
         public DateTime EstablishedDate { get; set; }
+        public string Logo { get; set; }
+        public string Devise { get; set; }
     }
 }

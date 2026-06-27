@@ -32,6 +32,8 @@ namespace Application.Features.Schools.Commands
                 schoolInDb.Ville = request.UpdateSchool.Ville;
                 schoolInDb.Statut = request.UpdateSchool.Statut;
                 schoolInDb.EstablishedDate = request.UpdateSchool.EstablishedDate;
+                schoolInDb.Logo = request.UpdateSchool.Logo;
+                schoolInDb.Devise = request.UpdateSchool.Devise;
 
                 var updatedSchoolId = await _schoolService.UpdateAsync(schoolInDb);
 

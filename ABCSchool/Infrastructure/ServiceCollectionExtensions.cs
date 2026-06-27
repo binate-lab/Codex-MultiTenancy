@@ -63,6 +63,7 @@ namespace Infrastructure
                 .AddTransient<ApplicationDbSeeder>()
                 .AddTransient<ITenantService, TenantService>()
                 .AddTransient<ISchoolService, SchoolService>()
+                .AddTransient<Application.Features.AnneesScolaires.IAnneeScolaireService, Infrastructure.AnneesScolaires.AnneeScolaireService>()
                 .AddTransient<Application.Features.Schools.Memberships.ISchoolMembershipService, SchoolMembershipService>()
                 .AddTransient<ICertificatService, CertificatService>()
                 .AddScoped<CertificatAppareilMiddleware>()

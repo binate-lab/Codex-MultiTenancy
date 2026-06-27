@@ -29,7 +29,9 @@ namespace TrajanEcoleApp.Pages.Schools
                 Telephone = School.Telephone,
                 Ville = School.Ville,
                 Statut = School.Statut,
-                EstablishedDate = School.EstablishedDate
+                EstablishedDate = School.EstablishedDate,
+                Logo = School.Logo,
+                Devise = School.Devise
             };
         }
 

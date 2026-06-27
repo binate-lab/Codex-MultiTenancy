@@ -62,6 +62,32 @@ namespace App.Infrastructure.Services.Implementations.Identity
                 return await ResponseWrapper.FailAsync(messages: result.Messages);
             }
         }
+        public async Task<IResponseWrapper> SelectSchoolAsync(string codeEts)
+        {
+            // Endpoint [Authorize] : le bearer courant (posé après le login) est déjà
+            // attaché par DefaultRequestHeaders. On échange le JWT contre un JWT école-scoped.
+            var response = await _httpClient.PostAsJsonAsync(
+                _apiSettings.TokenEndpoints.SelectSchool,
+                new SelectSchoolRequest { CodeEts = codeEts });
+
+            var result = await response.WrapToResponse<TokenResponse>();
+
+            if (result.IsSuccessful)
+            {
+                var token = result.Data.Jwt;
+                var refreshToken = result.Data.RefreshToken;
+
+                await _localStorageService.SetItemAsync(StorageConstants.AuthToken, token);
+                await _localStorageService.SetItemAsync(StorageConstants.RefreshToken, refreshToken);
+
+                ((ApplicationStateProvider)_authStateProvider).MarkUserAuthenticated();
+
+                _httpClient.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+                return await ResponseWrapper.SuccessAsync();
+            }
+            return await ResponseWrapper.FailAsync(messages: result.Messages);
+        }
+
         public async Task<IResponseWrapper> LogoutAsync()
         {
             await _localStorageService.RemoveItemAsync(StorageConstants.AuthToken);

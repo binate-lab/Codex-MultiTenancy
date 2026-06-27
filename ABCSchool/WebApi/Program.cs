@@ -51,6 +51,9 @@ app.UseCors(BlazorClientCorsPolicy);
 
 app.UseHttpsRedirection();
 
+// Sert les fichiers statiques (dont les dossiers par école créés sous wwwroot/{NomCourtEts}).
+app.UseStaticFiles();
+
 app.UseInfrastructure();
 
 app.UseMiddleware<ErrorHandlingMiddleware>();
