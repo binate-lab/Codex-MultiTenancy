@@ -45,9 +45,15 @@
                 @if (IsSchoolHome)
                 {
                     <MudToolBar Dense="true" Class="school-submenu px-2 gap-1">
-                        <MudButton StartIcon="@Icons.Material.Outlined.Apps"
-                                   Size="Size.Small"
-                                   Color="Color.Inherit">Structure</MudButton>
+                        <MudMenu Label="Structure"
+                                 StartIcon="@Icons.Material.Outlined.Apps"
+                                 Size="Size.Small"
+                                 Color="Color.Inherit"
+                                 Dense="true">
+                            <MudMenuItem Href="/structures" Icon="@Icons.Material.Outlined.AccountTree">
+                                Cycles, niveaux, classes &amp; matières
+                            </MudMenuItem>
+                        </MudMenu>
                         <MudButton StartIcon="@Icons.Material.Outlined.Print"
                                    Size="Size.Small"
                                    Color="Color.Inherit">Imprimer</MudButton>

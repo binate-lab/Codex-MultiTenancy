@@ -1,0 +1,180 @@
+@page "/structures"
+@layout SchoolLayout
+@using global::App.Infrastructure.Services.Structures
+
+<MudPaper Elevation="6" Class="ma-2">
+    <MudToolBar Dense="true" Class="px-3" Style="background-color:#1b4f72; color:white;">
+        <MudIcon Icon="@Icons.Material.Outlined.Apps" Class="mr-2" />
+        <MudText Typo="Typo.h6">Structures pédagogiques</MudText>
+        <MudSpacer />
+        <MudText Typo="Typo.subtitle2" Class="mr-4">@_annee</MudText>
+        <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Inherit"
+                   OnClick="@(() => _navigation.NavigateTo("/ecole"))">Fermer</MudButton>
+    </MudToolBar>
+
+    <MudTabs Elevation="0" ApplyEffectsToContainer="true" PanelClass="pa-4" KeepPanelsAlive="true">
+
+        @* ------------------------------- CYCLES & NIVEAUX ------------------------------- *@
+        <MudTabPanel Text="Cycles & niveaux" Icon="@Icons.Material.Outlined.AccountTree">
+            <MudGrid Spacing="4">
+                <MudItem xs="12" md="5">
+                    <MudText Typo="Typo.subtitle1" Class="mb-2" Style="font-weight:600;">Cycles</MudText>
+
+                    <MudTable Items="_cycles" Dense="true" Hover="true" Elevation="1">
+                        <HeaderContent>
+                            <MudTh Style="width:90px;">N°</MudTh>
+                            <MudTh>Libellé</MudTh>
+                            <MudTh Style="width:110px;">Niveaux</MudTh>
+                            <MudTh Style="width:110px;"></MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd><MudNumericField T="int" @bind-Value="context.Numero" Margin="Margin.Dense" Variant="Variant.Outlined" HideSpinButtons="true" /></MudTd>
+                            <MudTd><MudTextField T="string" @bind-Value="context.Libelle" Margin="Margin.Dense" Variant="Variant.Outlined" /></MudTd>
+                            <MudTd Style="text-align:center;">@context.NbNiveaux</MudTd>
+                            <MudTd>
+                                <MudIconButton Icon="@Icons.Material.Filled.Save" Size="Size.Small" Color="Color.Primary"
+                                               OnClick="@(() => EnregistrerCycleAsync(context))" title="Enregistrer" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                               OnClick="@(() => SupprimerCycleAsync(context))" title="Supprimer" />
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+
+                    <MudStack Row="true" Spacing="2" Class="mt-3" AlignItems="AlignItems.Center">
+                        <MudNumericField T="int" @bind-Value="_nouveauCycleNumero" Label="N°" Margin="Margin.Dense"
+                                         Variant="Variant.Outlined" HideSpinButtons="true" Style="max-width:80px;" />
+                        <MudTextField T="string" @bind-Value="_nouveauCycleLibelle" Label="Libellé du cycle"
+                                      Margin="Margin.Dense" Variant="Variant.Outlined" />
+                        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                                   Size="Size.Small" OnClick="AjouterCycleAsync">Ajouter</MudButton>
+                    </MudStack>
+                </MudItem>
+
+                <MudItem xs="12" md="7">
+                    <MudText Typo="Typo.subtitle1" Class="mb-2" Style="font-weight:600;">Niveaux</MudText>
+
+                    <MudTable Items="_niveaux" Dense="true" Hover="true" Elevation="1">
+                        <HeaderContent>
+                            <MudTh Style="width:170px;">Cycle</MudTh>
+                            <MudTh Style="width:110px;">Code</MudTh>
+                            <MudTh>Libellé</MudTh>
+                            <MudTh Style="width:100px;">Classes</MudTh>
+                            <MudTh Style="width:110px;"></MudTh>
+                        </HeaderContent>
+                        <RowTemplate>
+                            <MudTd>
+                                <MudSelect T="Guid" @bind-Value="context.CycleId" Margin="Margin.Dense" Variant="Variant.Outlined">
+                                    @foreach (var c in _cycles)
+                                    {
+                                        <MudSelectItem T="Guid" Value="@c.Id">@c.Libelle</MudSelectItem>
+                                    }
+                                </MudSelect>
+                            </MudTd>
+                            <MudTd><MudTextField T="string" @bind-Value="context.Code" Margin="Margin.Dense" Variant="Variant.Outlined" /></MudTd>
+                            <MudTd><MudTextField T="string" @bind-Value="context.Libelle" Margin="Margin.Dense" Variant="Variant.Outlined" /></MudTd>
+                            <MudTd Style="text-align:center;">@context.NbClasses</MudTd>
+                            <MudTd>
+                                <MudIconButton Icon="@Icons.Material.Filled.Save" Size="Size.Small" Color="Color.Primary"
+                                               OnClick="@(() => EnregistrerNiveauAsync(context))" title="Enregistrer" />
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                               OnClick="@(() => SupprimerNiveauAsync(context))" title="Supprimer" />
+                            </MudTd>
+                        </RowTemplate>
+                    </MudTable>
+
+                    <MudStack Row="true" Spacing="2" Class="mt-3" AlignItems="AlignItems.Center">
+                        <MudSelect T="Guid?" @bind-Value="_nouveauNiveauCycleId" Label="Cycle" Margin="Margin.Dense"
+                                   Variant="Variant.Outlined" Style="min-width:150px;">
+                            @foreach (var c in _cycles)
+                            {
+                                <MudSelectItem T="Guid?" Value="@((Guid?)c.Id)">@c.Libelle</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <MudTextField T="string" @bind-Value="_nouveauNiveauCode" Label="Code (ex. 6e)"
+                                      Margin="Margin.Dense" Variant="Variant.Outlined" Style="max-width:120px;" />
+                        <MudTextField T="string" @bind-Value="_nouveauNiveauLibelle" Label="Libellé (ex. Sixième)"
+                                      Margin="Margin.Dense" Variant="Variant.Outlined" />
+                        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                                   Size="Size.Small" OnClick="AjouterNiveauAsync">Ajouter</MudButton>
+                    </MudStack>
+                </MudItem>
+            </MudGrid>
+        </MudTabPanel>
+
+        @* ------------------------------------ CLASSES ------------------------------------ *@
+        <MudTabPanel Text="Classes" Icon="@Icons.Material.Outlined.MeetingRoom">
+            <MudText Typo="Typo.subtitle2" Class="mb-3">Classes ouvertes pour l'année <b>@_annee</b></MudText>
+
+            <MudTable Items="_classes" Dense="true" Hover="true" Elevation="1">
+                <HeaderContent>
+                    <MudTh Style="width:170px;">Niveau</MudTh>
+                    <MudTh>Libellé</MudTh>
+                    <MudTh Style="width:130px;">Année</MudTh>
+                    <MudTh Style="width:110px;"></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd>
+                        <MudSelect T="Guid" @bind-Value="context.NiveauId" Margin="Margin.Dense" Variant="Variant.Outlined">
+                            @foreach (var n in _niveaux)
+                            {
+                                <MudSelectItem T="Guid" Value="@n.Id">@n.Code</MudSelectItem>
+                            }
+                        </MudSelect>
+                    </MudTd>
+                    <MudTd><MudTextField T="string" @bind-Value="context.Libelle" Margin="Margin.Dense" Variant="Variant.Outlined" /></MudTd>
+                    <MudTd>@context.AnneeScolaire</MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Save" Size="Size.Small" Color="Color.Primary"
+                                       OnClick="@(() => EnregistrerClasseAsync(context))" title="Enregistrer" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                       OnClick="@(() => SupprimerClasseAsync(context))" title="Supprimer" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+
+            <MudStack Row="true" Spacing="2" Class="mt-3" AlignItems="AlignItems.Center">
+                <MudSelect T="Guid?" @bind-Value="_nouvelleClasseNiveauId" Label="Niveau" Margin="Margin.Dense"
+                           Variant="Variant.Outlined" Style="min-width:150px;">
+                    @foreach (var n in _niveaux)
+                    {
+                        <MudSelectItem T="Guid?" Value="@((Guid?)n.Id)">@n.Code — @n.Libelle</MudSelectItem>
+                    }
+                </MudSelect>
+                <MudTextField T="string" @bind-Value="_nouvelleClasseLibelle" Label="Libellé (ex. 6e A)"
+                              Margin="Margin.Dense" Variant="Variant.Outlined" />
+                <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                           Size="Size.Small" OnClick="AjouterClasseAsync">Ajouter</MudButton>
+            </MudStack>
+        </MudTabPanel>
+
+        @* ------------------------------------ MATIÈRES ------------------------------------ *@
+        <MudTabPanel Text="Matières" Icon="@Icons.Material.Outlined.MenuBook">
+            <MudTable Items="_matieres" Dense="true" Hover="true" Elevation="1" Style="max-width:700px;">
+                <HeaderContent>
+                    <MudTh Style="width:150px;">Code</MudTh>
+                    <MudTh>Libellé</MudTh>
+                    <MudTh Style="width:110px;"></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd><MudTextField T="string" @bind-Value="context.Code" Margin="Margin.Dense" Variant="Variant.Outlined" /></MudTd>
+                    <MudTd><MudTextField T="string" @bind-Value="context.Libelle" Margin="Margin.Dense" Variant="Variant.Outlined" /></MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Save" Size="Size.Small" Color="Color.Primary"
+                                       OnClick="@(() => EnregistrerMatiereAsync(context))" title="Enregistrer" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                       OnClick="@(() => SupprimerMatiereAsync(context))" title="Supprimer" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+
+            <MudStack Row="true" Spacing="2" Class="mt-3" AlignItems="AlignItems.Center" Style="max-width:700px;">
+                <MudTextField T="string" @bind-Value="_nouvelleMatiereCode" Label="Code (ex. MATH)"
+                              Margin="Margin.Dense" Variant="Variant.Outlined" Style="max-width:150px;" />
+                <MudTextField T="string" @bind-Value="_nouvelleMatiereLibelle" Label="Libellé (ex. Mathématiques)"
+                              Margin="Margin.Dense" Variant="Variant.Outlined" />
+                <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                           Size="Size.Small" OnClick="AjouterMatiereAsync">Ajouter</MudButton>
+            </MudStack>
+        </MudTabPanel>
+    </MudTabs>
+</MudPaper>

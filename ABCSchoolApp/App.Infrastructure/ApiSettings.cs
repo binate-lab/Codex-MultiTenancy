@@ -7,6 +7,8 @@
         public string ElevesApiUrl { get; set; }
         // Base address du microservice Scolarite.Api (#5 : compteur N° Inscription par ecole).
         public string ScolariteApiUrl { get; set; }
+        // Base address de pedagogie-api (modules Structures, referentiel Eleves...).
+        public string PedagogieApiUrl { get; set; }
         public TokenEndpoints TokenEndpoints { get; set; }
         public UserEndpoints UserEndpoints { get; set; }
         public TenantEndpoints TenantEndpoints { get; set; }

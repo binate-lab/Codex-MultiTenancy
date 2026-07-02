@@ -9,6 +9,8 @@ using App.Infrastructure.Services.Implementations.Certificats;
 using App.Infrastructure.Services.Implementations.Chat;
 using App.Infrastructure.Services.Eleves;
 using App.Infrastructure.Services.Implementations.Eleves;
+using App.Infrastructure.Services.Structures;
+using App.Infrastructure.Services.Implementations.Structures;
 using App.Infrastructure.Services.AnneesScolaires;
 using App.Infrastructure.Services.Implementations.AnneesScolaires;
 using App.Infrastructure.Services.Implementations.Schools;
@@ -86,6 +88,14 @@ namespace App.Infrastructure.Extensions
                 .AddHttpClient<IScolariteEleveService, ScolariteEleveService>(client =>
                 {
                     client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
+            // Client typie dedie a pedagogie-api : module Structures (cycles, niveaux, classes, matieres).
+            builder.Services
+                .AddHttpClient<IStructureService, StructureService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:PedagogieApiUrl").Get<string>());
                 })
                 .AddHttpMessageHandler<AuthenticationHeaderHandler>();
 
