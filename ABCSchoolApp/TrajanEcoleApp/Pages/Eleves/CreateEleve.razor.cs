@@ -9,7 +9,7 @@ using TrajanEcole.Shared.Library.Models.Requests.Eleves;
 
 namespace TrajanEcoleApp.Pages.Eleves
 {
-    public partial class CreateEleve : IDisposable
+    public partial class CreateEleve : IAsyncDisposable
     {
         [Inject] private IJSRuntime JS { get; set; }
         [Inject] private AuthenticationStateProvider _authProvider { get; set; }
@@ -24,7 +24,7 @@ namespace TrajanEcoleApp.Pages.Eleves
 
         private EleveRequestDto Eleve { get; set; } = new()
         {
-            AnneeScolaire = "2025-2026",
+            AnneeScolaire = AnneeScolaireRepli,
             Cycle = 1
         };
 
@@ -32,9 +32,22 @@ namespace TrajanEcoleApp.Pages.Eleves
         private readonly CreateEleveRequestValidator _validator = new();
         private bool _isSaving;
 
-        // #5 : a l'ouverture, applique le contexte ecole (CodeEts du claim + N° Inscription auto).
+        // Annee scolaire en cours (bandeau + DTO) : servie par l'API annees scolaires,
+        // avec repli statique si elle est indisponible a l'ouverture.
+        private const string AnneeScolaireRepli = "2025-2026";
+        private string _anneeEnCours = AnneeScolaireRepli;
+
+        // #5 : a l'ouverture, applique l'annee en cours puis le contexte ecole
+        // (CodeEts du claim + N° Inscription auto).
         protected override async Task OnInitializedAsync()
         {
+            var annee = await _anneeScolaireService.GetAnneeEnCoursAsync();
+            if (annee.IsSuccessful && annee.Data is not null)
+            {
+                _anneeEnCours = annee.Data.Libelle;
+                Eleve.AnneeScolaire = _anneeEnCours;
+            }
+
             await AppliquerContexteEcoleAsync();
         }
 
@@ -89,20 +102,21 @@ namespace TrajanEcoleApp.Pages.Eleves
             }
         }
 
-        // #2 : normalise la casse avant envoi — tous les champs texte en MAJUSCULES,
-        // sauf les prenoms (eleve + parents) en « Nom Propre » (1re lettre de chaque mot).
+        // #2 : normalise la casse avant envoi. Par defaut MAJUSCULES ; exceptions :
+        // prenoms (eleve + parents) en « Nom Propre » ; Classe selon le cycle (1=min, 2=MAJ) ;
+        // Nationalite avec seulement la 1re lettre en majuscule.
         private void Normaliser()
         {
             Eleve.NumeroMatricule = Maj(Eleve.NumeroMatricule);
             Eleve.Nom = Maj(Eleve.Nom);
             Eleve.Prenom = NomPropre(Eleve.Prenom);
-            Eleve.Classe = Maj(Eleve.Classe);
+            NettoyerClasse();   // #7 : cycle 1 minuscules / cycle 2 MAJUSCULES
             Eleve.LieuDeNaissance = Maj(Eleve.LieuDeNaissance);
             Eleve.BureauEtatCivil = Maj(Eleve.BureauEtatCivil);
             Eleve.SousPrefecture = Maj(Eleve.SousPrefecture);
             Eleve.NumExtrait = Maj(Eleve.NumExtrait);
             Eleve.DateExtrait = Maj(Eleve.DateExtrait);
-            Eleve.Nationalite = Maj(Eleve.Nationalite);
+            Eleve.Nationalite = Capitaliser(Eleve.Nationalite);
             Eleve.TransfertOuReaffect = Maj(Eleve.TransfertOuReaffect);
             Eleve.ClassePrecedente = Maj(Eleve.ClassePrecedente);
             Eleve.EtsOrigine = Maj(Eleve.EtsOrigine);
@@ -111,6 +125,24 @@ namespace TrajanEcoleApp.Pages.Eleves
             NormaliserParent(Eleve.Mere);
             NormaliserParent(Eleve.Tuteur);
         }
+
+        // #6 : en quittant le champ Matricule National, retire les espaces et met en
+        // majuscules (ex. « 24 568 951 n » -> « 24568951N »).
+        private void NettoyerMatricule()
+        {
+            if (!string.IsNullOrEmpty(Eleve.NumeroMatricule))
+                Eleve.NumeroMatricule = Eleve.NumeroMatricule.Replace(" ", string.Empty).ToUpperInvariant();
+        }
+
+        // #5 : Nom en MAJUSCULES a la sortie du champ.
+        private void NettoyerNom() => Eleve.Nom = Maj(Eleve.Nom);
+
+        // #6 : Prenoms en « Nom Propre » a la sortie du champ
+        // (coulibaly daouda alassane -> Coulibaly Daouda Alassane).
+        private void NettoyerPrenom() => Eleve.Prenom = NomPropre(Eleve.Prenom);
+
+        // #7 : Classe a la sortie du champ — cycle 1 en minuscules, cycle 2 en MAJUSCULES.
+        private void NettoyerClasse() => Eleve.Classe = Eleve.Cycle == 2 ? Maj(Eleve.Classe) : Min(Eleve.Classe);
 
         private static void NormaliserParent(ParentRequestDto p)
         {
@@ -122,13 +154,25 @@ namespace TrajanEcoleApp.Pages.Eleves
         }
 
         // MAJUSCULES (accents geres) ; conserve la chaine vide telle quelle.
-        private static string Maj(string? s)
+        private static string Maj(string s)
             => string.IsNullOrWhiteSpace(s) ? (s ?? string.Empty) : s.ToUpperInvariant();
 
+        // minuscules (accents geres) ; conserve la chaine vide telle quelle.
+        private static string Min(string s)
+            => string.IsNullOrWhiteSpace(s) ? (s ?? string.Empty) : s.ToLowerInvariant();
+
         // 1re lettre de chaque mot en majuscule, reste en minuscule (jean-marc → Jean-Marc).
-        private static string NomPropre(string? s)
+        private static string NomPropre(string s)
             => string.IsNullOrWhiteSpace(s) ? (s ?? string.Empty)
                : CultureInfo.CurrentCulture.TextInfo.ToTitleCase(s.Trim().ToLowerInvariant());
+
+        // Seulement la 1re lettre en majuscule, reste en minuscule (ivoirienne → Ivoirienne).
+        private static string Capitaliser(string s)
+        {
+            if (string.IsNullOrWhiteSpace(s)) return s ?? string.Empty;
+            var t = s.Trim();
+            return char.ToUpperInvariant(t[0]) + t[1..].ToLowerInvariant();
+        }
 
         // Fermer : on revient à l'espace école (page principale ORION DALOA),
         // pas à l'accueil MainLayout.
@@ -142,12 +186,16 @@ namespace TrajanEcoleApp.Pages.Eleves
         // Regime, langues, Serie, parents, etc.) via les initialiseurs du DTO.
         private async Task Nouveau()
         {
-            Eleve = new EleveRequestDto { AnneeScolaire = "2025-2026", Cycle = 1 };
-
+            // ResetAsync ecrit null/defaut CLR a travers les bindings : il doit passer sur
+            // l'ANCIEN DTO (jete ensuite), jamais apres l'assignation du neuf — sinon il
+            // ecrase les valeurs par defaut (Cycle, DispenseEps, Red, Regime, langues...)
+            // et l'enregistrement suivant part en 500 cote pedagogie-api.
             if (_form is not null)
             {
                 await _form.ResetAsync();
             }
+
+            Eleve = new EleveRequestDto { AnneeScolaire = _anneeEnCours, Cycle = 1 };
 
             // #5 : reapplique CodeEts + prochain N° Inscription pour la nouvelle saisie.
             await AppliquerContexteEcoleAsync();
@@ -180,10 +228,14 @@ namespace TrajanEcoleApp.Pages.Eleves
             StateHasChanged();
         }
 
-        public void Dispose()
+        public async ValueTask DisposeAsync()
         {
-            // Désenregistre le listener clavier global puis libère la référence .NET.
-            _ = JS.InvokeVoidAsync("trajanCreateEleve.unregister");
+            // Retire d'abord le listener clavier global (await) PUIS libère la référence .NET :
+            // sinon une touche pendant le teardown invoque une ref deja disposee -> JSInterop
+            // « GetObjectReference : no tracked object with id ». JSDisconnectedException est
+            // avale (page en cours de fermeture / circuit coupe).
+            try { await JS.InvokeVoidAsync("trajanCreateEleve.unregister"); }
+            catch (JSDisconnectedException) { }
             _dotNetRef?.Dispose();
         }
     }
