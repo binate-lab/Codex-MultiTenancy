@@ -23,6 +23,8 @@
         public string Create { get; set; }
         // #5 : GET compteur N° Inscription par ecole (sur Scolarite.Api).
         public string NextMatriculeInterne { get; set; }
+        // GET liste des eleves d'une ecole (sur Scolarite.Api / ScolariteDb).
+        public string Liste { get; set; }
     }
 
     public class AnneeScolaireEndpoints

@@ -1,0 +1,149 @@
+@page "/scolarites"
+@layout SchoolLayout
+
+<MudPaper Elevation="6" Class="ma-2">
+    <div class="acc-window">
+
+        <!-- Bandeau : titre + année + Fermer -->
+        <div class="acc-titlebar">
+            <div class="d-flex align-center gap-3">
+                <span class="acc-title">Scolarités</span>
+                <span class="acc-year">@_annee</span>
+            </div>
+            <div class="d-flex align-center gap-2">
+                <MudButton Variant="Variant.Text" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Close"
+                           OnClick="Fermer">Fermer</MudButton>
+            </div>
+        </div>
+
+        <!-- ============ Barre de filtres ============ -->
+        <div class="acc-filterbar">
+            <div class="acc-fgroup">
+                <label class="acc-flabel">Nom :</label>
+                <MudTextField @bind-Value="_fNom" Immediate="true" Clearable="true"
+                              Placeholder="Nom…"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield" />
+            </div>
+            <div class="acc-fgroup">
+                <label class="acc-flabel">Prénoms :</label>
+                <MudTextField @bind-Value="_fPrenoms" Immediate="true" Clearable="true"
+                              Placeholder="Prénoms…"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield" />
+            </div>
+            <div class="acc-fgroup">
+                <label class="acc-flabel">Matricule :</label>
+                <MudTextField @bind-Value="_fMatricule" Immediate="true" Clearable="true"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-yellow" />
+            </div>
+            <div class="acc-fgroup">
+                <label class="acc-flabel">Niveau :</label>
+                <MudSelect @bind-Value="_fNiveau" T="string" Clearable="true" Dense="true"
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                    <MudSelectItem Value="@("")">Tous</MudSelectItem>
+                    @foreach (var n in _niveaux)
+                    {
+                        <MudSelectItem Value="@n">@n</MudSelectItem>
+                    }
+                </MudSelect>
+            </div>
+            <div class="acc-fgroup">
+                <label class="acc-flabel">Classe :</label>
+                <MudTextField @bind-Value="_fClasse" Immediate="true" Clearable="true"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow" />
+            </div>
+            <div class="acc-fgroup">
+                <label class="acc-flabel">Statut :</label>
+                <MudSelect @bind-Value="_fStatut" T="string" Dense="true"
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                    <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
+                    <MudSelectItem Value="@("Aff")">Aff</MudSelectItem>
+                    <MudSelectItem Value="@("Naff")">Naff</MudSelectItem>
+                </MudSelect>
+            </div>
+            <div class="acc-fgroup">
+                <label class="acc-flabel">Inscrit :</label>
+                <MudSelect @bind-Value="_fInscrit" T="string" Dense="true"
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                    <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
+                    <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
+                    <MudSelectItem Value="@("Non")">Non</MudSelectItem>
+                </MudSelect>
+            </div>
+            <MudButton OnClick="Effacer" Variant="Variant.Outlined" Size="Size.Small"
+                       StartIcon="@Icons.Material.Filled.FilterAltOff" Class="ml-auto">Effacer</MudButton>
+        </div>
+
+        <!-- ============ Zone rouge : liste des élèves ============ -->
+        <!-- La table est enveloppée dans un div qui porte l'attribut de scope CSS :
+             c'est lui qui permet aux sélecteurs ::deep d'atteindre les <td> de MudTable. -->
+        <div class="acc-grid mt-1">
+        <MudTable Items="Filtered" Dense="true" Hover="true" Bordered="true"
+                  RowsPerPage="5">
+            <HeaderContent>
+                <MudTh Style="width:96px">Matricule</MudTh>
+                <MudTh Style="width:104px">Tél. Correspondant</MudTh>
+                <MudTh>Nom</MudTh>
+                <MudTh>Prénoms</MudTh>
+                <MudTh Style="width:52px; text-align:center">Inscrit</MudTh>
+                <MudTh Style="width:70px">Statut</MudTh>
+                <MudTh Style="width:74px">Niveau</MudTh>
+                <MudTh Style="width:64px">Classe</MudTh>
+                <MudTh Style="text-align:right">Net à payer</MudTh>
+                <MudTh Style="text-align:right">Inscription</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Matricule">@context.Matricule</MudTd>
+                <MudTd DataLabel="Tél. Correspondant">@context.TelCorrespondant</MudTd>
+                <MudTd DataLabel="Nom" Class="acc-cell-nom">@context.Nom</MudTd>
+                <MudTd DataLabel="Prénoms" Class="acc-cell-prenom">@context.Prenoms</MudTd>
+                <MudTd DataLabel="Inscrit" Style="text-align:center">
+                    <MudIcon Size="Size.Small"
+                             Icon="@(context.Inscrit ? Icons.Material.Filled.CheckBox : Icons.Material.Filled.CheckBoxOutlineBlank)" />
+                </MudTd>
+                <MudTd DataLabel="Statut">
+                    <MudSelect T="string" Value="@context.Statut"
+                               ValueChanged="@(v => OnStatutChanged(context, v))"
+                               Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                               Class="acc-cell-select">
+                        <MudSelectItem Value="@("Aff")">Aff</MudSelectItem>
+                        <MudSelectItem Value="@("Naff")">Naff</MudSelectItem>
+                    </MudSelect>
+                </MudTd>
+                <MudTd DataLabel="Niveau">
+                    <MudSelect T="string" Value="@context.Niveau"
+                               ValueChanged="@(v => OnNiveauChanged(context, v))"
+                               Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                               Class="acc-cell-select">
+                        @foreach (var n in _niveaux)
+                        {
+                            <MudSelectItem Value="@n">@n</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd DataLabel="Classe">
+                    <MudTextField T="string" Value="@context.Classe"
+                                  ValueChanged="@(v => OnClasseChanged(context, v))"
+                                  Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                                  Class="acc-cell-input" />
+                </MudTd>
+                <MudTd DataLabel="Net à payer" Style="text-align:right">@Fmt(context.NetAPayer)</MudTd>
+                <MudTd DataLabel="Inscription" Style="text-align:right">@Fmt(context.Inscription)</MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText Class="pa-2">Aucun élève ne correspond au filtre.</MudText>
+            </NoRecordsContent>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="new[] { 5, 10, 25 }" />
+            </PagerContent>
+        </MudTable>
+        </div>
+
+        <div class="acc-gridfoot">
+            <MudText Typo="Typo.caption">@Filtered.Count() élève(s) affiché(s)</MudText>
+            <MudText Typo="Typo.caption" Class="acc-demo-note">
+                Source : Scolarite (ScolariteDb).
+            </MudText>
+        </div>
+    </div>
+</MudPaper>

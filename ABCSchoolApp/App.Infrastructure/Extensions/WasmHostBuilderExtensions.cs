@@ -81,6 +81,14 @@ namespace App.Infrastructure.Extensions
                 })
                 .AddHttpMessageHandler<AuthenticationHeaderHandler>();
 
+            // Client typie dedie au microservice Scolarite.Api : liste des eleves (grille Scolarités).
+            builder.Services
+                .AddHttpClient<IScolariteEleveService, ScolariteEleveService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
             builder.Services.AddHttpClientInterceptor();
 
             return builder;
