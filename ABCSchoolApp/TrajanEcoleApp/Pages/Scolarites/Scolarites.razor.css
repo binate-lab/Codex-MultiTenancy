@@ -105,19 +105,24 @@
     color: #ffffff !important;
 }
 
-/* Sélecteurs éditables (Statut / Niveau) : texte blanc, compact, fond transparent */
+/* Sélecteurs éditables (Statut / Niveau / Classe) : texte blanc, compact, fond transparent.
+   IMPORTANT : MudBlazor pose font-size 1rem sur .mud-input et 0.875rem sur les cellules
+   (.mud-table-cell) — « inherit » aligne le texte des sélecteurs sur celui de la cellule,
+   ni plus gros (troncature dans les colonnes étroites), ni plus petit. */
 .acc-grid ::deep td .mud-input-slot,
-.acc-grid ::deep td .mud-select-input {
+.acc-grid ::deep td .mud-select-input,
+.acc-grid ::deep td .mud-input {
     color: #ffffff !important;
     font-weight: 700;
+    font-size: inherit !important;
 }
 
 .acc-grid ::deep .acc-cell-select {
-    width: 62px;
+    width: 70px;
 }
 
 .acc-grid ::deep .acc-cell-input {
-    width: 48px;
+    width: 70px;
 }
 
 /* Pas de trait de soulignement sous les sélecteurs Statut / Niveau */
