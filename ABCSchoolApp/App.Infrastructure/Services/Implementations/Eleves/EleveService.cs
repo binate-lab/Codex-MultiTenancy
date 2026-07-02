@@ -4,7 +4,7 @@ using TrajanEcole.Shared.Library.Models.Requests.Eleves;
 
 namespace App.Infrastructure.Services.Implementations.Eleves
 {
-    // Client du microservice Eleves.Api (base address dediee = ApiSettings.ElevesApiUrl).
+    // Client du referentiel Eleves (module de Pedagogie.Api ; base = ApiSettings.ElevesApiUrl, port 5103).
     public class EleveService : IEleveService
     {
         private readonly HttpClient _httpClient;
