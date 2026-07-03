@@ -16,7 +16,7 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             _apiSettings = apiSettings;
         }
 
-        public async Task<IReadOnlyList<EleveScolariteItem>> GetElevesAsync(string codeEts, string? annee = null)
+        public async Task<IReadOnlyList<EleveScolariteItem>> GetElevesAsync(string codeEts, string annee = null)
         {
             try
             {

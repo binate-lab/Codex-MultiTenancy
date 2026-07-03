@@ -6,7 +6,7 @@ namespace App.Infrastructure.Services.Eleves
     {
         // Eleves d'une ecole (CodeEts), filtres optionnellement par annee scolaire.
         // Retourne une liste vide si le service est indisponible.
-        Task<IReadOnlyList<EleveScolariteItem>> GetElevesAsync(string codeEts, string? annee = null);
+        Task<IReadOnlyList<EleveScolariteItem>> GetElevesAsync(string codeEts, string annee = null);
     }
 
     // Projection plate calquee sur EleveListeItem (Scolarite.Api/Eleves/Liste).
