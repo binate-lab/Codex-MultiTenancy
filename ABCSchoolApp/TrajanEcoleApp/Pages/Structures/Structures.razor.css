@@ -1,0 +1,55 @@
+/* Page "Structures pédagogiques" — grilles compactes façon Access (palette gris-bleu
+   de CreateEleve / Scolarités) : en-tête plein, lignes bordées, éditeurs fondus
+   dans les cellules (même taille de texte que la cellule). */
+
+.str-grid ::deep .mud-table-root {
+    font-size: 0.875rem;
+}
+
+.str-grid ::deep th {
+    background: #5f6b73 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    white-space: nowrap;
+    padding: 4px 10px !important;
+}
+
+.str-grid ::deep td {
+    background: #ffffff;
+    border-color: #c3ccd3 !important;
+    padding: 2px 10px !important;
+    white-space: nowrap;
+}
+
+.str-grid ::deep tr:hover td {
+    background: #eef3f6;
+}
+
+/* Éditeurs dans les cellules : texte à la taille de la cellule, pas de soulignement */
+.str-grid ::deep td .mud-input-slot,
+.str-grid ::deep td .mud-select-input,
+.str-grid ::deep td .mud-input {
+    font-size: inherit !important;
+}
+
+.str-grid ::deep td .mud-input.mud-input-underline::before,
+.str-grid ::deep td .mud-input.mud-input-underline::after {
+    border-bottom: none !important;
+}
+
+.str-grid ::deep td .mud-input-control {
+    margin-top: 0 !important;
+}
+
+.str-grid ::deep td .mud-input-slot {
+    min-height: 24px;
+}
+
+/* Barre d'ajout sous chaque grille */
+.str-addbar {
+    background: #cfd9df;
+    border: 1px solid #9fb0bb;
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-top: 8px;
+}

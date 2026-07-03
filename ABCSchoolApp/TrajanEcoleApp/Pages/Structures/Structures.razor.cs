@@ -14,7 +14,6 @@ namespace TrajanEcoleApp.Pages.Structures
         private List<CycleRow> _cycles = new();
         private List<NiveauRow> _niveaux = new();
         private List<ClasseRow> _classes = new();
-        private List<MatiereRow> _matieres = new();
 
         // Champs des lignes d'ajout.
         private int _nouveauCycleNumero = 1;
@@ -24,8 +23,6 @@ namespace TrajanEcoleApp.Pages.Structures
         private string _nouveauNiveauLibelle = string.Empty;
         private Guid? _nouvelleClasseNiveauId;
         private string _nouvelleClasseLibelle = string.Empty;
-        private string _nouvelleMatiereCode = string.Empty;
-        private string _nouvelleMatiereLibelle = string.Empty;
 
         protected override async Task OnInitializedAsync()
         {
@@ -42,7 +39,6 @@ namespace TrajanEcoleApp.Pages.Structures
         {
             await ChargerCyclesEtNiveauxAsync();
             await ChargerClassesAsync();
-            await ChargerMatieresAsync();
         }
 
         // L'arbre cycles→niveaux arrive d'un bloc ; on l'aplatit pour les deux grilles.
@@ -57,12 +53,6 @@ namespace TrajanEcoleApp.Pages.Structures
         {
             var classes = await _structureService.GetClassesAsync(_annee == "—" ? null : _annee);
             _classes = classes.Select(c => new ClasseRow(c)).ToList();
-        }
-
-        private async Task ChargerMatieresAsync()
-        {
-            var matieres = await _structureService.GetMatieresAsync();
-            _matieres = matieres.Select(m => new MatiereRow(m)).ToList();
         }
 
         // Affiche le message métier du backend (doublon, suppression refusée...) tel quel.
@@ -204,44 +194,6 @@ namespace TrajanEcoleApp.Pages.Structures
             }
         }
 
-        // ------------------------------- Matières -------------------------------
-
-        private async Task AjouterMatiereAsync()
-        {
-            if (string.IsNullOrWhiteSpace(_nouvelleMatiereCode) || string.IsNullOrWhiteSpace(_nouvelleMatiereLibelle))
-            {
-                _snackbar.Add("Le code et le libellé de la matière sont obligatoires.", Severity.Warning);
-                return;
-            }
-
-            var ordre = _matieres.Count + 1;
-            var result = await _structureService.CreateMatiereAsync(_nouvelleMatiereCode, _nouvelleMatiereLibelle, ordre);
-            if (Verifier(result, $"Matière « {_nouvelleMatiereCode.ToUpperInvariant()} » ajoutée."))
-            {
-                _nouvelleMatiereCode = string.Empty;
-                _nouvelleMatiereLibelle = string.Empty;
-                await ChargerMatieresAsync();
-            }
-        }
-
-        private async Task EnregistrerMatiereAsync(MatiereRow row)
-        {
-            var result = await _structureService.UpdateMatiereAsync(row.Id, row.Code, row.Libelle, row.Ordre);
-            if (Verifier(result, $"Matière « {row.Code} » enregistrée."))
-            {
-                await ChargerMatieresAsync();
-            }
-        }
-
-        private async Task SupprimerMatiereAsync(MatiereRow row)
-        {
-            var result = await _structureService.DeleteMatiereAsync(row.Id);
-            if (Verifier(result, $"Matière « {row.Code} » supprimée."))
-            {
-                await ChargerMatieresAsync();
-            }
-        }
-
         // ------------------- ViewModels mutables des grilles -------------------
 
         public sealed class CycleRow
@@ -283,16 +235,5 @@ namespace TrajanEcoleApp.Pages.Structures
             public string Libelle { get; set; }
         }
 
-        public sealed class MatiereRow
-        {
-            public MatiereRow(MatiereItem m)
-            {
-                Id = m.Id; Code = m.Code; Libelle = m.Libelle; Ordre = m.Ordre;
-            }
-            public Guid Id { get; }
-            public string Code { get; set; }
-            public string Libelle { get; set; }
-            public int Ordre { get; set; }
-        }
     }
 }

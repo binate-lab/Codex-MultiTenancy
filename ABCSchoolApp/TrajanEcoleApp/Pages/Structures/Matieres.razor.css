@@ -1,0 +1,52 @@
+/* Page "Matières" — même grille compacte façon Access que la page Structures
+   (le CSS scoped ne traverse pas les composants, d'où la reprise locale). */
+
+.mat-grid ::deep .mud-table-root {
+    font-size: 0.875rem;
+}
+
+.mat-grid ::deep th {
+    background: #5f6b73 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    white-space: nowrap;
+    padding: 4px 10px !important;
+}
+
+.mat-grid ::deep td {
+    background: #ffffff;
+    border-color: #c3ccd3 !important;
+    padding: 2px 10px !important;
+    white-space: nowrap;
+}
+
+.mat-grid ::deep tr:hover td {
+    background: #eef3f6;
+}
+
+.mat-grid ::deep td .mud-input-slot,
+.mat-grid ::deep td .mud-select-input,
+.mat-grid ::deep td .mud-input {
+    font-size: inherit !important;
+}
+
+.mat-grid ::deep td .mud-input.mud-input-underline::before,
+.mat-grid ::deep td .mud-input.mud-input-underline::after {
+    border-bottom: none !important;
+}
+
+.mat-grid ::deep td .mud-input-control {
+    margin-top: 0 !important;
+}
+
+.mat-grid ::deep td .mud-input-slot {
+    min-height: 24px;
+}
+
+.mat-addbar {
+    background: #cfd9df;
+    border: 1px solid #9fb0bb;
+    border-radius: 4px;
+    padding: 6px 10px;
+    margin-top: 8px;
+}

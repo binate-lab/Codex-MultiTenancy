@@ -1,0 +1,45 @@
+@page "/matieres"
+@layout SchoolLayout
+@using global::App.Infrastructure.Services.Structures
+
+<MudPaper Elevation="6" Class="ma-2">
+    <MudToolBar Dense="true" Class="px-3" Style="background-color:#1b4f72; color:white;">
+        <MudIcon Icon="@Icons.Material.Outlined.MenuBook" Class="mr-2" />
+        <MudText Typo="Typo.h6">Matières</MudText>
+        <MudSpacer />
+        <MudText Typo="Typo.subtitle2" Class="mr-4">@_annee</MudText>
+        <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Inherit"
+                   OnClick="@(() => _navigation.NavigateTo("/ecole"))">Fermer</MudButton>
+    </MudToolBar>
+
+    <div class="pa-4">
+        <div class="mat-grid" style="max-width:700px;">
+            <MudTable Items="_matieres" Dense="true" Hover="true" Elevation="1" Bordered="true">
+                <HeaderContent>
+                    <MudTh Style="width:150px;">Code</MudTh>
+                    <MudTh>Libellé</MudTh>
+                    <MudTh Style="width:100px;"></MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd><MudTextField T="string" @bind-Value="context.Code" Margin="Margin.Dense" Variant="Variant.Text" /></MudTd>
+                    <MudTd><MudTextField T="string" @bind-Value="context.Libelle" Margin="Margin.Dense" Variant="Variant.Text" /></MudTd>
+                    <MudTd>
+                        <MudIconButton Icon="@Icons.Material.Filled.Save" Size="Size.Small" Color="Color.Primary"
+                                       OnClick="@(() => EnregistrerMatiereAsync(context))" title="Enregistrer" />
+                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
+                                       OnClick="@(() => SupprimerMatiereAsync(context))" title="Supprimer" />
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </div>
+
+        <MudStack Row="true" Spacing="2" Class="mat-addbar" AlignItems="AlignItems.Center" Style="max-width:700px;">
+            <MudTextField T="string" @bind-Value="_nouvelleMatiereCode" Label="Code (ex. MATH)"
+                          Margin="Margin.Dense" Variant="Variant.Outlined" Style="max-width:150px;" />
+            <MudTextField T="string" @bind-Value="_nouvelleMatiereLibelle" Label="Libellé (ex. Mathématiques)"
+                          Margin="Margin.Dense" Variant="Variant.Outlined" />
+            <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
+                       Size="Size.Small" OnClick="AjouterMatiereAsync">Ajouter</MudButton>
+        </MudStack>
+    </div>
+</MudPaper>
