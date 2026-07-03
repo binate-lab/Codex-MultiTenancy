@@ -45,8 +45,10 @@
                           Margin="Margin.Dense" Variant="Variant.Outlined" Style="max-width:150px;" />
             <MudTextField T="string" @bind-Value="_nouvelleMatiereLibelle" Label="Libellé (ex. Mathématiques)"
                           Margin="Margin.Dense" Variant="Variant.Outlined" />
-            <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
-                       Size="Size.Small" OnClick="AjouterMatiereAsync">Ajouter</MudButton>
+            <MudTooltip Text="Ajouter">
+                <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" IconSize="Size.Medium"
+                        OnClick="AjouterMatiereAsync" />
+            </MudTooltip>
         </MudStack>
     </div>
 </MudPaper>

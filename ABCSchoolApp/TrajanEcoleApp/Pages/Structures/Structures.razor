@@ -55,8 +55,10 @@
                                          Variant="Variant.Outlined" HideSpinButtons="true" Style="max-width:80px;" />
                         <MudTextField T="string" @bind-Value="_nouveauCycleLibelle" Label="Libellé du cycle"
                                       Margin="Margin.Dense" Variant="Variant.Outlined" />
-                        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
-                                   Size="Size.Small" OnClick="AjouterCycleAsync">Ajouter</MudButton>
+                        <MudTooltip Text="Ajouter">
+                            <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" IconSize="Size.Medium"
+                                    OnClick="AjouterCycleAsync" />
+                        </MudTooltip>
                     </MudStack>
                 </MudItem>
 
@@ -108,8 +110,10 @@
                                       Margin="Margin.Dense" Variant="Variant.Outlined" Style="max-width:120px;" />
                         <MudTextField T="string" @bind-Value="_nouveauNiveauLibelle" Label="Libellé (ex. Sixième)"
                                       Margin="Margin.Dense" Variant="Variant.Outlined" />
-                        <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
-                                   Size="Size.Small" OnClick="AjouterNiveauAsync">Ajouter</MudButton>
+                        <MudTooltip Text="Ajouter">
+                            <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" IconSize="Size.Medium"
+                                    OnClick="AjouterNiveauAsync" />
+                        </MudTooltip>
                     </MudStack>
                 </MudItem>
             </MudGrid>
@@ -163,8 +167,10 @@
                 </MudSelect>
                 <MudTextField T="string" @bind-Value="_nouvelleClasseLibelle" Label="Libellé (ex. 6e A)"
                               Margin="Margin.Dense" Variant="Variant.Outlined" />
-                <MudButton StartIcon="@Icons.Material.Filled.Add" Variant="Variant.Filled" Color="Color.Primary"
-                           Size="Size.Small" OnClick="AjouterClasseAsync">Ajouter</MudButton>
+                <MudTooltip Text="Ajouter">
+                    <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" IconSize="Size.Medium"
+                            OnClick="AjouterClasseAsync" />
+                </MudTooltip>
             </MudStack>
         </MudTabPanel>
     </MudTabs>
