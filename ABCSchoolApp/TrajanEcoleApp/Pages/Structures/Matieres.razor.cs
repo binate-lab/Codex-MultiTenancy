@@ -65,12 +65,24 @@ namespace TrajanEcoleApp.Pages.Structures
             }
         }
 
-        private async Task EnregistrerMatiereAsync(MatiereRow row)
+        // Enregistrement direct façon Access : part en base à la sortie de la cellule,
+        // seulement si code ou libellé a réellement changé ; restauration si refus.
+        private async Task EnregistrerMatiereSiModifieeAsync(MatiereRow row)
         {
+            if (row.Code == row.CodeInitial && row.Libelle == row.LibelleInitial)
+            {
+                return;
+            }
+
             var result = await _structureService.UpdateMatiereAsync(row.Id, row.Code, row.Libelle, row.Ordre);
             if (Verifier(result, $"Matière « {row.Code} » enregistrée."))
             {
                 await ChargerMatieresAsync();
+            }
+            else
+            {
+                row.Code = row.CodeInitial;
+                row.Libelle = row.LibelleInitial;
             }
         }
 
@@ -87,11 +99,14 @@ namespace TrajanEcoleApp.Pages.Structures
         {
             public MatiereRow(MatiereItem m)
             {
-                Id = m.Id; Code = m.Code; Libelle = m.Libelle; Ordre = m.Ordre;
+                Id = m.Id; Code = m.Code; CodeInitial = m.Code;
+                Libelle = m.Libelle; LibelleInitial = m.Libelle; Ordre = m.Ordre;
             }
             public Guid Id { get; }
             public string Code { get; set; }
+            public string CodeInitial { get; }
             public string Libelle { get; set; }
+            public string LibelleInitial { get; }
             public int Ordre { get; set; }
         }
     }

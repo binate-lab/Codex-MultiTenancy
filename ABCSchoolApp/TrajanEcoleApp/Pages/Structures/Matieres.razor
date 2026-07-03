@@ -18,16 +18,23 @@
                 <HeaderContent>
                     <MudTh Style="width:150px;">Code</MudTh>
                     <MudTh>Libellé</MudTh>
-                    <MudTh Style="width:100px;"></MudTh>
+                    <MudTh Style="width:80px; text-align:right;">Actions</MudTh>
                 </HeaderContent>
                 <RowTemplate>
-                    <MudTd><MudTextField T="string" @bind-Value="context.Code" Margin="Margin.Dense" Variant="Variant.Text" /></MudTd>
-                    <MudTd><MudTextField T="string" @bind-Value="context.Libelle" Margin="Margin.Dense" Variant="Variant.Text" /></MudTd>
+                    @* Enregistrement direct façon Access : part en base à la sortie de la cellule. *@
                     <MudTd>
-                        <MudIconButton Icon="@Icons.Material.Filled.Save" Size="Size.Small" Color="Color.Primary"
-                                       OnClick="@(() => EnregistrerMatiereAsync(context))" title="Enregistrer" />
-                        <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
-                                       OnClick="@(() => SupprimerMatiereAsync(context))" title="Supprimer" />
+                        <MudTextField T="string" @bind-Value="context.Code" Margin="Margin.Dense" Variant="Variant.Text"
+                                      OnBlur="@(() => EnregistrerMatiereSiModifieeAsync(context))" />
+                    </MudTd>
+                    <MudTd>
+                        <MudTextField T="string" @bind-Value="context.Libelle" Margin="Margin.Dense" Variant="Variant.Text"
+                                      OnBlur="@(() => EnregistrerMatiereSiModifieeAsync(context))" />
+                    </MudTd>
+                    <MudTd Style="text-align:right;">
+                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Color="Color.Secondary"
+                                 TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
+                            <MudMenuItem OnClick="@(() => SupprimerMatiereAsync(context))">Supprimer</MudMenuItem>
+                        </MudMenu>
                     </MudTd>
                 </RowTemplate>
             </MudTable>

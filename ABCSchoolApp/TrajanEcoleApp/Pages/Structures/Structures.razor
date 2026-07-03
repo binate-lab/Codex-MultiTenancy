@@ -20,23 +20,31 @@
                 <MudItem xs="12" md="5">
                     <MudText Typo="Typo.subtitle1" Class="mb-2" Style="font-weight:600;">Cycles</MudText>
 
+                    @* Enregistrement direct façon Access : la modification part en base
+                       à la sortie de la cellule (si la valeur a changé). *@
                     <div class="str-grid">
                         <MudTable Items="_cycles" Dense="true" Hover="true" Elevation="1" Bordered="true">
                             <HeaderContent>
                                 <MudTh Style="width:70px;">N°</MudTh>
                                 <MudTh>Libellé</MudTh>
                                 <MudTh Style="width:90px;">Niveaux</MudTh>
-                                <MudTh Style="width:100px;"></MudTh>
+                                <MudTh Style="width:80px; text-align:right;">Actions</MudTh>
                             </HeaderContent>
                             <RowTemplate>
-                                <MudTd><MudNumericField T="int" @bind-Value="context.Numero" Margin="Margin.Dense" Variant="Variant.Text" HideSpinButtons="true" /></MudTd>
-                                <MudTd><MudTextField T="string" @bind-Value="context.Libelle" Margin="Margin.Dense" Variant="Variant.Text" /></MudTd>
-                                <MudTd Style="text-align:center;">@context.NbNiveaux</MudTd>
                                 <MudTd>
-                                    <MudIconButton Icon="@Icons.Material.Filled.Save" Size="Size.Small" Color="Color.Primary"
-                                                   OnClick="@(() => EnregistrerCycleAsync(context))" title="Enregistrer" />
-                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
-                                                   OnClick="@(() => SupprimerCycleAsync(context))" title="Supprimer" />
+                                    <MudNumericField T="int" @bind-Value="context.Numero" Margin="Margin.Dense" Variant="Variant.Text" HideSpinButtons="true"
+                                                     OnBlur="@(() => EnregistrerCycleSiModifieAsync(context))" />
+                                </MudTd>
+                                <MudTd>
+                                    <MudTextField T="string" @bind-Value="context.Libelle" Margin="Margin.Dense" Variant="Variant.Text"
+                                                  OnBlur="@(() => EnregistrerCycleSiModifieAsync(context))" />
+                                </MudTd>
+                                <MudTd Style="text-align:center;">@context.NbNiveaux</MudTd>
+                                <MudTd Style="text-align:right;">
+                                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Color="Color.Secondary"
+                                             TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
+                                        <MudMenuItem OnClick="@(() => SupprimerCycleAsync(context))">Supprimer</MudMenuItem>
+                                    </MudMenu>
                                 </MudTd>
                             </RowTemplate>
                         </MudTable>
@@ -55,43 +63,45 @@
                 <MudItem xs="12" md="7">
                     <MudText Typo="Typo.subtitle1" Class="mb-2" Style="font-weight:600;">Niveaux</MudText>
 
+                    @* Cycle affiché par son N° (non éditable : un niveau ne change pas de cycle ici) ;
+                       le code s'enregistre en base dès la sortie de la cellule (pas de disquette). *@
                     <div class="str-grid">
                         <MudTable Items="_niveaux" Dense="true" Hover="true" Elevation="1" Bordered="true">
                             <HeaderContent>
-                                <MudTh Style="width:170px;">Cycle</MudTh>
-                                <MudTh Style="width:100px;">Code</MudTh>
-                                <MudTh>Libellé</MudTh>
+                                <MudTh Style="width:80px; text-align:center;">Cycle</MudTh>
+                                <MudTh Style="width:110px;">Code</MudTh>
                                 <MudTh Style="width:90px;">Classes</MudTh>
-                                <MudTh Style="width:100px;"></MudTh>
+                                <MudTh Style="width:80px; text-align:right;">Actions</MudTh>
                             </HeaderContent>
                             <RowTemplate>
+                                <MudTd Style="text-align:center;">@context.CycleNumero</MudTd>
                                 <MudTd>
-                                    <MudSelect T="Guid" @bind-Value="context.CycleId" Margin="Margin.Dense" Variant="Variant.Text">
-                                        @foreach (var c in _cycles)
-                                        {
-                                            <MudSelectItem T="Guid" Value="@c.Id">@c.Libelle</MudSelectItem>
-                                        }
-                                    </MudSelect>
+                                    <MudTextField T="string" @bind-Value="context.Code" Margin="Margin.Dense" Variant="Variant.Text"
+                                                  OnBlur="@(() => EnregistrerNiveauSiModifieAsync(context))" />
                                 </MudTd>
-                                <MudTd><MudTextField T="string" @bind-Value="context.Code" Margin="Margin.Dense" Variant="Variant.Text" /></MudTd>
-                                <MudTd><MudTextField T="string" @bind-Value="context.Libelle" Margin="Margin.Dense" Variant="Variant.Text" /></MudTd>
                                 <MudTd Style="text-align:center;">@context.NbClasses</MudTd>
-                                <MudTd>
-                                    <MudIconButton Icon="@Icons.Material.Filled.Save" Size="Size.Small" Color="Color.Primary"
-                                                   OnClick="@(() => EnregistrerNiveauAsync(context))" title="Enregistrer" />
-                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
-                                                   OnClick="@(() => SupprimerNiveauAsync(context))" title="Supprimer" />
+                                <MudTd Style="text-align:right;">
+                                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Color="Color.Secondary"
+                                             TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
+                                        <MudMenuItem OnClick="@(() => SupprimerNiveauAsync(context))">Supprimer</MudMenuItem>
+                                    </MudMenu>
                                 </MudTd>
                             </RowTemplate>
                         </MudTable>
                     </div>
 
+                    @* Liste déroulante en 2 colonnes (N° + libellé) ; une fois choisi,
+                       seul le N° du cycle est affiché dans la zone (ToStringFunc). *@
                     <MudStack Row="true" Spacing="2" Class="str-addbar" AlignItems="AlignItems.Center">
                         <MudSelect T="Guid?" @bind-Value="_nouveauNiveauCycleId" Label="Cycle" Margin="Margin.Dense"
-                                   Variant="Variant.Outlined" Style="min-width:150px;">
+                                   Variant="Variant.Outlined" Style="min-width:110px;"
+                                   ToStringFunc="@AfficherNumeroCycle">
                             @foreach (var c in _cycles)
                             {
-                                <MudSelectItem T="Guid?" Value="@((Guid?)c.Id)">@c.Libelle</MudSelectItem>
+                                <MudSelectItem T="Guid?" Value="@((Guid?)c.Id)">
+                                    <span style="display:inline-block; min-width:36px; font-weight:600;">@c.Numero</span>
+                                    <span>@c.Libelle</span>
+                                </MudSelectItem>
                             }
                         </MudSelect>
                         <MudTextField T="string" @bind-Value="_nouveauNiveauCode" Label="Code (ex. 6e)"
@@ -115,24 +125,29 @@
                         <MudTh Style="width:160px;">Niveau</MudTh>
                         <MudTh>Libellé</MudTh>
                         <MudTh Style="width:120px;">Année</MudTh>
-                        <MudTh Style="width:100px;"></MudTh>
+                        <MudTh Style="width:80px; text-align:right;">Actions</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd>
-                            <MudSelect T="Guid" @bind-Value="context.NiveauId" Margin="Margin.Dense" Variant="Variant.Text">
+                            @* Enregistrement direct dès le choix d'un autre niveau (@bind:after). *@
+                            <MudSelect T="Guid" @bind-Value="context.NiveauId" @bind-Value:after="@(() => EnregistrerClasseSiModifieeAsync(context))"
+                                       Margin="Margin.Dense" Variant="Variant.Text">
                                 @foreach (var n in _niveaux)
                                 {
                                     <MudSelectItem T="Guid" Value="@n.Id">@n.Code</MudSelectItem>
                                 }
                             </MudSelect>
                         </MudTd>
-                        <MudTd><MudTextField T="string" @bind-Value="context.Libelle" Margin="Margin.Dense" Variant="Variant.Text" /></MudTd>
-                        <MudTd>@context.AnneeScolaire</MudTd>
                         <MudTd>
-                            <MudIconButton Icon="@Icons.Material.Filled.Save" Size="Size.Small" Color="Color.Primary"
-                                           OnClick="@(() => EnregistrerClasseAsync(context))" title="Enregistrer" />
-                            <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small" Color="Color.Error"
-                                           OnClick="@(() => SupprimerClasseAsync(context))" title="Supprimer" />
+                            <MudTextField T="string" @bind-Value="context.Libelle" Margin="Margin.Dense" Variant="Variant.Text"
+                                          OnBlur="@(() => EnregistrerClasseSiModifieeAsync(context))" />
+                        </MudTd>
+                        <MudTd>@context.AnneeScolaire</MudTd>
+                        <MudTd Style="text-align:right;">
+                            <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Color="Color.Secondary"
+                                     TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
+                                <MudMenuItem OnClick="@(() => SupprimerClasseAsync(context))">Supprimer</MudMenuItem>
+                            </MudMenu>
                         </MudTd>
                     </RowTemplate>
                 </MudTable>

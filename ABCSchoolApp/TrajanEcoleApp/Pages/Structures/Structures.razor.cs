@@ -41,13 +41,20 @@ namespace TrajanEcoleApp.Pages.Structures
             await ChargerClassesAsync();
         }
 
-        // L'arbre cycles→niveaux arrive d'un bloc ; on l'aplatit pour les deux grilles.
+        // L'arbre cycles→niveaux arrive d'un bloc ; on l'aplatit pour les deux grilles
+        // (le N° du cycle parent est dénormalisé dans chaque ligne de niveau).
         private async Task ChargerCyclesEtNiveauxAsync()
         {
             var cycles = await _structureService.GetCyclesAsync();
             _cycles = cycles.Select(c => new CycleRow(c)).ToList();
-            _niveaux = cycles.SelectMany(c => c.Niveaux).Select(n => new NiveauRow(n)).ToList();
+            _niveaux = cycles
+                .SelectMany(c => c.Niveaux.Select(n => new NiveauRow(n, c.Numero)))
+                .ToList();
         }
+
+        // Zone d'ajout de niveau : le cycle choisi s'affiche par son seul N°.
+        private string AfficherNumeroCycle(Guid? id)
+            => _cycles.FirstOrDefault(c => c.Id == id)?.Numero.ToString() ?? string.Empty;
 
         private async Task ChargerClassesAsync()
         {
@@ -88,12 +95,24 @@ namespace TrajanEcoleApp.Pages.Structures
             }
         }
 
-        private async Task EnregistrerCycleAsync(CycleRow row)
+        // Enregistrement direct façon Access : part en base à la sortie de la cellule,
+        // seulement si N° ou libellé a réellement changé ; restauration si refus.
+        private async Task EnregistrerCycleSiModifieAsync(CycleRow row)
         {
+            if (row.Numero == row.NumeroInitial && row.Libelle == row.LibelleInitial)
+            {
+                return;
+            }
+
             var result = await _structureService.UpdateCycleAsync(row.Id, row.Numero, row.Libelle, row.Ordre);
             if (Verifier(result, $"Cycle « {row.Libelle} » enregistré."))
             {
                 await ChargerCyclesEtNiveauxAsync();
+            }
+            else
+            {
+                row.Numero = row.NumeroInitial;
+                row.Libelle = row.LibelleInitial;
             }
         }
 
@@ -132,12 +151,23 @@ namespace TrajanEcoleApp.Pages.Structures
             }
         }
 
-        private async Task EnregistrerNiveauAsync(NiveauRow row)
+        // Enregistrement direct façon Access : la modification du code part en base
+        // dès la sortie de la cellule, uniquement si la valeur a réellement changé.
+        private async Task EnregistrerNiveauSiModifieAsync(NiveauRow row)
         {
+            if (row.Code == row.CodeInitial)
+            {
+                return;
+            }
+
             var result = await _structureService.UpdateNiveauAsync(row.Id, row.CycleId, row.Code, row.Libelle, row.Ordre);
             if (Verifier(result, $"Niveau « {row.Code} » enregistré."))
             {
                 await ChargerCyclesEtNiveauxAsync();
+            }
+            else
+            {
+                row.Code = row.CodeInitial; // valeur refusée (doublon...) : on restaure
             }
         }
 
@@ -175,12 +205,23 @@ namespace TrajanEcoleApp.Pages.Structures
             }
         }
 
-        private async Task EnregistrerClasseAsync(ClasseRow row)
+        private async Task EnregistrerClasseSiModifieeAsync(ClasseRow row)
         {
+            if (row.NiveauId == row.NiveauIdInitial && row.Libelle == row.LibelleInitial)
+            {
+                return;
+            }
+
             var result = await _structureService.UpdateClasseAsync(row.Id, row.NiveauId, row.AnneeScolaire, row.Libelle);
             if (Verifier(result, $"Classe « {row.Libelle} » enregistrée."))
             {
                 await ChargerClassesAsync();
+                await ChargerCyclesEtNiveauxAsync(); // le compteur de classes d'un niveau a pu bouger
+            }
+            else
+            {
+                row.NiveauId = row.NiveauIdInitial;
+                row.Libelle = row.LibelleInitial;
             }
         }
 
@@ -200,25 +241,33 @@ namespace TrajanEcoleApp.Pages.Structures
         {
             public CycleRow(CycleItem c)
             {
-                Id = c.Id; Numero = c.Numero; Libelle = c.Libelle; Ordre = c.Ordre; NbNiveaux = c.Niveaux.Count;
+                Id = c.Id; Numero = c.Numero; NumeroInitial = c.Numero;
+                Libelle = c.Libelle; LibelleInitial = c.Libelle;
+                Ordre = c.Ordre; NbNiveaux = c.Niveaux.Count;
             }
             public Guid Id { get; }
             public int Numero { get; set; }
+            public int NumeroInitial { get; }
             public string Libelle { get; set; }
+            public string LibelleInitial { get; }
             public int Ordre { get; set; }
             public int NbNiveaux { get; }
         }
 
         public sealed class NiveauRow
         {
-            public NiveauRow(NiveauItem n)
+            public NiveauRow(NiveauItem n, int cycleNumero)
             {
-                Id = n.Id; CycleId = n.CycleId; Code = n.Code; Libelle = n.Libelle; Ordre = n.Ordre; NbClasses = n.NbClasses;
+                Id = n.Id; CycleId = n.CycleId; CycleNumero = cycleNumero;
+                Code = n.Code; CodeInitial = n.Code; Libelle = n.Libelle;
+                Ordre = n.Ordre; NbClasses = n.NbClasses;
             }
             public Guid Id { get; }
-            public Guid CycleId { get; set; }
+            public Guid CycleId { get; }          // non éditable : un niveau ne change pas de cycle ici
+            public int CycleNumero { get; }
             public string Code { get; set; }
-            public string Libelle { get; set; }
+            public string CodeInitial { get; }    // pour ne sauver au blur que si la valeur a changé
+            public string Libelle { get; set; }   // conservé (non affiché) : requis par l'endpoint d'update
             public int Ordre { get; set; }
             public int NbClasses { get; }
         }
@@ -227,12 +276,15 @@ namespace TrajanEcoleApp.Pages.Structures
         {
             public ClasseRow(ClasseItem c)
             {
-                Id = c.Id; NiveauId = c.NiveauId; AnneeScolaire = c.AnneeScolaire; Libelle = c.Libelle;
+                Id = c.Id; NiveauId = c.NiveauId; NiveauIdInitial = c.NiveauId;
+                AnneeScolaire = c.AnneeScolaire; Libelle = c.Libelle; LibelleInitial = c.Libelle;
             }
             public Guid Id { get; }
             public Guid NiveauId { get; set; }
+            public Guid NiveauIdInitial { get; }
             public string AnneeScolaire { get; set; }
             public string Libelle { get; set; }
+            public string LibelleInitial { get; }
         }
 
     }
