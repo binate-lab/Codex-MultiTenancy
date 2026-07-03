@@ -18,6 +18,10 @@
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>
     </PackageReference>
     <PackageReference Include="Swashbuckle.AspNetCore" Version="10.1.7" />
+    <!-- Epingle Microsoft.OpenApi >= 2.7.5 : corrige NU1903 / CVE-2026-49451 (DoS par
+         schema circulaire). La version transitive 2.4.1 tiree par Swashbuckle est vulnerable ;
+         une reference directe l'emporte. Meme majeure (2.x) => compatible Swashbuckle 10.1.7. -->
+    <PackageReference Include="Microsoft.OpenApi" Version="2.7.5" />
   </ItemGroup>
 
   <ItemGroup>
