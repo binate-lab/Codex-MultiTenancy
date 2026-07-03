@@ -133,6 +133,15 @@
         .acc-window textarea {
             font-size: 22px !important;
         }
+
+        /* Matricule National : plus grand que les autres champs, gras, bordeaux (#6D071A).
+           L'affichage groupé (« 25 789 312 Z ») est fait côté C# à la sortie du champ. */
+        .acc-window .acc-matricule input {
+            font-size: 26px !important;
+            font-weight: 700 !important;
+            color: #6D071A !important;
+            letter-spacing: 1px;
+        }
     </style>
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
@@ -304,6 +313,23 @@
                 if (this._onKey) { document.removeEventListener('keydown', this._onKey, true); this._onKey = null; }
             }
         };
+
+        // Masque de saisie des dates (champs marques .acc-datemask) : les « / » se placent
+        // tout seuls — taper 15112015 affiche 15/11/2015. Le 2e event 'input' dispatche
+        // apres reecriture informe Blazor/MudBlazor de la nouvelle valeur (pas de boucle :
+        // au 2e passage la valeur masquee est identique, on ressort sans rien faire).
+        document.addEventListener('input', function (e) {
+            var el = e.target;
+            if (!el || el.tagName !== 'INPUT' || !el.closest || !el.closest('.acc-datemask')) { return; }
+            var digits = el.value.replace(/\D/g, '').slice(0, 8);
+            var out = digits.length > 4 ? digits.slice(0, 2) + '/' + digits.slice(2, 4) + '/' + digits.slice(4)
+                    : digits.length > 2 ? digits.slice(0, 2) + '/' + digits.slice(2)
+                    : digits;
+            if (out !== el.value) {
+                el.value = out;
+                el.dispatchEvent(new Event('input', { bubbles: true }));
+            }
+        }, true);
     </script>
 </body>
 

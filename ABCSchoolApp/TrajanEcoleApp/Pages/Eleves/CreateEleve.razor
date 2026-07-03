@@ -42,7 +42,7 @@
                                 <label class="acc-label">Matricule National:</label>
                                 <MudTextField @bind-Value="Eleve.NumeroMatricule" @bind-Value:after="NettoyerMatricule" For="@(() => Eleve.NumeroMatricule)"
                                               Variant="Variant.Outlined" Margin="Margin.Dense"
-                                              Class="acc-field acc-yellow" />
+                                              Class="acc-field acc-yellow acc-matricule" />
                             </div>
                             <div class="acc-row">
                                 <label class="acc-label">Nom:</label>
@@ -93,7 +93,7 @@
                             <div class="acc-row">
                                 <label class="acc-label">Date de Naissance:</label>
                                 <MudDatePicker @bind-Date="Eleve.DateNaissance" Editable="true" DateFormat="dd/MM/yyyy"
-                                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />                            </div>
+                                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field acc-datemask" />                            </div>
                             <div class="acc-row">
                                 <label class="acc-label">Lieu de Naissance:</label>
                                 <MudTextField @bind-Value="Eleve.LieuDeNaissance" For="@(() => Eleve.LieuDeNaissance)"
@@ -218,7 +218,7 @@
                             <div class="acc-row">
                                 <label class="acc-label">Date Inscription:</label>
                                 <MudDatePicker @bind-Date="Eleve.DateInscription" Editable="true" DateFormat="dd/MM/yyyy"
-                                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
+                                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field acc-datemask" />
                             </div>
                         </MudItem>
                     </MudGrid>

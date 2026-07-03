@@ -138,6 +138,11 @@ namespace TrajanEcoleApp.Pages.Eleves
                 }
 
                 var result = await _eleveService.CreateAsync(new CreateEleveRequest { EleveDto = Eleve });
+
+                // Reapplique le format d'affichage du matricule (Normaliser l'a depouille).
+                if (!string.IsNullOrEmpty(Eleve.NumeroMatricule))
+                    Eleve.NumeroMatricule = FormaterMatricule(Eleve.NumeroMatricule);
+
                 if (result.IsSuccessful)
                 {
                     // #3 : on NE vide PAS les controles apres enregistrement ; seul le
@@ -161,7 +166,9 @@ namespace TrajanEcoleApp.Pages.Eleves
         // Nationalite avec seulement la 1re lettre en majuscule.
         private void Normaliser()
         {
-            Eleve.NumeroMatricule = Maj(Eleve.NumeroMatricule);
+            // Forme canonique envoyee au backend : sans espaces (« 24568951N »),
+            // le format d'affichage groupe est reapplique apres l'enregistrement.
+            Eleve.NumeroMatricule = Maj(Eleve.NumeroMatricule).Replace(" ", string.Empty);
             Eleve.Nom = Maj(Eleve.Nom);
             Eleve.Prenom = NomPropre(Eleve.Prenom);
             // La classe vient du référentiel structures (sélecteur) : on la garde telle
@@ -181,12 +188,33 @@ namespace TrajanEcoleApp.Pages.Eleves
             NormaliserParent(Eleve.Tuteur);
         }
 
-        // #6 : en quittant le champ Matricule National, retire les espaces et met en
-        // majuscules (ex. « 24 568 951 n » -> « 24568951N »).
+        // #6 : en quittant le champ Matricule National, majuscules puis format d'affichage
+        // « 24 568 951 N » (chiffres groupés par 3 depuis la droite, lettre détachée).
+        // La forme canonique SANS espaces est retablie dans Normaliser() avant l'envoi.
         private void NettoyerMatricule()
         {
             if (!string.IsNullOrEmpty(Eleve.NumeroMatricule))
-                Eleve.NumeroMatricule = Eleve.NumeroMatricule.Replace(" ", string.Empty).ToUpperInvariant();
+                Eleve.NumeroMatricule = FormaterMatricule(Eleve.NumeroMatricule);
+        }
+
+        // « 24568951n » / « 24 568 951 N » -> « 24 568 951 N ».
+        private static string FormaterMatricule(string s)
+        {
+            var brut = s.Replace(" ", string.Empty).ToUpperInvariant();
+            var chiffres = new string(brut.TakeWhile(char.IsDigit).ToArray());
+            var suffixe = brut[chiffres.Length..];
+
+            var groupes = new List<string>();
+            for (var fin = chiffres.Length; fin > 0; fin -= 3)
+            {
+                var debut = Math.Max(0, fin - 3);
+                groupes.Insert(0, chiffres[debut..fin]);
+            }
+
+            var format = string.Join(" ", groupes);
+            return suffixe.Length == 0 ? format
+                 : format.Length == 0 ? suffixe
+                 : $"{format} {suffixe}";
         }
 
         // #5 : Nom en MAJUSCULES a la sortie du champ.
