@@ -64,7 +64,7 @@
 /* Champs compacts facon Access : fond blanc, bord fin */
 .acc-field ::deep .mud-input-slot,
 .acc-field ::deep .mud-select-input {
-    font-size: 0.78rem;
+    font-size: calc(0.78rem + 2px); /* zones de saisie +2px ; labels (.acc-label) inchanges */
     padding-top: 1px;
     padding-bottom: 1px;
     background: #ffffff;

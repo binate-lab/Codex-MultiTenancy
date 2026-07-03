@@ -1,5 +1,6 @@
 using System.Globalization;
 using App.Infrastructure.Services.Eleves;
+using App.Infrastructure.Services.Structures;
 using Microsoft.AspNetCore.Components;
 
 namespace TrajanEcoleApp.Pages.Scolarites
@@ -7,13 +8,20 @@ namespace TrajanEcoleApp.Pages.Scolarites
     public partial class Scolarites
     {
         [Inject] private IScolariteEleveService _scolariteEleveService { get; set; } = default!;
+        [Inject] private IStructureService _structureService { get; set; } = default!;
 
         // Année scolaire en cours (bandeau) — même source que SchoolNavMenu.
         private string _annee = "—";
 
-        // Niveaux valides côté domaine (calqué CreateEleve / Eleves.Api NiveauId).
-        private static readonly string[] _niveaux =
-            ["6e", "5e", "4e", "3e", "2nde", "1ere", "Tle", "BT"];
+        // Référentiel structures de l'école (module Structures de pedagogie-api) :
+        // les sélecteurs Niveau/Classe de la grille et du filtre sont alimentés par
+        // CE référentiel, plus par une liste figée dans le code.
+        private List<string> _niveaux = new();
+        private IReadOnlyList<ClasseItem> _classesRef = new List<ClasseItem>();
+
+        // Classes ouvertes pour le niveau donné (cellule Classe d'une ligne).
+        private IEnumerable<ClasseItem> ClassesPour(string niveau) =>
+            _classesRef.Where(c => c.NiveauCode == niveau);
 
         // Format monétaire façon Access : « 35 000 F » (espace comme séparateur de milliers).
         private static readonly CultureInfo _fr = CultureInfo.GetCultureInfo("fr-FR");
@@ -42,6 +50,11 @@ namespace TrajanEcoleApp.Pages.Scolarites
             {
                 _annee = annee.Data.Libelle;
             }
+
+            // Référentiel structures : niveaux (dans l'ordre configuré) + classes de l'année.
+            var cycles = await _structureService.GetCyclesAsync();
+            _niveaux = cycles.SelectMany(c => c.Niveaux).Select(n => n.Code).ToList();
+            _classesRef = await _structureService.GetClassesAsync(_annee == "—" ? null : _annee);
 
             // Chargement des élèves de l'école depuis Scolarite.Api (table Eleve / ScolariteDb).
             if (!string.IsNullOrWhiteSpace(codeEts))
@@ -93,12 +106,17 @@ namespace TrajanEcoleApp.Pages.Scolarites
             row.Statut = nouveau;
         }
 
-        // Édition en ligne du niveau d'un élève.
+        // Édition en ligne du niveau d'un élève. La classe est invalidée si elle
+        // n'appartient plus au nouveau niveau (cascade du référentiel structures).
         // TODO (à venir) : publier un événement « changement de niveau » relié à
         // l'échéancier (les frais / l'échéancier dépendent du niveau).
         private void OnNiveauChanged(EleveScolariteRow row, string nouveau)
         {
             row.Niveau = nouveau;
+            if (!ClassesPour(nouveau).Any(c => c.Libelle == row.Classe))
+            {
+                row.Classe = string.Empty;
+            }
         }
 
         // Édition en ligne de la classe d'un élève.

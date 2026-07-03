@@ -123,6 +123,16 @@
         .acc-yellow input {
             background-color: #fff79a !important;
         }
+
+        /* Zones de saisie du formulaire Création élève : +2px sur la taille EFFECTIVE
+           (~1rem par défaut MudBlazor, pas 0.78rem qui n'était jamais appliqué). Labels
+           (.acc-label) inchangés. Règle globale car un ::deep scopé n'atteint pas MudBlazor. */
+        .acc-window .mud-input-slot,
+        .acc-window .mud-select-input,
+        .acc-window input,
+        .acc-window textarea {
+            font-size: 22px !important;
+        }
     </style>
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
@@ -263,12 +273,13 @@
                     // Raccourcis d'action (actifs sur toute la page Création élève)
                     if ((e.ctrlKey && (e.key === 's' || e.key === 'S')) || e.key === 'F2') {
                         e.preventDefault();
-                        dotNetRef.invokeMethodAsync('SaveFromShortcut');
+                        // Garde : si la ref .NET a ete disposee, on ignore au lieu de crasher.
+                        try { dotNetRef.invokeMethodAsync('SaveFromShortcut').catch(function () { }); } catch (err) { }
                         return;
                     }
                     if (e.key === 'F8') {
                         e.preventDefault();
-                        dotNetRef.invokeMethodAsync('NewFromShortcut');
+                        try { dotNetRef.invokeMethodAsync('NewFromShortcut').catch(function () { }); } catch (err) { }
                         return;
                     }
                     // Entrée : passer au champ suivant (comme Tab), dans le formulaire

@@ -122,10 +122,17 @@
                     </MudSelect>
                 </MudTd>
                 <MudTd DataLabel="Classe">
-                    <MudTextField T="string" Value="@context.Classe"
-                                  ValueChanged="@(v => OnClasseChanged(context, v))"
-                                  Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
-                                  Class="acc-cell-input" />
+                    @* Classe = sélecteur alimenté par le référentiel structures (classes du
+                       niveau de la ligne, pour l'année en cours) — plus de saisie libre. *@
+                    <MudSelect T="string" Value="@context.Classe"
+                               ValueChanged="@(v => OnClasseChanged(context, v))"
+                               Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                               Class="acc-cell-select">
+                        @foreach (var cl in ClassesPour(context.Niveau))
+                        {
+                            <MudSelectItem Value="@cl.Libelle">@cl.Libelle</MudSelectItem>
+                        }
+                    </MudSelect>
                 </MudTd>
                 <MudTd DataLabel="Net à payer" Style="text-align:right">@Fmt(context.NetAPayer)</MudTd>
                 <MudTd DataLabel="Inscription" Style="text-align:right">@Fmt(context.Inscription)</MudTd>

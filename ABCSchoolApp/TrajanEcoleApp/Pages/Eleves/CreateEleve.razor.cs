@@ -1,6 +1,7 @@
 using App.Infrastructure.Validators;
 using System.Globalization;
 using App.Infrastructure.Services.Eleves;
+using App.Infrastructure.Services.Structures;
 using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Authorization;
 using Microsoft.JSInterop;
@@ -14,13 +15,23 @@ namespace TrajanEcoleApp.Pages.Eleves
         [Inject] private IJSRuntime JS { get; set; }
         [Inject] private AuthenticationStateProvider _authProvider { get; set; }
         [Inject] private IInscriptionService _inscriptionService { get; set; }
+        [Inject] private IStructureService _structureService { get; set; }
 
         // Référence .NET passée au script clavier (index.html) pour les raccourcis.
         private DotNetObjectReference<CreateEleve> _dotNetRef;
 
-        // Niveaux valides cote domaine (Eleves.Api/ValueObjects/NiveauId).
-        private static readonly string[] _niveaux =
-            ["6e", "5e", "4e", "3e", "2nde", "1ere", "Tle", "BT"];
+        // Référentiel structures de l'école (module Structures de pedagogie-api) :
+        // cycles→niveaux + classes ouvertes pour l'année en cours. Les sélecteurs
+        // Cycle/Niveau/Classe sont alimentés par CE référentiel, plus par des listes figées.
+        private IReadOnlyList<CycleItem> _cyclesRef = new List<CycleItem>();
+        private IReadOnlyList<ClasseItem> _classesRef = new List<ClasseItem>();
+
+        // Niveaux du cycle sélectionné, puis classes du niveau sélectionné (cascade).
+        private IEnumerable<NiveauItem> NiveauxDuCycle =>
+            _cyclesRef.FirstOrDefault(c => c.Numero == Eleve.Cycle)?.Niveaux ?? new List<NiveauItem>();
+
+        private IEnumerable<ClasseItem> ClassesDuNiveau =>
+            _classesRef.Where(c => c.NiveauCode == Eleve.Niveau);
 
         private EleveRequestDto Eleve { get; set; } = new()
         {
@@ -38,7 +49,7 @@ namespace TrajanEcoleApp.Pages.Eleves
         private string _anneeEnCours = AnneeScolaireRepli;
 
         // #5 : a l'ouverture, applique l'annee en cours puis le contexte ecole
-        // (CodeEts du claim + N° Inscription auto).
+        // (CodeEts du claim + N° Inscription auto), et charge le referentiel structures.
         protected override async Task OnInitializedAsync()
         {
             var annee = await _anneeScolaireService.GetAnneeEnCoursAsync();
@@ -49,6 +60,40 @@ namespace TrajanEcoleApp.Pages.Eleves
             }
 
             await AppliquerContexteEcoleAsync();
+            await ChargerReferentielAsync();
+        }
+
+        // Charge cycles→niveaux + classes de l'annee en cours depuis le module Structures.
+        private async Task ChargerReferentielAsync()
+        {
+            _cyclesRef = await _structureService.GetCyclesAsync();
+            _classesRef = await _structureService.GetClassesAsync(_anneeEnCours);
+
+            if (_cyclesRef.Count == 0)
+            {
+                _snackbar.Add(
+                    "Aucune structure pédagogique configurée pour cette école — menu Structure → Cycles, niveaux & classes.",
+                    Severity.Warning);
+            }
+        }
+
+        // Cascade : changer de cycle invalide le niveau (et la classe) s'ils n'en font plus partie.
+        private void OnCycleChange()
+        {
+            if (!NiveauxDuCycle.Any(n => n.Code == Eleve.Niveau))
+            {
+                Eleve.Niveau = string.Empty;
+                Eleve.Classe = string.Empty;
+            }
+        }
+
+        // Cascade : changer de niveau invalide la classe si elle n'en fait plus partie.
+        private void OnNiveauChange()
+        {
+            if (!ClassesDuNiveau.Any(c => c.Libelle == Eleve.Classe))
+            {
+                Eleve.Classe = string.Empty;
+            }
         }
 
         // #5 : CodeEts vient du JWT (claim « school », pose au clic sur la carte ecole) et
@@ -84,12 +129,21 @@ namespace TrajanEcoleApp.Pages.Eleves
                 // #2 : normalise la casse juste avant l'envoi.
                 Normaliser();
 
+                // N° Inscription : si le pré-remplissage a échoué à l'ouverture (Scolarite.Api
+                // indisponible), on retente ici pour que le numéro envoyé — et affiché après
+                // enregistrement — soit toujours celui de l'élève saisi (repris ensuite dans /scolarites).
+                if (Eleve.MatriculeInterne is null && !string.IsNullOrWhiteSpace(Eleve.CodeEts))
+                {
+                    Eleve.MatriculeInterne = await _inscriptionService.GetNextMatriculeInterneAsync(Eleve.CodeEts);
+                }
+
                 var result = await _eleveService.CreateAsync(new CreateEleveRequest { EleveDto = Eleve });
                 if (result.IsSuccessful)
                 {
                     // #3 : on NE vide PAS les controles apres enregistrement ; seul le
-                    // bouton « Nouveau » reinitialise le formulaire.
-                    _snackbar.Add($"Eleve cree (Id : {result.Id}).", Severity.Success);
+                    // bouton « Nouveau » reinitialise le formulaire. Le N° Inscription reste
+                    // donc affiche : c'est celui de l'eleve qu'on vient d'enregistrer.
+                    _snackbar.Add($"Élève enregistré — N° Inscription : {Eleve.MatriculeInterne}.", Severity.Success);
                 }
                 else
                 {
@@ -110,7 +164,8 @@ namespace TrajanEcoleApp.Pages.Eleves
             Eleve.NumeroMatricule = Maj(Eleve.NumeroMatricule);
             Eleve.Nom = Maj(Eleve.Nom);
             Eleve.Prenom = NomPropre(Eleve.Prenom);
-            NettoyerClasse();   // #7 : cycle 1 minuscules / cycle 2 MAJUSCULES
+            // La classe vient du référentiel structures (sélecteur) : on la garde telle
+            // quelle pour qu'elle corresponde exactement à la classe configurée (#7 abandonné).
             Eleve.LieuDeNaissance = Maj(Eleve.LieuDeNaissance);
             Eleve.BureauEtatCivil = Maj(Eleve.BureauEtatCivil);
             Eleve.SousPrefecture = Maj(Eleve.SousPrefecture);
@@ -141,9 +196,6 @@ namespace TrajanEcoleApp.Pages.Eleves
         // (coulibaly daouda alassane -> Coulibaly Daouda Alassane).
         private void NettoyerPrenom() => Eleve.Prenom = NomPropre(Eleve.Prenom);
 
-        // #7 : Classe a la sortie du champ — cycle 1 en minuscules, cycle 2 en MAJUSCULES.
-        private void NettoyerClasse() => Eleve.Classe = Eleve.Cycle == 2 ? Maj(Eleve.Classe) : Min(Eleve.Classe);
-
         private static void NormaliserParent(ParentRequestDto p)
         {
             if (p is null) return;
@@ -156,10 +208,6 @@ namespace TrajanEcoleApp.Pages.Eleves
         // MAJUSCULES (accents geres) ; conserve la chaine vide telle quelle.
         private static string Maj(string s)
             => string.IsNullOrWhiteSpace(s) ? (s ?? string.Empty) : s.ToUpperInvariant();
-
-        // minuscules (accents geres) ; conserve la chaine vide telle quelle.
-        private static string Min(string s)
-            => string.IsNullOrWhiteSpace(s) ? (s ?? string.Empty) : s.ToLowerInvariant();
 
         // 1re lettre de chaque mot en majuscule, reste en minuscule (jean-marc → Jean-Marc).
         private static string NomPropre(string s)

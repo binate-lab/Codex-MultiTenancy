@@ -29,7 +29,8 @@
         </div>
 
         <MudForm @ref="_form" Model="Eleve" Validation="@(_validator.ValidateValue)" ValidationDelay="0">
-            <MudTabs Elevation="0" Rounded="true" Border="true" ApplyEffectsToContainer="true" PanelClass="pa-2">
+            <MudTabs Elevation="0" Rounded="true" Border="true" ApplyEffectsToContainer="true" PanelClass="pa-2"
+                     KeepPanelsAlive="true">
 
                 <!-- ============ Onglet ÉLÈVE ============ -->
                 <MudTabPanel Text="Élève" Icon="@Icons.Material.Filled.Person">
@@ -39,40 +40,49 @@
                         <MudItem xs="12" md="6">
                             <div class="acc-row">
                                 <label class="acc-label">Matricule National:</label>
-                                <MudTextField @bind-Value="Eleve.NumeroMatricule" For="@(() => Eleve.NumeroMatricule)"
+                                <MudTextField @bind-Value="Eleve.NumeroMatricule" @bind-Value:after="NettoyerMatricule" For="@(() => Eleve.NumeroMatricule)"
                                               Variant="Variant.Outlined" Margin="Margin.Dense"
                                               Class="acc-field acc-yellow" />
                             </div>
                             <div class="acc-row">
                                 <label class="acc-label">Nom:</label>
-                                <MudTextField @bind-Value="Eleve.Nom" For="@(() => Eleve.Nom)"
+                                <MudTextField @bind-Value="Eleve.Nom" @bind-Value:after="NettoyerNom" For="@(() => Eleve.Nom)"
                                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
                             </div>
                             <div class="acc-row">
                                 <label class="acc-label">Prénoms:</label>
-                                <MudTextField @bind-Value="Eleve.Prenom" For="@(() => Eleve.Prenom)"
+                                <MudTextField @bind-Value="Eleve.Prenom" @bind-Value:after="NettoyerPrenom" For="@(() => Eleve.Prenom)"
                                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
                             </div>
+                            @* Cycle / Niveau / Classe : alimentés par le référentiel structures
+                               de l'école (cascade — le niveau dépend du cycle, la classe du niveau). *@
                             <div class="acc-row">
                                 <label class="acc-label">Cycle:</label>
-                                <MudSelect @bind-Value="Eleve.Cycle" For="@(() => Eleve.Cycle)"
+                                <MudSelect @bind-Value="Eleve.Cycle" @bind-Value:after="OnCycleChange" For="@(() => Eleve.Cycle)"
                                            Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
-                                    <MudSelectItem Value="1">1</MudSelectItem>
-                                    <MudSelectItem Value="2">2</MudSelectItem>
+                                    @foreach (var c in _cyclesRef)
+                                    {
+                                        <MudSelectItem Value="@c.Numero">@c.Numero</MudSelectItem>
+                                    }
                                 </MudSelect>                            </div>
                             <div class="acc-row">
                                 <label class="acc-label">Niveau:</label>
-                                <MudSelect @bind-Value="Eleve.Niveau" For="@(() => Eleve.Niveau)"
+                                <MudSelect @bind-Value="Eleve.Niveau" @bind-Value:after="OnNiveauChange" For="@(() => Eleve.Niveau)"
                                            Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
-                                    @foreach (var niveau in _niveaux)
+                                    @foreach (var niveau in NiveauxDuCycle)
                                     {
-                                        <MudSelectItem Value="@niveau">@niveau</MudSelectItem>
+                                        <MudSelectItem Value="@niveau.Code">@niveau.Code</MudSelectItem>
                                     }
                                 </MudSelect>                            </div>
                             <div class="acc-row">
                                 <label class="acc-label">Classe:</label>
-                                <MudTextField @bind-Value="Eleve.Classe" For="@(() => Eleve.Classe)"
-                                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />                            </div>
+                                <MudSelect @bind-Value="Eleve.Classe" For="@(() => Eleve.Classe)"
+                                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
+                                    @foreach (var classe in ClassesDuNiveau)
+                                    {
+                                        <MudSelectItem Value="@classe.Libelle">@classe.Libelle</MudSelectItem>
+                                    }
+                                </MudSelect>                            </div>
                             <div class="acc-row">
                                 <label class="acc-label">Sexe:</label>
                                 <MudSelect @bind-Value="Eleve.Sexe" For="@(() => Eleve.Sexe)"
@@ -82,7 +92,7 @@
                                 </MudSelect>                            </div>
                             <div class="acc-row">
                                 <label class="acc-label">Date de Naissance:</label>
-                                <MudDatePicker @bind-Date="Eleve.DateNaissance"
+                                <MudDatePicker @bind-Date="Eleve.DateNaissance" Editable="true" DateFormat="dd/MM/yyyy"
                                                Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />                            </div>
                             <div class="acc-row">
                                 <label class="acc-label">Lieu de Naissance:</label>
@@ -189,9 +199,12 @@
                                 <label class="acc-label">Série:</label>
                                 <MudSelect @bind-Value="Eleve.Serie" T="string"
                                            Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field">
-                                    <MudSelectItem Value="@("A")">A</MudSelectItem>
+                                    <MudSelectItem Value="@("A1")">A1</MudSelectItem>
+                                    <MudSelectItem Value="@("A2")">A2</MudSelectItem>
                                     <MudSelectItem Value="@("C")">C</MudSelectItem>
                                     <MudSelectItem Value="@("D")">D</MudSelectItem>
+                                    <MudSelectItem Value="@("A")">A</MudSelectItem>
+                                    <MudSelectItem Value="@("x")">x</MudSelectItem>
                                 </MudSelect>
                             </div>
                             <div class="acc-row">
@@ -204,7 +217,7 @@
                             </div>
                             <div class="acc-row">
                                 <label class="acc-label">Date Inscription:</label>
-                                <MudDatePicker @bind-Date="Eleve.DateInscription"
+                                <MudDatePicker @bind-Date="Eleve.DateInscription" Editable="true" DateFormat="dd/MM/yyyy"
                                                Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-field" />
                             </div>
                         </MudItem>
