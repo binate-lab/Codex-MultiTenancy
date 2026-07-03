@@ -50,12 +50,26 @@
                                  Size="Size.Small"
                                  Color="Color.Inherit"
                                  Dense="true">
-                            <MudMenuItem Href="/structures" Icon="@Icons.Material.Outlined.AccountTree">
-                                Cycles, niveaux &amp; classes
-                            </MudMenuItem>
-                            <MudMenuItem Href="/matieres" Icon="@Icons.Material.Outlined.MenuBook">
-                                Matières
-                            </MudMenuItem>
+                            @* Sous-menus (MudBlazor 8 : un MudMenu imbriqué devient un
+                               élément avec flèche, ouvert au survol). D'autres entrées
+                               viendront s'ajouter dans chaque groupe. *@
+                            <MudMenu Label="Pédagogie"
+                                     StartIcon="@Icons.Material.Outlined.School"
+                                     Dense="true">
+                                <MudMenuItem Href="/structures" Icon="@Icons.Material.Outlined.AccountTree">
+                                    Cycles, niveaux &amp; classes
+                                </MudMenuItem>
+                                <MudMenuItem Href="/matieres" Icon="@Icons.Material.Outlined.MenuBook">
+                                    Matières
+                                </MudMenuItem>
+                            </MudMenu>
+                            <MudMenu Label="Economat"
+                                     StartIcon="@Icons.Material.Outlined.Payments"
+                                     Dense="true">
+                                <MudMenuItem Icon="@Icons.Material.Outlined.EventNote" Disabled="true">
+                                    Échéancier (à venir)
+                                </MudMenuItem>
+                            </MudMenu>
                         </MudMenu>
                         <MudButton StartIcon="@Icons.Material.Outlined.Print"
                                    Size="Size.Small"
