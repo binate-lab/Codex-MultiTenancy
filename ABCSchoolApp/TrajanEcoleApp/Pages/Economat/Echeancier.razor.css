@@ -1,0 +1,112 @@
+/* Page "Échéancier" (Economat) — grille bleue (même bleu que le bandeau #1b4f72),
+   écritures blanches, éditeurs fondus dans les cellules. La grille défile
+   horizontalement si les 10 colonnes de mois dépassent l'écran.
+   NB : les classes ech-* sont posées sur des div HTML bruts (pas des composants
+   MudBlazor) pour que l'attribut de scope du CSS isolé s'applique bien. */
+
+/* Filtres au-dessus de la grille : côte à côte, centrés au milieu de la page */
+/* Filtres dans une boîte compacte : bordure noire, pas de fond, centrée au milieu */
+.ech-filtres {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    width: fit-content;
+    margin: 0 auto 12px;
+    border: 1px solid #000000;
+    border-radius: 4px;
+    padding: 6px 12px;
+}
+
+/* Largeur fixe des sélecteurs (filtres + création) : le Style inline sur MudSelect
+   n'atteint pas le conteneur qui s'étire, on force donc ici (racine + conteneur input). */
+.ech-filtres ::deep .mud-select,
+.ech-addbar ::deep .mud-select,
+.ech-filtres ::deep .mud-input-control,
+.ech-addbar ::deep .mud-input-control {
+    width: 110px !important;
+    flex: 0 0 auto !important;
+}
+
+.ech-grid {
+    overflow-x: auto;
+    /* petit dégagement pour que le trait bas du tableau ne soit pas rogné
+       par le conteneur à défilement horizontal */
+    padding-bottom: 3px;
+}
+
+.ech-grid ::deep .mud-table-root {
+    font-size: 0.875rem;
+}
+
+.ech-grid ::deep th {
+    background: #143c57 !important; /* bleu plus soutenu que les cellules */
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    white-space: nowrap;
+    padding: 4px 10px !important;
+}
+
+.ech-grid ::deep td {
+    background: #1b4f72; /* bleu du bandeau */
+    /* !important : MudBlazor pose sa propre couleur de texte sur .mud-table-cell,
+       sinon Niveau / Statut / Total (texte brut des cellules) restent en noir */
+    color: #ffffff !important;
+    border-color: #3d7bab !important;
+    padding: 0 8px !important;
+    height: 26px !important;
+    white-space: nowrap;
+}
+
+.ech-grid ::deep tr:hover td {
+    background: #24618c;
+}
+
+/* Éditeurs dans les cellules : texte blanc à la taille de la cellule, pas de soulignement */
+.ech-grid ::deep td .mud-input-slot,
+.ech-grid ::deep td .mud-input,
+.ech-grid ::deep td .mud-input > input {
+    font-size: inherit !important;
+    color: #ffffff !important;
+    text-align: right;
+}
+
+.ech-grid ::deep td .mud-input.mud-input-underline::before,
+.ech-grid ::deep td .mud-input.mud-input-underline::after {
+    border-bottom: none !important;
+}
+
+.ech-grid ::deep td .mud-input-control {
+    margin-top: 0 !important;
+}
+
+.ech-grid ::deep td .mud-input-slot {
+    min-height: 20px;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+/* Le menu Actions (icone MoreVert) ne doit pas gonfler la hauteur de ligne */
+.ech-grid ::deep td .mud-button-root {
+    padding: 2px !important;
+    color: #ffffff;
+}
+
+/* Étiquette de la boîte de filtres */
+.ech-filtres-label {
+    font-weight: 600;
+    white-space: nowrap;
+}
+
+/* Barre d'ajout sous la grille : boîte compacte (Niveau + Statut + bouton),
+   même habillage que les filtres — bordure noire, pas de fond */
+.ech-addbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: fit-content;
+    border: 1px solid #000000;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin: 16px auto 0; /* centrée au milieu de l'écran */
+}

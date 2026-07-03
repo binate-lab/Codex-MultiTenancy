@@ -11,6 +11,8 @@ using App.Infrastructure.Services.Eleves;
 using App.Infrastructure.Services.Implementations.Eleves;
 using App.Infrastructure.Services.Structures;
 using App.Infrastructure.Services.Implementations.Structures;
+using App.Infrastructure.Services.Economat;
+using App.Infrastructure.Services.Implementations.Economat;
 using App.Infrastructure.Services.AnneesScolaires;
 using App.Infrastructure.Services.Implementations.AnneesScolaires;
 using App.Infrastructure.Services.Implementations.Schools;
@@ -96,6 +98,14 @@ namespace App.Infrastructure.Extensions
                 .AddHttpClient<IStructureService, StructureService>(client =>
                 {
                     client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:PedagogieApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
+            // Client typie dedie au module Economat de Scolarite.Api : bareme d'echeancier.
+            builder.Services
+                .AddHttpClient<IEcheancierService, EcheancierService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
                 })
                 .AddHttpMessageHandler<AuthenticationHeaderHandler>();
 

@@ -1,0 +1,110 @@
+@page "/echeancier"
+@layout SchoolLayout
+@using global::App.Infrastructure.Services.Economat
+
+<MudPaper Elevation="6" Class="ma-2">
+    <MudToolBar Dense="true" Class="px-3" Style="background-color:#1b4f72; color:white;">
+        <MudIcon Icon="@Icons.Material.Outlined.EventNote" Class="mr-2" />
+        <MudText Typo="Typo.h6">Échéancier — Modalités de versement</MudText>
+        <MudSpacer />
+        <MudText Typo="Typo.subtitle2" Class="mr-4">@_annee</MudText>
+        <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Inherit"
+                   OnClick="@(() => _navigation.NavigateTo("/ecole"))">Fermer</MudButton>
+    </MudToolBar>
+
+    <div class="pa-4">
+        @* Filtres de la grille : Niveau et Statut (« Tous » = pas de filtre), côte à côte
+           au centre de la page. Div HTML brut : le CSS isolé (scope Blazor) ne s'applique
+           pas aux racines des composants MudBlazor, d'où flexbox maison plutôt que MudStack. *@
+        <div class="ech-filtres">
+            <span class="ech-filtres-label">Filtres :</span>
+            <MudSelect T="string" @bind-Value="_filtreNiveau" Placeholder="Niveau" Margin="Margin.Dense"
+                       Variant="Variant.Outlined" Clearable="true">
+                @foreach (var n in _niveauxRef)
+                {
+                    <MudSelectItem T="string" Value="@n.Code">@n.Code</MudSelectItem>
+                }
+            </MudSelect>
+            <MudSelect T="string" @bind-Value="_filtreStatut" Placeholder="Statut" Margin="Margin.Dense"
+                       Variant="Variant.Outlined" Clearable="true">
+                <MudSelectItem T="string" Value="@("Naff")">Naff</MudSelectItem>
+                <MudSelectItem T="string" Value="@("Aff")">Aff</MudSelectItem>
+            </MudSelect>
+        </div>
+
+        @* Grille façon Access « Modalités Versement Scolarité » : Niveau, Statut et Total
+           non éditables ; chaque cellule de montant part en base au blur si modifiée. *@
+        <div class="ech-grid">
+            <MudTable Items="LignesFiltrees" Dense="true" Hover="true" Elevation="1" Bordered="true">
+                <HeaderContent>
+                    <MudTh Style="width:80px;">Niveau</MudTh>
+                    <MudTh Style="width:70px;">Statut</MudTh>
+                    <MudTh Style="width:110px; text-align:right;">Total</MudTh>
+                    <MudTh>Inscription</MudTh>
+                    <MudTh>Septembre</MudTh>
+                    <MudTh>Octobre</MudTh>
+                    <MudTh>Novembre</MudTh>
+                    <MudTh>Décembre</MudTh>
+                    <MudTh>Janvier</MudTh>
+                    <MudTh>Février</MudTh>
+                    <MudTh>Mars</MudTh>
+                    <MudTh>Avril</MudTh>
+                    <MudTh>Mai</MudTh>
+                    <MudTh Style="width:60px; text-align:right;">Actions</MudTh>
+                </HeaderContent>
+                <RowTemplate>
+                    <MudTd Style="text-align:center; font-weight:600;">@context.NiveauCode</MudTd>
+                    <MudTd Style="text-align:center;">@context.Statut</MudTd>
+                    <MudTd Style="text-align:right; font-weight:700;">@FormaterMontant(context.Total)</MudTd>
+                    <MudTd><MudNumericField T="decimal" @bind-Value="context.Inscription" Margin="Margin.Dense" Variant="Variant.Text" HideSpinButtons="true" Min="0" Format="N0" Culture="@_fr"
+                                            OnBlur="@(() => EnregistrerSiModifieeAsync(context))" /></MudTd>
+                    <MudTd><MudNumericField T="decimal" @bind-Value="context.Septembre" Margin="Margin.Dense" Variant="Variant.Text" HideSpinButtons="true" Min="0" Format="N0" Culture="@_fr"
+                                            OnBlur="@(() => EnregistrerSiModifieeAsync(context))" /></MudTd>
+                    <MudTd><MudNumericField T="decimal" @bind-Value="context.Octobre" Margin="Margin.Dense" Variant="Variant.Text" HideSpinButtons="true" Min="0" Format="N0" Culture="@_fr"
+                                            OnBlur="@(() => EnregistrerSiModifieeAsync(context))" /></MudTd>
+                    <MudTd><MudNumericField T="decimal" @bind-Value="context.Novembre" Margin="Margin.Dense" Variant="Variant.Text" HideSpinButtons="true" Min="0" Format="N0" Culture="@_fr"
+                                            OnBlur="@(() => EnregistrerSiModifieeAsync(context))" /></MudTd>
+                    <MudTd><MudNumericField T="decimal" @bind-Value="context.Decembre" Margin="Margin.Dense" Variant="Variant.Text" HideSpinButtons="true" Min="0" Format="N0" Culture="@_fr"
+                                            OnBlur="@(() => EnregistrerSiModifieeAsync(context))" /></MudTd>
+                    <MudTd><MudNumericField T="decimal" @bind-Value="context.Janvier" Margin="Margin.Dense" Variant="Variant.Text" HideSpinButtons="true" Min="0" Format="N0" Culture="@_fr"
+                                            OnBlur="@(() => EnregistrerSiModifieeAsync(context))" /></MudTd>
+                    <MudTd><MudNumericField T="decimal" @bind-Value="context.Fevrier" Margin="Margin.Dense" Variant="Variant.Text" HideSpinButtons="true" Min="0" Format="N0" Culture="@_fr"
+                                            OnBlur="@(() => EnregistrerSiModifieeAsync(context))" /></MudTd>
+                    <MudTd><MudNumericField T="decimal" @bind-Value="context.Mars" Margin="Margin.Dense" Variant="Variant.Text" HideSpinButtons="true" Min="0" Format="N0" Culture="@_fr"
+                                            OnBlur="@(() => EnregistrerSiModifieeAsync(context))" /></MudTd>
+                    <MudTd><MudNumericField T="decimal" @bind-Value="context.Avril" Margin="Margin.Dense" Variant="Variant.Text" HideSpinButtons="true" Min="0" Format="N0" Culture="@_fr"
+                                            OnBlur="@(() => EnregistrerSiModifieeAsync(context))" /></MudTd>
+                    <MudTd><MudNumericField T="decimal" @bind-Value="context.Mai" Margin="Margin.Dense" Variant="Variant.Text" HideSpinButtons="true" Min="0" Format="N0" Culture="@_fr"
+                                            OnBlur="@(() => EnregistrerSiModifieeAsync(context))" /></MudTd>
+                    <MudTd Style="text-align:right;">
+                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Color="Color.Secondary"
+                                 TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
+                            <MudMenuItem OnClick="@(() => SupprimerAsync(context))">Supprimer</MudMenuItem>
+                        </MudMenu>
+                    </MudTd>
+                </RowTemplate>
+            </MudTable>
+        </div>
+
+        @* Ajout d'une ligne : Niveau depuis le référentiel structures + Statut (Aff/Naff),
+           comme la création de Classe. La ligne naît avec 0 partout. *@
+        <div class="ech-addbar">
+            <MudSelect T="string" @bind-Value="_nouveauNiveauCode" Placeholder="Niveau" Margin="Margin.Dense"
+                       Variant="Variant.Outlined">
+                @foreach (var n in _niveauxRef)
+                {
+                    <MudSelectItem T="string" Value="@n.Code">@n.Code</MudSelectItem>
+                }
+            </MudSelect>
+            <MudSelect T="string" @bind-Value="_nouveauStatut" Placeholder="Statut" Margin="Margin.Dense"
+                       Variant="Variant.Outlined">
+                <MudSelectItem T="string" Value="@("Naff")">Naff</MudSelectItem>
+                <MudSelectItem T="string" Value="@("Aff")">Aff</MudSelectItem>
+            </MudSelect>
+            <MudTooltip Text="Ajouter">
+                <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" IconSize="Size.Medium"
+                        OnClick="AjouterAsync" />
+            </MudTooltip>
+        </div>
+    </div>
+</MudPaper>
