@@ -2,6 +2,7 @@ using System.Globalization;
 using App.Infrastructure.Services.Eleves;
 using App.Infrastructure.Services.Structures;
 using Microsoft.AspNetCore.Components;
+using Microsoft.JSInterop;
 using MudBlazor;
 
 namespace TrajanEcoleApp.Pages.Scolarites
@@ -11,9 +12,14 @@ namespace TrajanEcoleApp.Pages.Scolarites
         [Inject] private IScolariteEleveService _scolariteEleveService { get; set; } = default!;
         [Inject] private IStructureService _structureService { get; set; } = default!;
         [Inject] private IVersementService _versementService { get; set; } = default!;
+        [Inject] private IJSRuntime _js { get; set; } = default!;
 
         // Année scolaire en cours (bandeau) — même source que SchoolNavMenu.
         private string _annee = "—";
+
+        // Nom d'affichage de l'école active (en-tête du reçu PDF) — même source
+        // que SchoolNavMenu (GetMineAsync filtré sur le claim school).
+        private string _nomEcole = string.Empty;
 
         // Référentiel structures de l'école (module Structures de pedagogie-api) :
         // les sélecteurs Niveau/Classe de la grille et du filtre sont alimentés par
@@ -57,6 +63,16 @@ namespace TrajanEcoleApp.Pages.Scolarites
             var cycles = await _structureService.GetCyclesAsync();
             _niveaux = cycles.SelectMany(c => c.Niveaux).Select(n => n.Code).ToList();
             _classesRef = await _structureService.GetClassesAsync(_annee == "—" ? null : _annee);
+
+            // Nom de l'école active (en-tête du reçu PDF).
+            if (!string.IsNullOrWhiteSpace(codeEts))
+            {
+                var ecoles = await _schoolService.GetMineAsync();
+                if (ecoles.IsSuccessful && ecoles.Data is not null)
+                {
+                    _nomEcole = ecoles.Data.FirstOrDefault(s => s.CodeEts == codeEts)?.Name ?? string.Empty;
+                }
+            }
 
             // Chargement des élèves de l'école depuis Scolarite.Api (table Eleve / ScolariteDb).
             if (!string.IsNullOrWhiteSpace(codeEts))
@@ -216,6 +232,36 @@ namespace TrajanEcoleApp.Pages.Scolarites
             finally
             {
                 _vEnCours = false;
+            }
+        }
+
+        // ================== Reçu de paiement (PDF) ==================
+
+        private bool _recuEnCours;
+
+        // Télécharge le reçu PDF de l'élève sélectionné (situation du compte :
+        // versements + synthèse + échéancier) — calque du reçu Access.
+        private async Task TelechargerRecuAsync()
+        {
+            if (_sel is null) return;
+
+            _recuEnCours = true;
+            try
+            {
+                var pdf = await _versementService.GetRecuPdfAsync(_sel.Id, _nomEcole);
+                if (pdf is null || pdf.Length == 0)
+                {
+                    _snackbar.Add("Reçu indisponible pour cet élève.", Severity.Error);
+                    return;
+                }
+
+                var nomFichier = $"recu-{Compact(_sel.Matricule)}-{DateTime.Today:yyyyMMdd}.pdf";
+                await _js.InvokeVoidAsync("trajanTelechargerFichier",
+                    nomFichier, Convert.ToBase64String(pdf), "application/pdf");
+            }
+            finally
+            {
+                _recuEnCours = false;
             }
         }
 

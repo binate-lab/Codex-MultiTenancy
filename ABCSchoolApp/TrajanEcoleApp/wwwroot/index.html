@@ -330,6 +330,20 @@
                 el.dispatchEvent(new Event('input', { bubbles: true }));
             }
         }, true);
+
+        // Téléchargement d'un fichier produit par une API (reçu PDF, rapports...) :
+        // Blazor WASM passe les octets en base64, on déclenche le download navigateur.
+        window.trajanTelechargerFichier = function (nomFichier, base64, typeMime) {
+            var octets = Uint8Array.from(atob(base64), function (c) { return c.charCodeAt(0); });
+            var url = URL.createObjectURL(new Blob([octets], { type: typeMime || 'application/octet-stream' }));
+            var a = document.createElement('a');
+            a.href = url;
+            a.download = nomFichier;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        };
     </script>
 </body>
 

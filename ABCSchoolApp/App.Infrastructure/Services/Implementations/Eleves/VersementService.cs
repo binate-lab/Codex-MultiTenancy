@@ -55,5 +55,26 @@ namespace App.Infrastructure.Services.Implementations.Eleves
                 return new VersementOpResult(false, $"Service indisponible : {ex.Message}");
             }
         }
+
+        public async Task<byte[]> GetRecuPdfAsync(Guid eleveId, string ecole)
+        {
+            try
+            {
+                var url = $"eleves/{eleveId}/versements/recu";
+                if (!string.IsNullOrWhiteSpace(ecole))
+                {
+                    url += $"?ecole={Uri.EscapeDataString(ecole)}";
+                }
+
+                var reponse = await _httpClient.GetAsync(url);
+                if (!reponse.IsSuccessStatusCode) return null;
+
+                return await reponse.Content.ReadAsByteArrayAsync();
+            }
+            catch
+            {
+                return null;
+            }
+        }
     }
 }

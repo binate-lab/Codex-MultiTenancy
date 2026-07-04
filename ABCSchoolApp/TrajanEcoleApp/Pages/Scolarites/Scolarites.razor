@@ -226,6 +226,11 @@
                                        Size="Size.Small" Disabled="_vEnCours" Class="svt-btn-valider"
                                        StartIcon="@Icons.Material.Filled.Check">Valider</MudButton>
                         </MudTooltip>
+                        <MudTooltip Text="Imprimer le reçu de paiement (PDF)">
+                            <MudButton OnClick="TelechargerRecuAsync" Variant="Variant.Outlined" Color="Color.Primary"
+                                       Size="Size.Small" Disabled="_recuEnCours" Class="svt-btn-valider ml-2"
+                                       StartIcon="@Icons.Material.Filled.Print">Reçu</MudButton>
+                        </MudTooltip>
                     </div>
                 </div>
 

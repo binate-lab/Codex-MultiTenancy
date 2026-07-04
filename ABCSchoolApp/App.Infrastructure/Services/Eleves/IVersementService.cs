@@ -55,5 +55,9 @@ namespace App.Infrastructure.Services.Eleves
         // Enregistre un versement (valide + impute sur l'echeancier cote backend).
         Task<VersementOpResult> CreateAsync(Guid eleveId, decimal montant, DateTime? date,
             string nature, string moyenPaiement, string referenceOperation);
+
+        // Recu de paiement PDF (situation du compte : versements + synthese + echeancier).
+        // ecole = nom d'affichage de l'etablissement pour l'en-tete. null si indisponible.
+        Task<byte[]> GetRecuPdfAsync(Guid eleveId, string ecole);
     }
 }
