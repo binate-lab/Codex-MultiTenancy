@@ -194,14 +194,29 @@
 
 /* Bloc synthÃ¨se (Total Frais / PayÃ© / Reste) â€” calque des cadres de gauche Access */
 .svt-resume {
-    min-width: 210px;
+    flex: 0 0 230px;
     background: #e8eef2;
     border: 1px solid #9fb0bb;
-    padding: 8px 10px;
+    padding: 14px 16px;
     display: flex;
     flex-direction: column;
-    gap: 6px;
+    gap: 14px;
     justify-content: center;
+    font-size: 0.85rem;
+}
+
+/* Rangee du bas : Detail des versements aligne sous la zone bleue, meme largeur */
+.svt-zone-bas {
+    margin-top: 8px;
+}
+
+.svt-resume-spacer {
+    flex: 0 0 230px;
+}
+
+.svt-detail-col {
+    flex: 1 1 60%;
+    min-width: 0;
 }
 
 .svt-resume-ligne {
@@ -221,23 +236,36 @@
 
 /* Sous-form bleu ciel de saisie (calque Access) */
 .svt-saisie {
-    flex: 1;
+    flex: 1 1 60%;
     background: #bfddf0; /* bleu ciel Access */
     border: 1px solid #7fa8c8;
-    padding: 16px 14px;
-    min-height: 130px;
+    padding: 18px 14px;
+    min-height: 170px; /* +0,5 cm */
     display: flex;
     flex-direction: column;
-    justify-content: space-between;
+    justify-content: center;
 }
 
-.svt-saisie-haut {
-    display: flex;
-    align-items: center;
-    margin-bottom: 6px;
+/* Emplacement reserve a droite de la zone bleue (future grille echeancier eleve) */
+.svt-echeancier-slot {
+    flex: 0 0 26%;
+    min-width: 240px;
 }
 
-/* Conteneur MONTANT + Nouveau : envoye a droite (meme bord droit que VALIDER),
+/* Ecritures des champs de saisie (Inscription, Espece...) : plus petites que le
+   22px global de .acc-window (index.html), et listes deroulantes moins hautes */
+.svt-saisie ::deep .mud-input-slot,
+.svt-saisie ::deep .mud-select-input,
+.svt-saisie ::deep input {
+    font-size: 14px !important;
+    min-height: 30px !important;
+}
+
+.svt-saisie ::deep .mud-input-control {
+    margin-top: 0 !important;
+}
+
+/* Conteneur MONTANT + Nouveau : envoye a droite, au meme niveau que Ref. operation,
    bordure invisible */
 .svt-montant-box {
     display: flex;
@@ -260,16 +288,31 @@
     width: 150px;
 }
 
-.svt-saisie-haut ::deep .mud-input-control {
+.svt-montant-box ::deep .mud-input-control {
     width: 150px !important;
     flex: 0 0 auto !important;
 }
 
-.svt-montant ::deep input {
-    font-size: 26px !important;
-    font-weight: 700;
+/* MONTANT : gros, gras, ecriture rouge sur fond blanc, separateur de milliers
+   (Format="#,0" + culture fr cote composant). Cible via le div parent
+   svt-ligne-montant : le CSS isole ne pose pas son scope sur les composants MudBlazor. */
+.svt-ligne-montant ::deep .svt-montant input {
+    font-size: 30px !important;
+    font-weight: 700 !important;
+    color: #b02525 !important;
     text-align: right;
-    background: #e8eef2;
+    background: #ffffff !important;
+}
+
+.svt-ligne-montant ::deep .svt-montant .mud-input-slot,
+.svt-ligne-montant ::deep .svt-montant .mud-input {
+    background: #ffffff !important;
+    min-height: 42px !important;
+}
+
+/* Le champ montant est plus large que les autres controles de la ligne */
+.svt-ligne-montant ::deep .svt-montant {
+    width: 200px !important;
 }
 
 .svt-btn-nouveau {
@@ -309,8 +352,63 @@
     margin-bottom: 2px;
 }
 
-.svt-saisie-champs > :last-child {
-    margin-left: auto;
+/* VALIDER : en bas, au milieu du panneau */
+.svt-valider-box {
+    align-self: center;
+    margin-top: 8px;
+}
+
+/* Disposition Access : 2 colonnes (Date/Ref a gauche ; MONTANT puis Nature/Mode a droite) */
+.svt-cols {
+    display: flex;
+    gap: 28px;
+    align-items: flex-start;
+}
+
+.svt-col-gauche {
+    flex: 0 0 300px;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+}
+
+.svt-col-droite {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    align-items: flex-end;
+}
+
+/* Ligne libelle + controle (libelle a gauche, comme dans Access) */
+.svt-ligne {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+}
+
+.svt-ligne > label {
+    min-width: 120px;
+    text-align: right;
+    font-size: 0.75rem;
+    color: #5a748a;
+}
+
+.svt-ligne ::deep .mud-input-control {
+    width: 160px !important;
+    flex: 0 0 auto;
+}
+
+/* Listes deroulantes (Nature, Mode) : hauteur reduite */
+.svt-ligne ::deep .mud-input-slot,
+.svt-ligne ::deep .mud-select-input {
+    min-height: 24px !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+}
+
+.svt-ligne-montant ::deep .mud-input-control {
+    width: 150px !important;
 }
 
 /* Grille DÃ©tail des versements */

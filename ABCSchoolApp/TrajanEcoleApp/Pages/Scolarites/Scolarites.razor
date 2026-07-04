@@ -174,49 +174,53 @@
                     }
                 </div>
 
-                @* --- Sous-form bleu ciel : saisie d'un versement --- *@
+                @* --- Sous-form bleu ciel : saisie d'un versement, rangee comme dans
+                       Access : Date + Ref. operation a gauche ; MONTANT/Nouveau puis
+                       Nature et Mode (libelles a gauche des listes) a droite ;
+                       Valider en bas a droite. --- *@
                 <div class="svt-saisie">
-                    <div class="svt-saisie-haut">
-                        @* Conteneur MONTANT + Nouveau, pousse a droite (bordure invisible). *@
-                        <div class="svt-montant-box">
-                            <label class="svt-montant-label">MONTANT :</label>
-                            <MudNumericField T="decimal" @bind-Value="_vMontant" HideSpinButtons="true" Min="0"
-                                             Variant="Variant.Outlined" Margin="Margin.Dense" Class="svt-montant" />
-                            <MudButton OnClick="NouveauVersement" Variant="Variant.Outlined" Size="Size.Small"
-                                       Class="svt-btn-nouveau">Nouveau</MudButton>
+                    <div class="svt-cols">
+                        <div class="svt-col-droite">
+                            @* Date et MONTANT sur la meme ligne, pousses a droite. *@
+                            <div class="svt-ligne svt-ligne-montant">
+                                <label>Date :</label>
+                                <MudDatePicker @bind-Date="_vDate" Editable="true" DateFormat="dd/MM/yyyy"
+                                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-datemask" />
+                                <label class="svt-montant-label">MONTANT :</label>
+                                <MudNumericField T="decimal" @bind-Value="_vMontant" HideSpinButtons="true" Min="0"
+                                                 Format="#,0" Culture="@_fr"
+                                                 Variant="Variant.Outlined" Margin="Margin.Dense" Class="svt-montant" />
+                                <MudButton OnClick="NouveauVersement" Variant="Variant.Outlined" Size="Size.Small"
+                                           Class="svt-btn-nouveau">Nouveau</MudButton>
+                            </div>
+                            <div class="svt-ligne">
+                                <label>Nature du versement :</label>
+                                <MudSelect T="string" @bind-Value="_vNature" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                    <MudSelectItem Value="@("Inscription")">Inscription</MudSelectItem>
+                                    <MudSelectItem Value="@("Scolarite")">Scolarité</MudSelectItem>
+                                    <MudSelectItem Value="@("Transport")">Transport</MudSelectItem>
+                                    <MudSelectItem Value="@("Arriere")">Arriéré</MudSelectItem>
+                                    <MudSelectItem Value="@("Cantine")">Cantine</MudSelectItem>
+                                    <MudSelectItem Value="@("Autre")">Autre</MudSelectItem>
+                                </MudSelect>
+                            </div>
+                            <div class="svt-ligne">
+                                <label>Mode de paiement :</label>
+                                <MudSelect T="string" @bind-Value="_vMode" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                    <MudSelectItem Value="@("Espèce")">Espèce</MudSelectItem>
+                                    <MudSelectItem Value="@("Chèque")">Chèque</MudSelectItem>
+                                    <MudSelectItem Value="@("Virement")">Virement</MudSelectItem>
+                                    <MudSelectItem Value="@("Mobile Money")">Mobile Money</MudSelectItem>
+                                </MudSelect>
+                            </div>
+                            <div class="svt-ligne">
+                                <label>Réf. opération :</label>
+                                <MudTextField T="string" @bind-Value="_vRef" Variant="Variant.Outlined"
+                                              Margin="Margin.Dense" Class="acc-yellow" />
+                            </div>
                         </div>
                     </div>
-                    <div class="svt-saisie-champs">
-                        <div class="svt-champ">
-                            <label>Date :</label>
-                            <MudDatePicker @bind-Date="_vDate" Editable="true" DateFormat="dd/MM/yyyy"
-                                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-datemask" />
-                        </div>
-                        <div class="svt-champ">
-                            <label>Nature du versement :</label>
-                            <MudSelect T="string" @bind-Value="_vNature" Variant="Variant.Outlined" Margin="Margin.Dense">
-                                <MudSelectItem Value="@("Inscription")">Inscription</MudSelectItem>
-                                <MudSelectItem Value="@("Scolarite")">Scolarité</MudSelectItem>
-                                <MudSelectItem Value="@("Transport")">Transport</MudSelectItem>
-                                <MudSelectItem Value="@("Arriere")">Arriéré</MudSelectItem>
-                                <MudSelectItem Value="@("Cantine")">Cantine</MudSelectItem>
-                                <MudSelectItem Value="@("Autre")">Autre</MudSelectItem>
-                            </MudSelect>
-                        </div>
-                        <div class="svt-champ">
-                            <label>Mode de paiement :</label>
-                            <MudSelect T="string" @bind-Value="_vMode" Variant="Variant.Outlined" Margin="Margin.Dense">
-                                <MudSelectItem Value="@("Espèce")">Espèce</MudSelectItem>
-                                <MudSelectItem Value="@("Chèque")">Chèque</MudSelectItem>
-                                <MudSelectItem Value="@("Virement")">Virement</MudSelectItem>
-                                <MudSelectItem Value="@("Mobile Money")">Mobile Money</MudSelectItem>
-                            </MudSelect>
-                        </div>
-                        <div class="svt-champ svt-champ-ref">
-                            <label>Réf. opération :</label>
-                            <MudTextField T="string" @bind-Value="_vRef" Variant="Variant.Outlined"
-                                          Margin="Margin.Dense" Class="acc-yellow" />
-                        </div>
+                    <div class="svt-valider-box">
                         <MudTooltip Text="Valider le versement">
                             <MudButton OnClick="ValiderVersementAsync" Variant="Variant.Filled" Color="Color.Primary"
                                        Size="Size.Small" Disabled="_vEnCours" Class="svt-btn-valider"
@@ -224,11 +228,19 @@
                         </MudTooltip>
                     </div>
                 </div>
+
+                @* Emplacement reserve a droite de la zone bleue (future grille :
+                   echeancier de l'eleve). *@
+                <div class="svt-echeancier-slot"></div>
             </div>
 
-            @* --- Détail des versements --- *@
-            <div class="svt-detail-titre">Détail des versements</div>
-            <div class="svt-detail acc-grid">
+            @* --- Détail des versements : meme largeur et meme position que la zone bleue
+                   (colonne vide a gauche = gabarit du bloc synthese, slot vide a droite). --- *@
+            <div class="svt-zone svt-zone-bas">
+                <div class="svt-resume-spacer"></div>
+                <div class="svt-detail-col">
+                    <div class="svt-detail-titre">Détail des versements</div>
+                    <div class="svt-detail acc-grid">
                 <MudTable Items="_versements" Dense="true" Hover="true" Bordered="true">
                     <HeaderContent>
                         <MudTh Style="text-align:right; width:110px;">MONTANT</MudTh>
@@ -250,6 +262,9 @@
                         <MudText Class="pa-2">Aucun versement pour cet élève.</MudText>
                     </NoRecordsContent>
                 </MudTable>
+                    </div>
+                </div>
+                <div class="svt-echeancier-slot"></div>
             </div>
         }
     </div>
