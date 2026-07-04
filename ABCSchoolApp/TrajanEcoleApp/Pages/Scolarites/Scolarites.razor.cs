@@ -2,6 +2,7 @@ using System.Globalization;
 using App.Infrastructure.Services.Eleves;
 using App.Infrastructure.Services.Structures;
 using Microsoft.AspNetCore.Components;
+using MudBlazor;
 
 namespace TrajanEcoleApp.Pages.Scolarites
 {
@@ -9,6 +10,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
     {
         [Inject] private IScolariteEleveService _scolariteEleveService { get; set; } = default!;
         [Inject] private IStructureService _structureService { get; set; } = default!;
+        [Inject] private IVersementService _versementService { get; set; } = default!;
 
         // Année scolaire en cours (bandeau) — même source que SchoolNavMenu.
         private string _annee = "—";
@@ -61,6 +63,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
             {
                 var eleves = await _scolariteEleveService.GetElevesAsync(codeEts);
                 _all = eleves.Select(e => new EleveScolariteRow(
+                    e.Id,
                     e.Matricule,
                     e.Telephone,
                     e.Nom,
@@ -127,6 +130,101 @@ namespace TrajanEcoleApp.Pages.Scolarites
             row.Classe = nouveau;
         }
 
+        // ================== Versements de l'élève sélectionné ==================
+
+        // Élève sélectionné (clic sur une ligne de la grille rouge) + son état versements.
+        private EleveScolariteRow _sel;
+        private ScolariteResume _resume;
+        private List<VersementDetailItem> _versements = new();
+
+        // Champs de saisie du sous-form bleu ciel.
+        private decimal _vMontant;
+        private DateTime? _vDate = DateTime.Today;
+        private string _vNature = "Inscription";
+        private string _vMode = "Espèce";
+        private string _vRef = string.Empty;
+        private bool _vEnCours;
+
+        private async Task OnRowClick(TableRowClickEventArgs<EleveScolariteRow> args)
+        {
+            _sel = args.Item;
+            NouveauVersement();
+            await ChargerVersementsAsync();
+        }
+
+        // Surligne la ligne sélectionnée dans la grille rouge.
+        private string ClasseLigne(EleveScolariteRow row, int _)
+            => row == _sel ? "svt-ligne-sel" : string.Empty;
+
+        private async Task ChargerVersementsAsync()
+        {
+            var data = await _versementService.GetVersementsAsync(_sel.Id);
+            AppliquerReponse(data);
+        }
+
+        private void AppliquerReponse(VersementsEleveReponse data)
+        {
+            _resume = data?.Resume;
+            _versements = data?.Versements ?? new List<VersementDetailItem>();
+
+            // Rafraîchit la colonne « Net à payer » de la ligne (reste à payer à jour).
+            if (_resume is not null && _sel is not null)
+            {
+                _sel.NetAPayer = _resume.Reste;
+                _sel.Inscription = _resume.FraisScolarite;
+            }
+        }
+
+        // « Nouveau » : réinitialise la saisie (date du jour, Espèce, nature Inscription).
+        private void NouveauVersement()
+        {
+            _vMontant = 0;
+            _vDate = DateTime.Today;
+            _vNature = "Inscription";
+            _vMode = "Espèce";
+            _vRef = string.Empty;
+        }
+
+        private async Task ValiderVersementAsync()
+        {
+            if (_sel is null) return;
+            if (_vMontant <= 0)
+            {
+                _snackbar.Add("Saisis d'abord le montant du versement.", Severity.Warning);
+                return;
+            }
+
+            _vEnCours = true;
+            try
+            {
+                var result = await _versementService.CreateAsync(
+                    _sel.Id, _vMontant, _vDate, _vNature, _vMode, _vRef);
+
+                if (result.IsSuccessful)
+                {
+                    _snackbar.Add($"Versement de {Fmt(_vMontant)} enregistré pour {_sel.Nom} {_sel.Prenoms}.", Severity.Success);
+                    AppliquerReponse(result.Data);
+                    NouveauVersement();
+                }
+                else
+                {
+                    _snackbar.Add(result.Error, Severity.Error);
+                }
+            }
+            finally
+            {
+                _vEnCours = false;
+            }
+        }
+
+        // Libellé d'affichage des natures (les valeurs sont les noms de l'enum backend).
+        private static string AfficherNature(string nature) => nature switch
+        {
+            "Scolarite" => "Scolarité",
+            "Arriere" => "Arriéré",
+            _ => nature,
+        };
+
         // Comparaison de matricule insensible aux espaces (« 24 179 400 X » ~ « 24179400X »).
         private static string Compact(string s) => s.Replace(" ", string.Empty);
 
@@ -136,6 +234,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         // Statut et Niveau sont modifiables directement dans la grille → propriétés set.
         public sealed class EleveScolariteRow
         {
+            public Guid Id { get; }
             public string Matricule { get; }
             public string TelCorrespondant { get; }
             public string Nom { get; }
@@ -144,14 +243,15 @@ namespace TrajanEcoleApp.Pages.Scolarites
             public string Statut { get; set; }
             public string Niveau { get; set; }
             public string Classe { get; set; }
-            public decimal NetAPayer { get; }
-            public decimal Inscription { get; }
+            public decimal NetAPayer { get; set; }   // rafraîchi après chaque versement (reste à payer)
+            public decimal Inscription { get; set; } // frais de l'année (échéancier généré)
 
             public EleveScolariteRow(
-                string matricule, string telCorrespondant, string nom, string prenoms,
+                Guid id, string matricule, string telCorrespondant, string nom, string prenoms,
                 bool inscrit, string statut, string niveau, string classe,
                 decimal netAPayer, decimal inscription)
             {
+                Id = id;
                 Matricule = matricule;
                 TelCorrespondant = telCorrespondant;
                 Nom = nom;

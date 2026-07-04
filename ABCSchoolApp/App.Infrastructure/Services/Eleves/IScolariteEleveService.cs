@@ -10,7 +10,9 @@ namespace App.Infrastructure.Services.Eleves
     }
 
     // Projection plate calquee sur EleveListeItem (Scolarite.Api/Eleves/Liste).
+    // Id = EleveId cote Scolarite, requis pour les endpoints versements.
     public record EleveScolariteItem(
+        Guid Id,
         string Matricule,
         string Telephone,
         string Nom,

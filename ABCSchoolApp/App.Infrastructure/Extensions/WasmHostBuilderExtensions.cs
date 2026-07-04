@@ -101,6 +101,14 @@ namespace App.Infrastructure.Extensions
                 })
                 .AddHttpMessageHandler<AuthenticationHeaderHandler>();
 
+            // Client typie dedie au module Versements de Scolarite.Api (saisie + detail).
+            builder.Services
+                .AddHttpClient<IVersementService, VersementService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
             // Client typie dedie au module Economat de Scolarite.Api : bareme d'echeancier.
             builder.Services
                 .AddHttpClient<IEcheancierService, EcheancierService>(client =>

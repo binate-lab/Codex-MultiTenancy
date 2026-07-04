@@ -1,5 +1,5 @@
-/* Page "Scolarités" — reprend le calque Access (palette gris-bleu) de CreateEleve
-   pour l'enveloppe, et ajoute la barre de filtres + la grille rouge (liste élèves). */
+﻿/* Page "ScolaritÃ©s" â€” reprend le calque Access (palette gris-bleu) de CreateEleve
+   pour l'enveloppe, et ajoute la barre de filtres + la grille rouge (liste Ã©lÃ¨ves). */
 
 /* ---- Enveloppe (repris de CreateEleve, car le CSS scoped ne traverse pas les composants) ---- */
 .acc-window {
@@ -76,7 +76,7 @@
     background: #ffffff;
 }
 
-/* ---- Grille rouge (liste des élèves, façon Access) ---- */
+/* ---- Grille rouge (liste des Ã©lÃ¨ves, faÃ§on Access) ---- */
 .acc-grid ::deep .mud-table-root {
     font-size: 0.78rem;
 }
@@ -100,15 +100,15 @@
     background: #a3182f !important;
 }
 
-/* Cases à cocher "Inscrit" lisibles sur fond rouge */
+/* Cases Ã  cocher "Inscrit" lisibles sur fond rouge */
 .acc-grid ::deep td .mud-icon-root {
     color: #ffffff !important;
 }
 
-/* Sélecteurs éditables (Statut / Niveau / Classe) : texte blanc, compact, fond transparent.
+/* SÃ©lecteurs Ã©ditables (Statut / Niveau / Classe) : texte blanc, compact, fond transparent.
    IMPORTANT : MudBlazor pose font-size 1rem sur .mud-input et 0.875rem sur les cellules
-   (.mud-table-cell) — « inherit » aligne le texte des sélecteurs sur celui de la cellule,
-   ni plus gros (troncature dans les colonnes étroites), ni plus petit. */
+   (.mud-table-cell) â€” Â« inherit Â» aligne le texte des sÃ©lecteurs sur celui de la cellule,
+   ni plus gros (troncature dans les colonnes Ã©troites), ni plus petit. */
 .acc-grid ::deep td .mud-input-slot,
 .acc-grid ::deep td .mud-select-input,
 .acc-grid ::deep td .mud-input {
@@ -125,13 +125,13 @@
     width: 70px;
 }
 
-/* Pas de trait de soulignement sous les sélecteurs Statut / Niveau */
+/* Pas de trait de soulignement sous les sÃ©lecteurs Statut / Niveau */
 .acc-grid ::deep td .mud-input.mud-input-underline::before,
 .acc-grid ::deep td .mud-input.mud-input-underline::after {
     border-bottom: none !important;
 }
 
-/* Lignes compactes : on réduit le rembourrage vertical des cellules et des champs */
+/* Lignes compactes : on rÃ©duit le rembourrage vertical des cellules et des champs */
 .acc-grid ::deep td,
 .acc-grid ::deep th {
     padding-top: 1px !important;
@@ -157,4 +157,173 @@
 .acc-demo-note {
     font-style: italic;
     color: #8a5a00;
+}
+
+/* ==================== Versements de l'Ã©lÃ¨ve sÃ©lectionnÃ© ==================== */
+
+/* Ligne sÃ©lectionnÃ©e dans la grille rouge */
+::deep .svt-ligne-sel td {
+    background: #1b4f72 !important;
+    color: #ffffff !important;
+}
+
+.svt-titre {
+    display: flex;
+    align-items: center;
+    margin-top: 12px;
+    padding: 4px 10px;
+    background: #cfd9df;
+    border: 1px solid #9fb0bb;
+    border-radius: 4px 4px 0 0;
+    font-size: 0.95rem;
+    color: #7a1f1f;
+}
+
+.svt-titre-niveau {
+    margin-left: 12px;
+    color: #b02525;
+    font-weight: 700;
+}
+
+/* Zone synthÃ¨se + saisie cÃ´te Ã  cÃ´te */
+.svt-zone {
+    display: flex;
+    gap: 10px;
+    align-items: stretch;
+}
+
+/* Bloc synthÃ¨se (Total Frais / PayÃ© / Reste) â€” calque des cadres de gauche Access */
+.svt-resume {
+    min-width: 210px;
+    background: #e8eef2;
+    border: 1px solid #9fb0bb;
+    padding: 8px 10px;
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    justify-content: center;
+}
+
+.svt-resume-ligne {
+    display: flex;
+    justify-content: space-between;
+    gap: 10px;
+}
+
+.svt-resume-ligne b {
+    color: #1c2b36;
+}
+
+.svt-reste b {
+    color: #b02525;
+    font-size: 1.05rem;
+}
+
+/* Sous-form bleu ciel de saisie (calque Access) */
+.svt-saisie {
+    flex: 1;
+    background: #bfddf0; /* bleu ciel Access */
+    border: 1px solid #7fa8c8;
+    padding: 16px 14px;
+    min-height: 130px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.svt-saisie-haut {
+    display: flex;
+    align-items: center;
+    margin-bottom: 6px;
+}
+
+/* Conteneur MONTANT + Nouveau : envoye a droite (meme bord droit que VALIDER),
+   bordure invisible */
+.svt-montant-box {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-left: auto;
+    border: 1px solid transparent;
+    border-radius: 4px;
+    padding: 2px 0;
+}
+
+.svt-montant-label {
+    font-weight: 700;
+    color: #5a748a;
+    letter-spacing: 1px;
+}
+
+/* MONTANT : compact, colle au bouton Nouveau */
+.svt-montant {
+    width: 150px;
+}
+
+.svt-saisie-haut ::deep .mud-input-control {
+    width: 150px !important;
+    flex: 0 0 auto !important;
+}
+
+.svt-montant ::deep input {
+    font-size: 26px !important;
+    font-weight: 700;
+    text-align: right;
+    background: #e8eef2;
+}
+
+.svt-btn-nouveau {
+    color: #b02525 !important;
+    border-color: #b02525 !important;
+    font-style: italic;
+    font-weight: 700;
+}
+
+.svt-saisie-champs {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 12px;
+}
+
+.svt-champ {
+    display: flex;
+    flex-direction: column;
+    min-width: 150px;
+}
+
+.svt-champ label {
+    font-size: 0.72rem;
+    color: #5a748a;
+    margin-bottom: 2px;
+}
+
+.svt-champ-ref {
+    flex: 0 0 auto;
+    min-width: 120px;
+    max-width: 140px;
+}
+
+/* VALIDER : pousse au bord droit, meme axe vertical que le bloc MONTANT/Nouveau */
+.svt-btn-valider {
+    margin-bottom: 2px;
+}
+
+.svt-saisie-champs > :last-child {
+    margin-left: auto;
+}
+
+/* Grille DÃ©tail des versements */
+.svt-detail-titre {
+    margin-top: 10px;
+    padding: 3px 10px;
+    background: #cfd9df;
+    border: 1px solid #9fb0bb;
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.svt-detail {
+    margin-bottom: 4px;
 }
