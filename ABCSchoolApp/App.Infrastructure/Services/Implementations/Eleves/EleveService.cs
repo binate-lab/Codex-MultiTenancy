@@ -25,7 +25,7 @@ namespace App.Infrastructure.Services.Implementations.Eleves
                 if (response.IsSuccessStatusCode)
                 {
                     var created = await response.Content.ReadFromJsonAsync<CreateEleveResponse>();
-                    return new EleveCreationResult(true, created?.Id ?? Guid.Empty, null);
+                    return new EleveCreationResult(true, created?.Id ?? Guid.Empty, null, created?.NumOrdre ?? 0);
                 }
 
                 var error = await response.Content.ReadAsStringAsync();
@@ -38,6 +38,6 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
-        private record CreateEleveResponse(Guid Id);
+        private record CreateEleveResponse(Guid Id, int NumOrdre);
     }
 }

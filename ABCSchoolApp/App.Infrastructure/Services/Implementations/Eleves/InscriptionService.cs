@@ -16,7 +16,9 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             _apiSettings = apiSettings;
         }
 
-        public async Task<int?> GetNextMatriculeInterneAsync(string codeEts)
+        // NumOrdre a repris le role de MatriculeInterne ; l'URL backend historique
+        // (eleves/next-matricule-interne) est conservee, elle calcule max(NumOrdre)+1.
+        public async Task<int?> GetNextNumOrdreAsync(string codeEts)
         {
             try
             {

@@ -98,7 +98,7 @@ namespace TrajanEcoleApp.Pages.Eleves
 
         // #5 : CodeEts vient du JWT (claim « school », pose au clic sur la carte ecole) et
         // remplit le champ cache Eleve.CodeEts ; pre-remplit le N° Inscription = dernier
-        // MatriculeInterne de l'ecole + 1 (reste editable).
+        // NumOrdre de l'ecole + 1 (reste editable).
         private async Task AppliquerContexteEcoleAsync()
         {
             var authState = await _authProvider.GetAuthenticationStateAsync();
@@ -107,7 +107,7 @@ namespace TrajanEcoleApp.Pages.Eleves
 
             if (!string.IsNullOrWhiteSpace(codeEts))
             {
-                Eleve.MatriculeInterne = await _inscriptionService.GetNextMatriculeInterneAsync(codeEts);
+                Eleve.NumOrdre = await _inscriptionService.GetNextNumOrdreAsync(codeEts);
             }
         }
 
@@ -132,9 +132,9 @@ namespace TrajanEcoleApp.Pages.Eleves
                 // N° Inscription : si le pré-remplissage a échoué à l'ouverture (Scolarite.Api
                 // indisponible), on retente ici pour que le numéro envoyé — et affiché après
                 // enregistrement — soit toujours celui de l'élève saisi (repris ensuite dans /scolarites).
-                if (Eleve.MatriculeInterne is null && !string.IsNullOrWhiteSpace(Eleve.CodeEts))
+                if (Eleve.NumOrdre is null && !string.IsNullOrWhiteSpace(Eleve.CodeEts))
                 {
-                    Eleve.MatriculeInterne = await _inscriptionService.GetNextMatriculeInterneAsync(Eleve.CodeEts);
+                    Eleve.NumOrdre = await _inscriptionService.GetNextNumOrdreAsync(Eleve.CodeEts);
                 }
 
                 var result = await _eleveService.CreateAsync(new CreateEleveRequest { EleveDto = Eleve });
@@ -146,9 +146,14 @@ namespace TrajanEcoleApp.Pages.Eleves
                 if (result.IsSuccessful)
                 {
                     // #3 : on NE vide PAS les controles apres enregistrement ; seul le
-                    // bouton « Nouveau » reinitialise le formulaire. Le N° Inscription reste
-                    // donc affiche : c'est celui de l'eleve qu'on vient d'enregistrer.
-                    _snackbar.Add($"Élève enregistré — N° Inscription : {Eleve.MatriculeInterne}.", Severity.Success);
+                    // bouton « Nouveau » reinitialise le formulaire. Le N° Inscription affiche
+                    // est le DEFINITIF attribue par Pedagogie (unique par ecole) : il peut
+                    // differer du pre-rempli en cas de saisies simultanees.
+                    if (result.NumOrdre > 0)
+                    {
+                        Eleve.NumOrdre = result.NumOrdre;
+                    }
+                    _snackbar.Add($"Élève enregistré — N° Inscription : {Eleve.NumOrdre}.", Severity.Success);
                 }
                 else
                 {

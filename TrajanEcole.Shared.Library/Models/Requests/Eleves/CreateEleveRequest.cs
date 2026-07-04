@@ -13,7 +13,8 @@ namespace TrajanEcole.Shared.Library.Models.Requests.Eleves
     public class EleveRequestDto
     {
         public string NumeroMatricule { get; set; } = string.Empty;
-        public int? MatriculeInterne { get; set; } // #5 : N° Inscription (entier, auto par ecole)
+        public int? MatriculeInterne { get; set; } // ancien compteur N° Inscription (conserve pour compat)
+        public int? NumOrdre { get; set; }         // N° d'ordre = N° Inscription auto par ecole (remplace MatriculeInterne)
         public string Nom { get; set; } = string.Empty;
         public string Prenom { get; set; } = string.Empty;
         public int Cycle { get; set; }
