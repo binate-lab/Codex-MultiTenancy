@@ -229,9 +229,37 @@
                     </div>
                 </div>
 
-                @* Emplacement reserve a droite de la zone bleue (future grille :
-                   echeancier de l'eleve). *@
-                <div class="svt-echeancier-slot"></div>
+                @* Echeancier individuel de l'eleve (Inscription puis Septembre -> Mai),
+                   statut Paye / Partiel / NonPaye par ligne, comme la grille de droite
+                   du form Access. *@
+                <div class="svt-echeancier-slot">
+                    <div class="svt-ech-titre">Échéancier</div>
+                    <div class="svt-ech-grid">
+                        @if (_echeancier.Count == 0)
+                        {
+                            <div class="svt-ech-vide">Aucun échéancier pour cet élève.</div>
+                        }
+                        else
+                        {
+                            <table class="svt-ech-table">
+                                <thead>
+                                    <tr><th>Échéance</th><th>Montant</th><th>Payé</th><th>Statut</th></tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var e in _echeancier)
+                                    {
+                                        <tr class="@(e.EnRetard ? "svt-ech-retard" : "")">
+                                            <td>@e.Libelle</td>
+                                            <td class="svt-ech-num">@Fmt(e.Montant)</td>
+                                            <td class="svt-ech-num">@Fmt(e.MontantPaye)</td>
+                                            <td><span class="svt-ech-statut @ClasseStatut(e.Statut)">@AfficherStatut(e.Statut)</span></td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
             </div>
 
             @* --- Détail des versements : meme largeur et meme position que la zone bleue

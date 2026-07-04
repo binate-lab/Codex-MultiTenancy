@@ -246,10 +246,92 @@
     justify-content: center;
 }
 
-/* Emplacement reserve a droite de la zone bleue (future grille echeancier eleve) */
+/* Grille echeancier de l'eleve, a droite de la zone bleue (calque Access) */
 .svt-echeancier-slot {
     flex: 0 0 26%;
     min-width: 240px;
+}
+
+.svt-ech-titre {
+    padding: 3px 10px;
+    background: #cfd9df;
+    border: 1px solid #9fb0bb;
+    border-bottom: none;
+    font-weight: 700;
+    font-size: 0.85rem;
+}
+
+.svt-ech-grid {
+    border: 1px solid #9fb0bb;
+    background: #ffffff;
+    max-height: 220px;
+    overflow-y: auto;
+}
+
+.svt-ech-vide {
+    padding: 10px;
+    font-style: italic;
+    color: #5a748a;
+}
+
+/* Table HTML pure : le CSS isole s'applique directement (pas de composant MudBlazor) */
+.svt-ech-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 0.74rem;
+}
+
+.svt-ech-table th {
+    position: sticky;
+    top: 0;
+    background: #5f6b73;
+    color: #ffffff;
+    font-weight: 700;
+    text-align: left;
+    padding: 2px 6px;
+    white-space: nowrap;
+}
+
+.svt-ech-table td {
+    padding: 2px 6px;
+    border-bottom: 1px solid #dce4e9;
+    white-space: nowrap;
+}
+
+.svt-ech-num {
+    text-align: right;
+    font-weight: 600;
+}
+
+/* Echeance en retard : libelle et montants en rouge */
+.svt-ech-retard td {
+    color: #b02525;
+}
+
+/* Pastille de statut Paye / Partiel / Non paye */
+.svt-ech-statut {
+    display: inline-block;
+    min-width: 62px;
+    text-align: center;
+    border-radius: 8px;
+    padding: 0 6px;
+    font-weight: 700;
+    font-size: 0.68rem;
+}
+
+.svt-ech-paye {
+    background: #d9efd9;
+    color: #1e7d32;
+}
+
+.svt-ech-partiel {
+    background: #ffe9c7;
+    color: #9a6200;
+}
+
+.svt-ech-nonpaye {
+    background: #f6d7db;
+    color: #b02525;
 }
 
 /* Ecritures des champs de saisie (Inscription, Espece...) : plus petites que le

@@ -136,6 +136,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private EleveScolariteRow _sel;
         private ScolariteResume _resume;
         private List<VersementDetailItem> _versements = new();
+        private List<EcheanceEleveItem> _echeancier = new();
 
         // Champs de saisie du sous-form bleu ciel.
         private decimal _vMontant;
@@ -166,6 +167,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         {
             _resume = data?.Resume;
             _versements = data?.Versements ?? new List<VersementDetailItem>();
+            _echeancier = data?.Echeancier ?? new List<EcheanceEleveItem>();
 
             // Rafraîchit la colonne « Net à payer » de la ligne (reste à payer à jour).
             if (_resume is not null && _sel is not null)
@@ -223,6 +225,22 @@ namespace TrajanEcoleApp.Pages.Scolarites
             "Scolarite" => "Scolarité",
             "Arriere" => "Arriéré",
             _ => nature,
+        };
+
+        // Libellé et couleur du statut d'une échéance (valeurs = noms de l'enum backend).
+        private static string AfficherStatut(string statut) => statut switch
+        {
+            "Paye" => "Payé",
+            "Partiel" => "Partiel",
+            "NonPaye" => "Non payé",
+            _ => statut,
+        };
+
+        private static string ClasseStatut(string statut) => statut switch
+        {
+            "Paye" => "svt-ech-paye",
+            "Partiel" => "svt-ech-partiel",
+            _ => "svt-ech-nonpaye",
         };
 
         // Comparaison de matricule insensible aux espaces (« 24 179 400 X » ~ « 24179400X »).

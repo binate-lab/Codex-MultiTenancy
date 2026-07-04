@@ -23,10 +23,24 @@ namespace App.Infrastructure.Services.Eleves
         public decimal Credit { get; set; }
     }
 
+    // Ligne de l'echeancier individuel (Inscription puis Septembre -> Mai),
+    // avec statut Paye / Partiel / NonPaye calcule cote backend.
+    public class EcheanceEleveItem
+    {
+        public string Libelle { get; set; } = string.Empty;
+        public decimal Montant { get; set; }
+        public decimal MontantPaye { get; set; }
+        public decimal Reste { get; set; }
+        public string Statut { get; set; } = string.Empty;
+        public DateTime DateEcheance { get; set; }
+        public bool EnRetard { get; set; }
+    }
+
     public class VersementsEleveReponse
     {
         public ScolariteResume Resume { get; set; } = new();
         public List<VersementDetailItem> Versements { get; set; } = new();
+        public List<EcheanceEleveItem> Echeancier { get; set; } = new();
     }
 
     // Resultat d'ecriture : Error porte le message metier du backend ; Data = etat
