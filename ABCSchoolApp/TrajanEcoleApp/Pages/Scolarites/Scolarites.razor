@@ -85,6 +85,7 @@
                 <MudTh Style="width:104px">Tél. Correspondant</MudTh>
                 <MudTh>Nom</MudTh>
                 <MudTh>Prénoms</MudTh>
+                <MudTh Style="width:52px; text-align:center">Actif</MudTh>
                 <MudTh Style="width:52px; text-align:center">Inscrit</MudTh>
                 <MudTh Style="width:70px">Statut</MudTh>
                 <MudTh Style="width:74px">Niveau</MudTh>
@@ -97,6 +98,10 @@
                 <MudTd DataLabel="Tél. Correspondant">@context.TelCorrespondant</MudTd>
                 <MudTd DataLabel="Nom" Class="acc-cell-nom">@context.Nom</MudTd>
                 <MudTd DataLabel="Prénoms" Class="acc-cell-prenom">@context.Prenoms</MudTd>
+                <MudTd DataLabel="Actif" Style="text-align:center">
+                    <MudIcon Size="Size.Small"
+                             Icon="@(context.Actif ? Icons.Material.Filled.CheckBox : Icons.Material.Filled.CheckBoxOutlineBlank)" />
+                </MudTd>
                 <MudTd DataLabel="Inscrit" Style="text-align:center">
                     <MudIcon Size="Size.Small"
                              Icon="@(context.Inscrit ? Icons.Material.Filled.CheckBox : Icons.Material.Filled.CheckBoxOutlineBlank)" />
@@ -281,7 +286,7 @@
                         <MudTh Style="width:110px;">Date</MudTh>
                         <MudTh Style="width:120px;">Mode de paiement</MudTh>
                         <MudTh Style="width:130px;">Nature du versement</MudTh>
-                        <MudTh Style="width:90px;">Statut</MudTh>
+                        <MudTh Style="width:90px;">Statut élève</MudTh>
                         <MudTh>Ref Opération</MudTh>
                     </HeaderContent>
                     <RowTemplate>
@@ -289,7 +294,9 @@
                         <MudTd>@context.DateVersement.ToString("dd/MM/yyyy")</MudTd>
                         <MudTd>@context.MoyenPaiement</MudTd>
                         <MudTd>@AfficherNature(context.Nature)</MudTd>
-                        <MudTd>@context.Statut</MudTd>
+                        @* Statut de l'ELEVE (Aff/Naff) — sert au futur point global « Total
+                           payé par statut élève », pas le statut technique du versement. *@
+                        <MudTd>@_sel?.Statut</MudTd>
                         <MudTd>@(context.ReferencePaiement == "-" ? "" : context.ReferencePaiement)</MudTd>
                     </RowTemplate>
                     <NoRecordsContent>

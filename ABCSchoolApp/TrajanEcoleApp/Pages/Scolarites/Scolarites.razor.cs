@@ -87,6 +87,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
                     e.Telephone,
                     e.Nom,
                     e.Prenom,
+                    e.Actif,
                     e.Inscrit,
                     e.Statut,
                     e.Niveau,
@@ -188,11 +189,17 @@ namespace TrajanEcoleApp.Pages.Scolarites
             _versements = data?.Versements ?? new List<VersementDetailItem>();
             _echeancier = data?.Echeancier ?? new List<EcheanceEleveItem>();
 
-            // Rafraîchit la colonne « Net à payer » de la ligne (reste à payer à jour).
+            // Rafraîchit la colonne « Net à payer » de la ligne (reste à payer à jour)
+            // et les cases Actif / Inscrit (cochées quand un versement d'inscription passe).
             if (_resume is not null && _sel is not null)
             {
                 _sel.NetAPayer = _resume.Reste;
                 _sel.Inscription = _resume.FraisScolarite;
+            }
+            if (data is not null && _sel is not null)
+            {
+                _sel.Actif = data.Actif;
+                _sel.Inscrit = data.Inscrit;
             }
         }
 
@@ -312,7 +319,8 @@ namespace TrajanEcoleApp.Pages.Scolarites
             public string TelCorrespondant { get; }
             public string Nom { get; }
             public string Prenoms { get; }
-            public bool Inscrit { get; set; }
+            public bool Actif { get; set; }           // IsActif — coché quand l'inscription est entamée
+            public bool Inscrit { get; set; }         // IsInscrit — idem
             public string Statut { get; set; }
             public string Niveau { get; set; }
             public string Classe { get; set; }
@@ -321,7 +329,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
 
             public EleveScolariteRow(
                 Guid id, string matricule, string telCorrespondant, string nom, string prenoms,
-                bool inscrit, string statut, string niveau, string classe,
+                bool actif, bool inscrit, string statut, string niveau, string classe,
                 decimal netAPayer, decimal inscription)
             {
                 Id = id;
@@ -329,6 +337,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
                 TelCorrespondant = telCorrespondant;
                 Nom = nom;
                 Prenoms = prenoms;
+                Actif = actif;
                 Inscrit = inscrit;
                 Statut = statut;
                 Niveau = niveau;

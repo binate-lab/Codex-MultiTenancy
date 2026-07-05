@@ -41,6 +41,11 @@ namespace App.Infrastructure.Services.Eleves
         public ScolariteResume Resume { get; set; } = new();
         public List<VersementDetailItem> Versements { get; set; } = new();
         public List<EcheanceEleveItem> Echeancier { get; set; } = new();
+
+        // Statut inscription de l'eleve (rafraichit les cases Actif/Inscrit de la grille
+        // apres un versement d'inscription).
+        public bool Actif { get; set; }
+        public bool Inscrit { get; set; }
     }
 
     // Resultat d'ecriture : Error porte le message metier du backend ; Data = etat

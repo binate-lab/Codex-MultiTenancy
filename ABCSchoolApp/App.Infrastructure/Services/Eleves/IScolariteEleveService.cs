@@ -17,6 +17,7 @@ namespace App.Infrastructure.Services.Eleves
         string Telephone,
         string Nom,
         string Prenom,
+        bool Actif,
         bool Inscrit,
         string Statut,
         string Niveau,
