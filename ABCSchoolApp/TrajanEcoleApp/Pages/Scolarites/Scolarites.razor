@@ -195,7 +195,7 @@
                             </div>
                             <div class="svt-ligne">
                                 <label>Nature du versement :</label>
-                                <MudSelect T="string" @bind-Value="_vNature" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                <MudSelect T="string" @bind-Value="_vNature" Variant="Variant.Outlined" Margin="Margin.Dense" Class="svt-nav-nature">
                                     <MudSelectItem Value="@("Inscription")">Inscription</MudSelectItem>
                                     <MudSelectItem Value="@("Scolarite")">Scolarité</MudSelectItem>
                                     <MudSelectItem Value="@("Transport")">Transport</MudSelectItem>
@@ -206,7 +206,7 @@
                             </div>
                             <div class="svt-ligne">
                                 <label>Mode de paiement :</label>
-                                <MudSelect T="string" @bind-Value="_vMode" Variant="Variant.Outlined" Margin="Margin.Dense">
+                                <MudSelect T="string" @bind-Value="_vMode" Variant="Variant.Outlined" Margin="Margin.Dense" Class="svt-nav-mode">
                                     <MudSelectItem Value="@("Espèce")">Espèce</MudSelectItem>
                                     <MudSelectItem Value="@("Chèque")">Chèque</MudSelectItem>
                                     <MudSelectItem Value="@("Virement")">Virement</MudSelectItem>
@@ -216,7 +216,7 @@
                             <div class="svt-ligne">
                                 <label>Réf. opération :</label>
                                 <MudTextField T="string" @bind-Value="_vRef" Variant="Variant.Outlined"
-                                              Margin="Margin.Dense" Class="acc-yellow" />
+                                              Margin="Margin.Dense" Class="acc-yellow svt-nav-ref" />
                             </div>
                         </div>
                     </div>
@@ -228,7 +228,7 @@
                         </MudTooltip>
                         <MudTooltip Text="Imprimer le reçu de paiement (PDF)">
                             <MudButton OnClick="TelechargerRecuAsync" Variant="Variant.Outlined" Color="Color.Primary"
-                                       Size="Size.Small" Disabled="_recuEnCours" Class="svt-btn-valider ml-2"
+                                       Size="Size.Small" Disabled="_recuEnCours" Class="svt-btn-recu ml-2"
                                        StartIcon="@Icons.Material.Filled.Print">Reçu</MudButton>
                         </MudTooltip>
                     </div>
@@ -248,7 +248,7 @@
                         {
                             <table class="svt-ech-table">
                                 <thead>
-                                    <tr><th>Échéance</th><th>Montant</th><th>Payé</th><th>Statut</th></tr>
+                                    <tr><th>Échéance</th><th>Montant</th><th>Payé</th><th>Statut</th><th>Reste</th></tr>
                                 </thead>
                                 <tbody>
                                     @foreach (var e in _echeancier)
@@ -258,6 +258,7 @@
                                             <td class="svt-ech-num">@Fmt(e.Montant)</td>
                                             <td class="svt-ech-num">@Fmt(e.MontantPaye)</td>
                                             <td><span class="svt-ech-statut @ClasseStatut(e.Statut)">@AfficherStatut(e.Statut)</span></td>
+                                            <td class="svt-ech-num">@Fmt(e.Reste)</td>
                                         </tr>
                                     }
                                 </tbody>

@@ -248,8 +248,8 @@
 
 /* Grille echeancier de l'eleve, a droite de la zone bleue (calque Access) */
 .svt-echeancier-slot {
-    flex: 0 0 26%;
-    min-width: 240px;
+    flex: 0 0 32%;
+    min-width: 300px;
 }
 
 .svt-ech-titre {
@@ -274,11 +274,12 @@
     color: #5a748a;
 }
 
-/* Table HTML pure : le CSS isole s'applique directement (pas de composant MudBlazor) */
+/* Table HTML pure : le CSS isole s'applique directement (pas de composant MudBlazor).
+   Police et marges resserrees pour loger 5 colonnes (Echeance/Montant/Paye/Statut/Reste). */
 .svt-ech-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.74rem;
+    font-size: 0.68rem;
 }
 
 .svt-ech-table th {
@@ -288,12 +289,12 @@
     color: #ffffff;
     font-weight: 700;
     text-align: left;
-    padding: 2px 6px;
+    padding: 2px 4px;
     white-space: nowrap;
 }
 
 .svt-ech-table td {
-    padding: 2px 6px;
+    padding: 2px 4px;
     border-bottom: 1px solid #dce4e9;
     white-space: nowrap;
 }
@@ -308,15 +309,15 @@
     color: #b02525;
 }
 
-/* Pastille de statut Paye / Partiel / Non paye */
+/* Pastille de statut Paye / Partiel / Non paye (compacte pour degager de la place) */
 .svt-ech-statut {
     display: inline-block;
-    min-width: 62px;
+    min-width: 46px;
     text-align: center;
     border-radius: 8px;
-    padding: 0 6px;
+    padding: 0 4px;
     font-weight: 700;
-    font-size: 0.68rem;
+    font-size: 0.6rem;
 }
 
 .svt-ech-paye {
@@ -430,7 +431,8 @@
 }
 
 /* VALIDER : pousse au bord droit, meme axe vertical que le bloc MONTANT/Nouveau */
-.svt-btn-valider {
+.svt-btn-valider,
+.svt-btn-recu {
     margin-bottom: 2px;
 }
 

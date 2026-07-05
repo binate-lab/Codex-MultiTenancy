@@ -331,6 +331,70 @@
             }
         }, true);
 
+        // Navigation clavier de la zone de saisie d'un versement (form Access « Scolarités ») :
+        // Tab OU Entrée enchaîne Montant -> Date -> Nature -> Mode -> Réf. opération -> Valider,
+        // dans CET ordre (indépendant de l'ordre du DOM). Sur Valider : Entrée = clic, Tab = stop.
+        // Shift+Tab remonte. Toujours branché mais borné à .svt-saisie (no-op ailleurs) ; en
+        // veille tant qu'une liste déroulante / un calendrier MudBlazor est ouvert (choix natif).
+        (function () {
+            // Conteneurs des étapes, dans l'ordre voulu (indépendant du DOM).
+            var ETAPES = ['.svt-montant', '.acc-datemask', '.svt-nav-nature',
+                          '.svt-nav-mode', '.svt-nav-ref', '.svt-btn-valider'];
+
+            // Élément réellement focusable d'une étape : le <input> visible pour les champs
+            // texte/nombre/date ; le <div tabindex="0"> pour un MudSelect (son <input> est
+            // type=hidden, non focusable) ; le conteneur lui-même pour le bouton Valider.
+            function cibleFocus(zone, sel) {
+                var c = zone.querySelector(sel);
+                if (!c) { return null; }
+                return c.querySelector('input:not([type=hidden]):not([disabled])')
+                    || c.querySelector('[tabindex]:not([tabindex="-1"])')
+                    || (c.matches('button, [tabindex]') ? c : null)
+                    || c;
+            }
+
+            document.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter' && e.key !== 'Tab') { return; }
+                var el = e.target;
+                if (!el || !el.closest) { return; }
+                var zone = el.closest('.svt-saisie');
+                if (!zone) { return; }
+                // Liste déroulante / calendrier réellement ouvert : on laisse le clavier
+                // natif faire le choix. (On ne bloque PAS sur un simple tooltip ouvert, qui
+                // est aussi un popover mais ne contient ni liste ni calendrier.)
+                if (document.querySelector('.mud-popover-open .mud-list, .mud-popover-open .mud-picker')) { return; }
+
+                var i = ETAPES.findIndex(function (s) { return el.closest(s); });
+                if (i === -1) { return; } // focus sur Nouveau / Reçu : comportement par défaut
+
+                // On prend la main : couper aussi la propagation, sinon MudSelect ouvrirait
+                // sa liste (ou le DatePicker son calendrier) sur le même Entrée.
+                var prendreLaMain = function () {
+                    e.preventDefault();
+                    e.stopImmediatePropagation();
+                };
+
+                if (e.shiftKey) {
+                    if (e.key === 'Tab' && i > 0) {
+                        prendreLaMain();
+                        var prec = cibleFocus(zone, ETAPES[i - 1]);
+                        if (prec) { prec.focus(); }
+                    }
+                    return;
+                }
+
+                prendreLaMain();
+                if (i < ETAPES.length - 1) {
+                    var suiv = cibleFocus(zone, ETAPES[i + 1]);
+                    if (suiv) { suiv.focus(); }
+                } else if (e.key === 'Enter') {
+                    // Dernier champ = Valider : Entrée déclenche le clic (Tab ne fait rien).
+                    var btn = zone.querySelector('.svt-btn-valider');
+                    if (btn) { btn.click(); }
+                }
+            }, true);
+        })();
+
         // Convertit une image (URL/chemin servi par le front) en data-URI base64,
         // pour l'embarquer dans un PDF généré côté serveur (ex. logo école du reçu).
         // Renvoie null si l'image est absente ou illisible (le reçu se génère sans logo).
