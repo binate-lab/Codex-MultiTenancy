@@ -56,17 +56,15 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
-        public async Task<byte[]> GetRecuPdfAsync(Guid eleveId, string ecole)
+        public async Task<byte[]> GetRecuPdfAsync(Guid eleveId, string ecole, string logoBase64)
         {
             try
             {
-                var url = $"eleves/{eleveId}/versements/recu";
-                if (!string.IsNullOrWhiteSpace(ecole))
-                {
-                    url += $"?ecole={Uri.EscapeDataString(ecole)}";
-                }
+                // POST : l'en-tete (nom d'ecole + logo base64) peut peser plusieurs Ko.
+                var reponse = await _httpClient.PostAsJsonAsync(
+                    $"eleves/{eleveId}/versements/recu",
+                    new { ecole, logoBase64 });
 
-                var reponse = await _httpClient.GetAsync(url);
                 if (!reponse.IsSuccessStatusCode) return null;
 
                 return await reponse.Content.ReadAsByteArrayAsync();

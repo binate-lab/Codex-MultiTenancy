@@ -331,6 +331,24 @@
             }
         }, true);
 
+        // Convertit une image (URL/chemin servi par le front) en data-URI base64,
+        // pour l'embarquer dans un PDF généré côté serveur (ex. logo école du reçu).
+        // Renvoie null si l'image est absente ou illisible (le reçu se génère sans logo).
+        window.trajanImageEnBase64 = async function (url) {
+            try {
+                if (!url) { return null; }
+                const resp = await fetch(url);
+                if (!resp.ok) { return null; }
+                const blob = await resp.blob();
+                return await new Promise(function (resolve) {
+                    const reader = new FileReader();
+                    reader.onloadend = function () { resolve(reader.result); };
+                    reader.onerror = function () { resolve(null); };
+                    reader.readAsDataURL(blob);
+                });
+            } catch (e) { return null; }
+        };
+
         // Téléchargement d'un fichier produit par une API (reçu PDF, rapports...) :
         // Blazor WASM passe les octets en base64, on déclenche le download navigateur.
         window.trajanTelechargerFichier = function (nomFichier, base64, typeMime) {

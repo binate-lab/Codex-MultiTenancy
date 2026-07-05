@@ -57,7 +57,8 @@ namespace App.Infrastructure.Services.Eleves
             string nature, string moyenPaiement, string referenceOperation);
 
         // Recu de paiement PDF (situation du compte : versements + synthese + echeancier).
-        // ecole = nom d'affichage de l'etablissement pour l'en-tete. null si indisponible.
-        Task<byte[]> GetRecuPdfAsync(Guid eleveId, string ecole);
+        // ecole = nom d'affichage de l'etablissement ; logoBase64 = logo ecole (data-URI
+        // ou base64) affiche au centre de l'en-tete. null si indisponible.
+        Task<byte[]> GetRecuPdfAsync(Guid eleveId, string ecole, string logoBase64);
     }
 }

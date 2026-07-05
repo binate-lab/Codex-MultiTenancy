@@ -17,9 +17,10 @@ namespace TrajanEcoleApp.Pages.Scolarites
         // Année scolaire en cours (bandeau) — même source que SchoolNavMenu.
         private string _annee = "—";
 
-        // Nom d'affichage de l'école active (en-tête du reçu PDF) — même source
-        // que SchoolNavMenu (GetMineAsync filtré sur le claim school).
+        // Nom d'affichage et logo (URL/chemin) de l'école active (en-tête du reçu PDF) —
+        // même source que SchoolNavMenu (GetMineAsync filtré sur le claim school).
         private string _nomEcole = string.Empty;
+        private string _logoEcole = string.Empty;
 
         // Référentiel structures de l'école (module Structures de pedagogie-api) :
         // les sélecteurs Niveau/Classe de la grille et du filtre sont alimentés par
@@ -70,7 +71,9 @@ namespace TrajanEcoleApp.Pages.Scolarites
                 var ecoles = await _schoolService.GetMineAsync();
                 if (ecoles.IsSuccessful && ecoles.Data is not null)
                 {
-                    _nomEcole = ecoles.Data.FirstOrDefault(s => s.CodeEts == codeEts)?.Name ?? string.Empty;
+                    var ecole = ecoles.Data.FirstOrDefault(s => s.CodeEts == codeEts);
+                    _nomEcole = ecole?.Name ?? string.Empty;
+                    _logoEcole = ecole?.Logo ?? string.Empty;
                 }
             }
 
@@ -248,7 +251,13 @@ namespace TrajanEcoleApp.Pages.Scolarites
             _recuEnCours = true;
             try
             {
-                var pdf = await _versementService.GetRecuPdfAsync(_sel.Id, _nomEcole);
+                // Convertit le logo (URL/chemin front) en base64 pour l'embarquer dans le
+                // PDF serveur ; null si absent → le reçu se génère sans logo.
+                var logoBase64 = string.IsNullOrWhiteSpace(_logoEcole)
+                    ? null
+                    : await _js.InvokeAsync<string>("trajanImageEnBase64", _logoEcole);
+
+                var pdf = await _versementService.GetRecuPdfAsync(_sel.Id, _nomEcole, logoBase64);
                 if (pdf is null || pdf.Length == 0)
                 {
                     _snackbar.Add("Reçu indisponible pour cet élève.", Severity.Error);
