@@ -1,13 +1,18 @@
 ---
 name: mudtable-row-copy-paste
 description: >
-  Ajoute Copier/Coller d'une ligne dans une grille MudTable (front Blazor WASM MudBlazor
-  de TrajanEcoleApp/ABCSchool) : on copie les valeurs éditables d'une ligne et on les colle
-  sur une autre, avec persistance backend. Utilise ce skill dès que l'utilisateur veut
-  dupliquer/recopier les valeurs d'une ligne vers une autre dans une grille, ajouter
-  « Copier »/« Coller » à un menu Actions, ou propager un même jeu de montants/valeurs à
-  plusieurs lignes (ex. deux niveaux qui partagent le même barème), même s'il ne dit pas
-  explicitement « MudTable » ou « presse-papier ».
+  Ajoute Copier/Coller des VALEURS d'une ligne vers une autre ligne dans une grille MudTable
+  éditable du front Blazor WASM MudBlazor (TrajanEcoleApp / ABCSchool) : copie des cellules
+  éditables d'une ligne, collage sur une autre, « Coller » grisé tant que rien n'est copié,
+  persistance backend au collage. Déclenche ce skill dès que l'utilisateur veut
+  recopier / dupliquer / cloner / propager les valeurs d'une ligne de tableau vers une ou
+  plusieurs autres lignes, ou ajouter « Copier »/« Coller » au menu Actions d'une grille —
+  même sans dire « MudTable » ni « presse-papier » (ex. « deux niveaux ont le même barème,
+  copie la 6e sur la 5e »). N'utilise PAS ce skill pour : copier un fichier ; copier du texte
+  dans le presse-papier du navigateur/OS ; dupliquer un enregistrement/élève entier en base ;
+  copier des données d'une base à une autre ; exporter une grille (Excel/CSV/PDF) ; recopier
+  du code entre fichiers ; ou réordonner des lignes par glisser-déposer — ce sont d'autres
+  besoins, pas du copier-coller de valeurs entre lignes.
 ---
 
 # Copier / Coller une ligne dans une grille MudTable
