@@ -398,7 +398,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private string TexteSmsPour(string nature) => nature switch
         {
             "Inscription" => SansAccents(
-                $"Chers parents,\nl'inscription de {_sel?.Nom} {_sel?.Prenoms} a bien ete enregistree. \nMerci.\nLA DIRECTION"),
+                $"Chers parents,\nl'inscription de {_sel?.Nom} {_sel?.Prenoms} en {_sel?.Classe} a bien ete enregistree. \nMerci.\nLA DIRECTION"),
             _ => string.Empty,   // à compléter (texte fourni ultérieurement par nature)
         };
 
