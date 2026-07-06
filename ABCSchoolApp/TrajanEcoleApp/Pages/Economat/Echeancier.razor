@@ -79,7 +79,13 @@
                     <MudTd Style="text-align:right;">
                         <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Color="Color.Secondary"
                                  TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
-                            <MudMenuItem OnClick="@(() => SupprimerAsync(context))">Supprimer</MudMenuItem>
+                            <MudMenuItem Icon="@Icons.Material.Filled.ContentCopy"
+                                         OnClick="@(() => Copier(context))">Copier</MudMenuItem>
+                            @* Coller reste desactive tant qu'aucune ligne n'a ete copiee. *@
+                            <MudMenuItem Icon="@Icons.Material.Filled.ContentPaste" Disabled="@(_presse is null)"
+                                         OnClick="@(() => CollerAsync(context))">Coller</MudMenuItem>
+                            <MudMenuItem Icon="@Icons.Material.Filled.Delete"
+                                         OnClick="@(() => SupprimerAsync(context))">Supprimer</MudMenuItem>
                         </MudMenu>
                     </MudTd>
                 </RowTemplate>

@@ -125,6 +125,39 @@ namespace TrajanEcoleApp.Pages.Economat
             }
         }
 
+        // ------------------- Copier / Coller un barème (Inscription -> Mai) -------------------
+        // Presse-papier : les 10 montants copiés. null = rien de copié -> « Coller » désactivé.
+        // Utile quand plusieurs niveaux partagent le même barème : on copie une ligne et on
+        // colle ses montants sur une autre.
+        private decimal[] _presse;
+
+        private void Copier(EcheancierRow row)
+        {
+            _presse = row.LireMontants();
+            _snackbar.Add($"Barème « {row.NiveauCode} / {row.Statut} » copié.", Severity.Info);
+        }
+
+        private async Task CollerAsync(EcheancierRow row)
+        {
+            if (_presse is null)
+            {
+                return;
+            }
+
+            row.AppliquerMontants(_presse);
+
+            // Persistance immédiate (comme la saisie au blur), avec restauration si refus.
+            var result = await _echeancierService.UpdateMontantsAsync(row.VersItem());
+            if (Verifier(result, $"Barème collé sur « {row.NiveauCode} / {row.Statut} »."))
+            {
+                row.FigerSnapshot();
+            }
+            else
+            {
+                row.Restaurer();
+            }
+        }
+
         // ------------------- ViewModel mutable de la grille -------------------
 
         public sealed class EcheancierRow
@@ -164,6 +197,16 @@ namespace TrajanEcoleApp.Pages.Economat
 
             public bool EstModifiee => !Montants.SequenceEqual(_snapshot);
             public void FigerSnapshot() => _snapshot = Montants;
+
+            // Copier/coller : Montants renvoie un tableau neuf (indépendant), et
+            // AppliquerMontants réécrit les 10 cellules dans le même ordre.
+            public decimal[] LireMontants() => Montants;
+
+            public void AppliquerMontants(decimal[] m)
+            {
+                Inscription = m[0]; Septembre = m[1]; Octobre = m[2]; Novembre = m[3]; Decembre = m[4];
+                Janvier = m[5]; Fevrier = m[6]; Mars = m[7]; Avril = m[8]; Mai = m[9];
+            }
 
             public void Restaurer()
             {
