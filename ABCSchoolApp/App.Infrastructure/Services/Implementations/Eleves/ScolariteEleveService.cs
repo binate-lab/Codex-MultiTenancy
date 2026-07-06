@@ -33,5 +33,20 @@ namespace App.Infrastructure.Services.Implementations.Eleves
                 return new List<EleveScolariteItem>();
             }
         }
+
+        public async Task<bool> MajTelephoneCorrespondantAsync(Guid eleveId, string telephone)
+        {
+            try
+            {
+                var reponse = await _httpClient.PutAsJsonAsync(
+                    $"eleves/{eleveId}/telephone-correspondant",
+                    new { telephone });
+                return reponse.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

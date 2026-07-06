@@ -22,6 +22,9 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private string _nomEcole = string.Empty;
         private string _logoEcole = string.Empty;
 
+        // Nom court de l'école (défini à la création) — sert d'EXPÉDITEUR (Sender ID) des SMS.
+        private string _nomCourtEts = string.Empty;
+
         // Référentiel structures de l'école (module Structures de pedagogie-api) :
         // les sélecteurs Niveau/Classe de la grille et du filtre sont alimentés par
         // CE référentiel, plus par une liste figée dans le code.
@@ -74,6 +77,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
                     var ecole = ecoles.Data.FirstOrDefault(s => s.CodeEts == codeEts);
                     _nomEcole = ecole?.Name ?? string.Empty;
                     _logoEcole = ecole?.Logo ?? string.Empty;
+                    _nomCourtEts = ecole?.NomCourtEts ?? string.Empty;
                 }
             }
 
@@ -96,6 +100,9 @@ namespace TrajanEcoleApp.Pages.Scolarites
                     e.FraisScolarite    // colonne « Inscription » ≈ frais (à affiner plus tard)
                 )).ToList();
             }
+
+            // Restaure l'état mémorisé de la case « envoyer par SMS ».
+            await ChargerPrefSmsAsync();
         }
 
         // Filtre client sur la source. Tous les critères se cumulent (ET).
@@ -120,6 +127,24 @@ namespace TrajanEcoleApp.Pages.Scolarites
         }
 
         private void Fermer() => _navigation.NavigateTo("/ecole");
+
+        // Édition en ligne du téléphone du correspondant : mise à jour immédiate de la
+        // ligne puis persistance côté Scolarite.Api (Tuteur.Telephone1). En cas d'échec,
+        // on restaure l'ancienne valeur et on prévient l'utilisateur.
+        private async Task OnTelChanged(EleveScolariteRow row, string nouveau)
+        {
+            var ancien = row.TelCorrespondant;
+            if (nouveau == ancien) return;
+
+            row.TelCorrespondant = nouveau;
+
+            var ok = await _scolariteEleveService.MajTelephoneCorrespondantAsync(row.Id, nouveau ?? string.Empty);
+            if (!ok)
+            {
+                row.TelCorrespondant = ancien;
+                _snackbar.Add("Impossible d'enregistrer le téléphone du correspondant.", Severity.Error);
+            }
+        }
 
         // Édition en ligne du statut (Aff/Naff) d'un élève.
         // TODO (à venir) : publier un événement « changement de statut » relié à
@@ -281,6 +306,118 @@ namespace TrajanEcoleApp.Pages.Scolarites
             }
         }
 
+        // ================== Reçu par SMS ==================
+
+        // Clé localStorage de la préférence « case SMS cochée à l'ouverture ».
+        private const string SmsPrefKey = "scolarites.sms.coche";
+
+        // État de la case (cochée = envoi SMS autorisé) et verrou d'envoi.
+        private bool _smsCoche;
+        private bool _smsEnCours;
+
+        // Restaure au chargement la préférence mémorisée (« 1 » = case cochée).
+        private async Task ChargerPrefSmsAsync()
+        {
+            var pref = await _js.InvokeAsync<string>("localStorage.getItem", SmsPrefKey);
+            _smsCoche = pref == "1";
+        }
+
+        // Clic sur la case : demande si l'état choisi doit être mémorisé pour les
+        // prochaines ouvertures de la page (cf. cahier des charges).
+        private async Task OnSmsCocheChangedAsync(bool coche)
+        {
+            _smsCoche = coche;
+
+            if (coche)
+            {
+                // On vient de cocher → proposer de la garder cochée à l'avenir.
+                var oui = await _js.InvokeAsync<bool>("confirm",
+                    "Voulez-vous que cette case soit cochée à l'avenir ?");
+                if (oui)
+                {
+                    await _js.InvokeVoidAsync("localStorage.setItem", SmsPrefKey, "1");
+                }
+                // Sinon : on ne mémorise rien (à la prochaine ouverture, la préférence
+                // enregistrée précédemment — ou l'état décoché par défaut — s'applique).
+            }
+            else
+            {
+                // On vient de décocher → proposer de la garder décochée à l'avenir.
+                var oui = await _js.InvokeAsync<bool>("confirm",
+                    "Voulez-vous que cette case soit décochée à l'avenir ?");
+                // Oui → décochée à la prochaine ouverture ; sinon → cochée à l'avenir.
+                await _js.InvokeVoidAsync("localStorage.setItem", SmsPrefKey, oui ? "0" : "1");
+            }
+        }
+
+        // Bouton SMS : n'envoie que si la case est cochée (sinon rien ne se passe).
+        // Règle actuelle : seul le 1er versement d'inscription déclenche un SMS. Les autres
+        // versements d'inscription n'en envoient pas ; les autres natures (Scolarité,
+        // Transport…) auront leur propre texte, à définir (cf. _texteSmsPour).
+        private async Task EnvoyerSmsAsync()
+        {
+            if (!_smsCoche) return;   // case décochée → aucun envoi
+            if (_sel is null) return;
+
+            // Combien de versements d'inscription déjà enregistrés pour cet élève ?
+            var nbInscription = _versements.Count(v => v.Nature == "Inscription");
+            if (nbInscription == 0)
+            {
+                _snackbar.Add("Aucun versement d'inscription : pas de SMS pour l'instant.", Severity.Info);
+                return;
+            }
+            if (nbInscription > 1)
+            {
+                _snackbar.Add("SMS déjà envoyé au 1er versement d'inscription (les suivants n'en envoient pas).", Severity.Info);
+                return;
+            }
+
+            var destinataire = _sel.TelCorrespondant;
+            if (string.IsNullOrWhiteSpace(destinataire))
+            {
+                _snackbar.Add("Pas de téléphone correspondant : SMS impossible.", Severity.Warning);
+                return;
+            }
+
+            _smsEnCours = true;
+            try
+            {
+                var texte = TexteSmsPour("Inscription");
+                // TODO sms-api : envoyer `texte` à `destinataire`, expéditeur = _nomCourtEts.
+                _snackbar.Add($"SMS (exp. {_nomCourtEts}) → {destinataire} : {texte}", Severity.Success);
+            }
+            finally
+            {
+                _smsEnCours = false;
+            }
+        }
+
+        // Texte du SMS selon la nature du versement. Seul « Inscription » est défini pour
+        // l'instant ; les autres natures renverront le texte que tu me communiqueras.
+        // Tous les messages sont passés à SansAccents (SMS = caractères non accentués).
+        private string TexteSmsPour(string nature) => nature switch
+        {
+            "Inscription" => SansAccents(
+                $"Chers parents,\nl'inscription de {_sel?.Nom} {_sel?.Prenoms} a bien ete enregistree. \nMerci.\nLA DIRECTION"),
+            _ => string.Empty,   // à compléter (texte fourni ultérieurement par nature)
+        };
+
+        // Retire les caractères accentués d'un message SMS : « é/è/ê »→« e », « ç »→« c »,
+        // « à »→« a »… (décomposition Unicode puis suppression des marques diacritiques).
+        private static string SansAccents(string texte)
+        {
+            if (string.IsNullOrEmpty(texte)) return texte;
+
+            var decompose = texte.Normalize(System.Text.NormalizationForm.FormD);
+            var sb = new System.Text.StringBuilder(decompose.Length);
+            foreach (var c in decompose)
+            {
+                if (CharUnicodeInfo.GetUnicodeCategory(c) != UnicodeCategory.NonSpacingMark)
+                    sb.Append(c);
+            }
+            return sb.ToString().Normalize(System.Text.NormalizationForm.FormC);
+        }
+
         // Libellé d'affichage des natures (les valeurs sont les noms de l'enum backend).
         private static string AfficherNature(string nature) => nature switch
         {
@@ -316,7 +453,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         {
             public Guid Id { get; }
             public string Matricule { get; }
-            public string TelCorrespondant { get; }
+            public string TelCorrespondant { get; set; }
             public string Nom { get; }
             public string Prenoms { get; }
             public bool Actif { get; set; }           // IsActif — coché quand l'inscription est entamée

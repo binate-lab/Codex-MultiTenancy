@@ -95,7 +95,13 @@
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Matricule">@context.Matricule</MudTd>
-                <MudTd DataLabel="Tél. Correspondant">@context.TelCorrespondant</MudTd>
+                <MudTd DataLabel="Tél. Correspondant">
+                    <MudTextField T="string" Value="@context.TelCorrespondant"
+                                  ValueChanged="@(v => OnTelChanged(context, v))"
+                                  Immediate="false" Margin="Margin.Dense"
+                                  Variant="Variant.Text" Underline="false"
+                                  Class="acc-cell-input acc-cell-tel" />
+                </MudTd>
                 <MudTd DataLabel="Nom" Class="acc-cell-nom">@context.Nom</MudTd>
                 <MudTd DataLabel="Prénoms" Class="acc-cell-prenom">@context.Prenoms</MudTd>
                 <MudTd DataLabel="Actif" Style="text-align:center">
@@ -209,7 +215,7 @@
                                     <MudSelectItem Value="@("Autre")">Autre</MudSelectItem>
                                 </MudSelect>
                             </div>
-                            <div class="svt-ligne">
+                            <div class="svt-ligne svt-ligne-resserre">
                                 <label>Mode de paiement :</label>
                                 <MudSelect T="string" @bind-Value="_vMode" Variant="Variant.Outlined" Margin="Margin.Dense" Class="svt-nav-mode">
                                     <MudSelectItem Value="@("Espèce")">Espèce</MudSelectItem>
@@ -218,7 +224,7 @@
                                     <MudSelectItem Value="@("Mobile Money")">Mobile Money</MudSelectItem>
                                 </MudSelect>
                             </div>
-                            <div class="svt-ligne">
+                            <div class="svt-ligne svt-ligne-resserre">
                                 <label>Réf. opération :</label>
                                 <MudTextField T="string" @bind-Value="_vRef" Variant="Variant.Outlined"
                                               Margin="Margin.Dense" Class="acc-yellow svt-nav-ref" />
@@ -236,6 +242,15 @@
                                        Size="Size.Small" Disabled="_recuEnCours" Class="svt-btn-recu ml-2"
                                        StartIcon="@Icons.Material.Filled.Print">Reçu</MudButton>
                         </MudTooltip>
+                        @* SMS : le bouton n'envoie que si la case juste à droite est cochée.
+                           La case mémorise (ou non) son état pour les prochaines ouvertures. *@
+                        <MudTooltip Text="Envoyer le reçu par SMS (coche la case pour activer)">
+                            <MudButton OnClick="EnvoyerSmsAsync" Variant="Variant.Outlined" Color="Color.Primary"
+                                       Size="Size.Small" Disabled="_smsEnCours" Class="svt-btn-sms ml-2"
+                                       StartIcon="@Icons.Material.Filled.Sms">SMS</MudButton>
+                        </MudTooltip>
+                        <MudCheckBox T="bool" Value="_smsCoche" ValueChanged="OnSmsCocheChangedAsync"
+                                     Dense="true" Size="Size.Small" Color="Color.Primary" Class="svt-chk-sms" />
                     </div>
                 </div>
 

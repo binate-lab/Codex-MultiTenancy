@@ -125,6 +125,11 @@
     width: 70px;
 }
 
+/* Telephone du correspondant : editable en ligne, occupe la largeur de la colonne */
+.acc-grid ::deep .acc-cell-tel {
+    width: 98px;
+}
+
 /* Pas de trait de soulignement sous les sÃ©lecteurs Statut / Niveau */
 .acc-grid ::deep td .mud-input.mud-input-underline::before,
 .acc-grid ::deep td .mud-input.mud-input-underline::after {
@@ -440,6 +445,18 @@
 .svt-valider-box {
     align-self: center;
     margin-top: 8px;
+    display: flex;
+    align-items: center;
+}
+
+/* Case SMS : collee au bouton SMS, sans rembourrage superflu */
+.svt-chk-sms {
+    margin-left: 2px;
+}
+
+.svt-chk-sms ::deep .mud-button-root,
+.svt-chk-sms ::deep .mud-icon-button {
+    padding: 4px;
 }
 
 /* Disposition Access : 2 colonnes (Date/Ref a gauche ; MONTANT puis Nature/Mode a droite) */
@@ -469,6 +486,13 @@
     display: flex;
     align-items: center;
     gap: 8px;
+}
+
+/* Resserre l'espace vertical au-dessus : remonte Mode de paiement et Ref. operation
+   vers Nature du versement (qui, elle, ne bouge pas). Le gap de .svt-col-droite est
+   de 8px ; ce margin negatif l'annule presque entierement. */
+.svt-ligne-resserre {
+    margin-top: -6px;
 }
 
 .svt-ligne > label {

@@ -7,6 +7,10 @@ namespace App.Infrastructure.Services.Eleves
         // Eleves d'une ecole (CodeEts), filtres optionnellement par annee scolaire.
         // Retourne une liste vide si le service est indisponible.
         Task<IReadOnlyList<EleveScolariteItem>> GetElevesAsync(string codeEts, string annee = null);
+
+        // Met a jour le telephone du correspondant (colonne editable de la grille).
+        // Retourne true si l'enregistrement a reussi.
+        Task<bool> MajTelephoneCorrespondantAsync(Guid eleveId, string telephone);
     }
 
     // Projection plate calquee sur EleveListeItem (Scolarite.Api/Eleves/Liste).
