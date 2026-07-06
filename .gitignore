@@ -32,3 +32,7 @@ appsettings.Development.local.json
 ## Nested repository backups
 .git.backup-*/
 **/.git.backup-*/
+
+## Claude Code (données locales d'agent)
+**/.claude/worktrees/
+**/.claude/settings.local.json

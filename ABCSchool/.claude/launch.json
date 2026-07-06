@@ -1,0 +1,17 @@
+{
+  "version": "0.0.1",
+  "configurations": [
+    {
+      "name": "webapi",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "WebApi", "--launch-profile", "https"],
+      "port": 7198
+    },
+    {
+      "name": "front",
+      "runtimeExecutable": "dotnet",
+      "runtimeArgs": ["run", "--project", "../ABCSchoolApp/TrajanEcoleApp", "--launch-profile", "http"],
+      "port": 5091
+    }
+  ]
+}
