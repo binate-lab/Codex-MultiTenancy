@@ -95,6 +95,15 @@ namespace Infrastructure.Identity.Tokens
                 throw new UnauthorizedException(["Token invalide."]);
             }
 
+            // Si le token expirant était ECOLE-scoped (claim « school »), on régénère un
+            // token école-scoped -> le refresh conserve school + nomCourtEts (sinon l'envoi
+            // SMS par école casserait après un rafraîchissement). Sinon : token général.
+            var codeEts = userPrincipal.FindFirst(ClaimConstants.School)?.Value;
+            if (!string.IsNullOrWhiteSpace(codeEts))
+            {
+                return await GenerateSchoolScopedTokenAsync(userInDb, codeEts);
+            }
+
             return await GenerateTokenAndUpdateUserAsync(userInDb);
         }
 
@@ -111,8 +120,18 @@ namespace Infrastructure.Identity.Tokens
                 throw new UnauthorizedException(["L'utilisateur est inactif actuellement. Contacter Administrateur."]);
             }
 
-            var school = await _schoolService.GetByCodeEtsAsync(request.CodeEts)
-                ?? throw new NotFoundException([$"École '{request.CodeEts}' introuvable."]);
+            // Corps « école-scoped » partagé avec le refresh (pour qu'un token rafraîchi
+            // conserve school + nomCourtEts au lieu de retomber sur un token général).
+            return await GenerateSchoolScopedTokenAsync(userInDb, request.CodeEts);
+        }
+
+        // Construit un token ECOLE-scoped (claims school + nomCourtEts + rôles/permissions
+        // de l'utilisateur DANS cette école) et met à jour son refresh token. Utilisé par
+        // SelectSchool ET par le refresh d'un token déjà école-scoped.
+        private async Task<TokenResponse> GenerateSchoolScopedTokenAsync(ApplicationUser userInDb, string codeEts)
+        {
+            var school = await _schoolService.GetByCodeEtsAsync(codeEts)
+                ?? throw new NotFoundException([$"École '{codeEts}' introuvable."]);
 
             // admin/root (rôle tenant-wide Admin) : accès à toutes les écoles du tenant,
             // avec toutes ses permissions tenant-wide (Root incluses si tenant racine).
@@ -126,7 +145,7 @@ namespace Infrastructure.Identity.Tokens
             else
             {
                 // Sinon : il faut une affectation (SchoolMembership) à cette école précise.
-                var roleIds = await _membershipService.GetUserRoleIdsInSchoolAsync(userId, school.Id);
+                var roleIds = await _membershipService.GetUserRoleIdsInSchoolAsync(userInDb.Id, school.Id);
 
                 if (roleIds.Count == 0)
                 {
