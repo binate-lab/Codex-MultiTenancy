@@ -144,7 +144,7 @@ namespace Infrastructure.Identity.Tokens
                 }
             }
 
-            var claims = await GetSchoolScopedClaims(userInDb, school.CodeEts, roleNames);
+            var claims = await GetSchoolScopedClaims(userInDb, school.CodeEts, school.NomCourtEts, roleNames);
             var jwt = GenerateEncryptedToken(GenerateSigningCredentials(), claims);
 
             userInDb.RefreshToken = GenerateRefreshToken();
@@ -160,7 +160,7 @@ namespace Infrastructure.Identity.Tokens
         }
 
         private async Task<IEnumerable<Claim>> GetSchoolScopedClaims(
-            ApplicationUser user, string codeEts, List<string> roleNames)
+            ApplicationUser user, string codeEts, string nomCourtEts, List<string> roleNames)
         {
             var userClaims = await _userManager.GetClaimsAsync(user);
 
@@ -186,6 +186,7 @@ namespace Infrastructure.Identity.Tokens
                 new(ClaimTypes.Surname, user.LastName ?? string.Empty),
                 new(ClaimConstants.Tenant, GetCurrentTenant().Identifier),
                 new(ClaimConstants.School, codeEts),
+                new(ClaimConstants.NomCourtEts, nomCourtEts ?? string.Empty),
                 new(ClaimTypes.MobilePhone, user.PhoneNumber ?? string.Empty)
             }
             .Union(roleClaims)

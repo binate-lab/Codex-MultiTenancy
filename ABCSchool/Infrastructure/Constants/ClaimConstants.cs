@@ -4,6 +4,7 @@
     {
         public const string Tenant = "tenant";
         public const string School = "school";
+        public const string NomCourtEts = "nomCourtEts";
         public const string Permission = "permission";
     }
 }
