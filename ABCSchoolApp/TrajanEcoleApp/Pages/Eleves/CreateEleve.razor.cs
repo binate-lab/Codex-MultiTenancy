@@ -85,6 +85,13 @@ namespace TrajanEcoleApp.Pages.Eleves
                 Eleve.Niveau = string.Empty;
                 Eleve.Classe = string.Empty;
             }
+
+            // Cycle 1 (collège) : pas de séries -> Série = « x » (sans objet). Les séries
+            // ne concernent que le cycle 2 (lycée), où l'utilisateur choisit librement.
+            if (Eleve.Cycle == 1)
+            {
+                Eleve.Serie = "x";
+            }
         }
 
         // Cascade : changer de niveau invalide la classe si elle n'en fait plus partie.
@@ -196,10 +203,24 @@ namespace TrajanEcoleApp.Pages.Eleves
         // #6 : en quittant le champ Matricule National, majuscules puis format d'affichage
         // « 24 568 951 N » (chiffres groupés par 3 depuis la droite, lettre détachée).
         // La forme canonique SANS espaces est retablie dans Normaliser() avant l'envoi.
-        private void NettoyerMatricule()
+        private async Task NettoyerMatricule()
         {
-            if (!string.IsNullOrEmpty(Eleve.NumeroMatricule))
-                Eleve.NumeroMatricule = FormaterMatricule(Eleve.NumeroMatricule);
+            if (string.IsNullOrEmpty(Eleve.NumeroMatricule))
+                return;
+
+            Eleve.NumeroMatricule = FormaterMatricule(Eleve.NumeroMatricule);
+
+            // Controle en direct du doublon : on interroge Pedagogie avec la forme canonique
+            // (sans espaces, majuscules) — celle qui sera stockee. Si deja pris dans l'ecole,
+            // on previent tout de suite (la garde definitive reste la creation).
+            var canonique = Eleve.NumeroMatricule.Replace(" ", string.Empty).ToUpperInvariant();
+            if (!string.IsNullOrWhiteSpace(Eleve.CodeEts)
+                && await _eleveService.MatriculeExisteAsync(Eleve.CodeEts, canonique))
+            {
+                _snackbar.Add(
+                    $"Risque de doublon : le matricule national « {Eleve.NumeroMatricule} » est déjà utilisé par un élève de cette école.",
+                    Severity.Warning);
+            }
         }
 
         // « 24568951n » / « 24 568 951 N » -> « 24 568 951 N ».

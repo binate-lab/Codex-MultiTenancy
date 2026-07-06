@@ -38,6 +38,23 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
+        public async Task<bool> MatriculeExisteAsync(string codeEts, string matricule)
+        {
+            try
+            {
+                var url = $"{_apiSettings.EleveEndpoints.MatriculeExiste}" +
+                          $"?codeEts={Uri.EscapeDataString(codeEts)}&matricule={Uri.EscapeDataString(matricule)}";
+                var resp = await _httpClient.GetFromJsonAsync<MatriculeExisteResponse>(url);
+                return resp?.Existe ?? false;
+            }
+            catch
+            {
+                // Indisponible : on ne bloque pas la saisie (la garde definitive est a la creation).
+                return false;
+            }
+        }
+
         private record CreateEleveResponse(Guid Id, int NumOrdre);
+        private record MatriculeExisteResponse(bool Existe);
     }
 }

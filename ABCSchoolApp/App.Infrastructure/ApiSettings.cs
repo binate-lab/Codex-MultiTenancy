@@ -27,6 +27,8 @@
         public string NextMatriculeInterne { get; set; }
         // GET liste des eleves d'une ecole (sur Scolarite.Api / ScolariteDb).
         public string Liste { get; set; }
+        // GET : le matricule national existe-t-il deja dans l'ecole ? (sur Pedagogie.Api)
+        public string MatriculeExiste { get; set; }
     }
 
     public class AnneeScolaireEndpoints
