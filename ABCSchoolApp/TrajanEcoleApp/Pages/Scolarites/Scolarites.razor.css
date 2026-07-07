@@ -224,6 +224,19 @@
     min-width: 0;
 }
 
+/* Titre du bloc synthese : « Point de l'eleve » avec un trait bord a bord (les marges
+   negatives annulent le padding 14/16 du bloc pour que le trait touche les deux bords). */
+.svt-resume-titre {
+    margin: -14px -16px 10px;
+    padding: 6px 16px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-align: center;
+    color: #1c2b36;
+    background: #cfd9df;
+    border-bottom: 2px solid #9fb0bb;
+}
+
 .svt-resume-ligne {
     display: flex;
     justify-content: space-between;

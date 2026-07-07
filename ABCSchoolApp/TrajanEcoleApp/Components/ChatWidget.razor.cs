@@ -1,15 +1,36 @@
 using TrajanEcole.Shared.Library.Models.Requests.Chat;
 using Microsoft.AspNetCore.Components.Web;
+using Microsoft.AspNetCore.Components.Routing;
 using MudBlazor;
 
 namespace TrajanEcoleApp.Components
 {
-    public partial class ChatWidget
+    public partial class ChatWidget : IDisposable
     {
         private bool _isOpen;
         private bool _isLoading;
         private string _input = string.Empty;
         private readonly List<ChatMessageDto> _messages = [];
+
+        // Position horizontale de la bulle flottante : a GAUCHE sur la page versement
+        // (/scolarites), pour la loger du cote de « Point de l'eleve » ; a DROITE partout
+        // ailleurs (defaut). _navigation vient de _Imports.razor (@inject global).
+        private string PositionHorizontale =>
+            _navigation.ToBaseRelativePath(_navigation.Uri).TrimStart('/')
+                .StartsWith("scolarites", StringComparison.OrdinalIgnoreCase)
+                ? "left: 24px;"
+                : "right: 24px;";
+
+        // La bulle vit dans le layout (montee une fois) : on re-rend a chaque navigation
+        // pour reevaluer sa position quand on entre/sort de /scolarites.
+        protected override void OnInitialized()
+            => _navigation.LocationChanged += OnLocationChanged;
+
+        private void OnLocationChanged(object sender, LocationChangedEventArgs e)
+            => InvokeAsync(StateHasChanged);
+
+        public void Dispose()
+            => _navigation.LocationChanged -= OnLocationChanged;
 
         private void Toggle()
         {

@@ -175,6 +175,7 @@
             <div class="svt-zone">
                 @* --- Bloc synthèse (Total Frais / Payé / Reste) --- *@
                 <div class="svt-resume">
+                    <div class="svt-resume-titre">Point de l'élève</div>
                     <div class="svt-resume-ligne"><span>Total Frais :</span><b>@Fmt(_resume?.FraisScolarite ?? 0)</b></div>
                     <div class="svt-resume-ligne"><span>Réduction :</span><b>@Fmt(_resume?.TotalReduction ?? 0)</b></div>
                     <div class="svt-resume-ligne"><span>Payé :</span><b>@Fmt(_resume?.TotalVerse ?? 0)</b></div>
