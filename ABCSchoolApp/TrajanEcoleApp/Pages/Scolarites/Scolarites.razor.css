@@ -219,6 +219,21 @@
     flex: 0 0 230px;
 }
 
+/* Hote de la bulle d'assistance (Sophia) : reference de positionnement pour la bulle
+   ancree (position: absolute dans ChatWidget). min-height pour garder de la place a la
+   bulle meme quand la grille detail est courte. */
+.svt-chat-host {
+    position: relative;
+    min-height: 90px;
+}
+
+/* Bouton « Modifier » (mode edition du versement) : ecriture rouge, plus visible que le
+   texte par defaut sur le fond jaune (Color.Warning). */
+.svt-btn-modif ::deep .mud-button-label {
+    color: #c62828 !important;
+    font-weight: 700;
+}
+
 .svt-detail-col {
     flex: 1 1 60%;
     min-width: 0;

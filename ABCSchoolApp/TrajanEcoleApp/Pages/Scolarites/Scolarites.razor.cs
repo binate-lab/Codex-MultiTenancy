@@ -191,6 +191,11 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private string _vRef = string.Empty;
         private bool _vEnCours;
 
+        // Id du versement en cours de modification (null = saisie d'un nouveau versement).
+        // Quand il est renseigne, le bouton Valider fait une modification (PUT) au lieu
+        // d'une creation (POST).
+        private Guid? _vEnEdition;
+
         private async Task OnRowClick(TableRowClickEventArgs<EleveScolariteRow> args)
         {
             _sel = args.Item;
@@ -228,7 +233,8 @@ namespace TrajanEcoleApp.Pages.Scolarites
             }
         }
 
-        // « Nouveau » : réinitialise la saisie (date du jour, Espèce, nature Inscription).
+        // « Nouveau » : réinitialise la saisie (date du jour, Espèce, nature Inscription)
+        // et sort du mode modification s'il était actif.
         private void NouveauVersement()
         {
             _vMontant = 0;
@@ -236,6 +242,19 @@ namespace TrajanEcoleApp.Pages.Scolarites
             _vNature = "Inscription";
             _vMode = "Espèce";
             _vRef = string.Empty;
+            _vEnEdition = null;
+        }
+
+        // Clic sur « Modifier » d'une ligne du détail : charge ses valeurs dans le sous-form
+        // et bascule en mode modification (le bouton Valider fera un PUT).
+        private void EditerVersement(VersementDetailItem v)
+        {
+            _vEnEdition = v.Id;
+            _vMontant = v.Montant;
+            _vDate = v.DateVersement;
+            _vNature = v.Nature;
+            _vMode = v.MoyenPaiement;
+            _vRef = v.ReferencePaiement == "-" ? string.Empty : v.ReferencePaiement;
         }
 
         private async Task ValiderVersementAsync()
@@ -250,14 +269,51 @@ namespace TrajanEcoleApp.Pages.Scolarites
             _vEnCours = true;
             try
             {
-                var result = await _versementService.CreateAsync(
-                    _sel.Id, _vMontant, _vDate, _vNature, _vMode, _vRef);
+                // Mode modification (PUT) si un versement est en édition, sinon création (POST).
+                var result = _vEnEdition is Guid id
+                    ? await _versementService.UpdateAsync(
+                        _sel.Id, id, _vMontant, _vDate, _vNature, _vMode, _vRef)
+                    : await _versementService.CreateAsync(
+                        _sel.Id, _vMontant, _vDate, _vNature, _vMode, _vRef);
 
                 if (result.IsSuccessful)
                 {
-                    _snackbar.Add($"Versement de {Fmt(_vMontant)} enregistré pour {_sel.Nom} {_sel.Prenoms}.", Severity.Success);
+                    var verbe = _vEnEdition is null ? "enregistré" : "modifié";
+                    _snackbar.Add($"Versement de {Fmt(_vMontant)} {verbe} pour {_sel.Nom} {_sel.Prenoms}.", Severity.Success);
                     AppliquerReponse(result.Data);
                     NouveauVersement();
+                }
+                else
+                {
+                    _snackbar.Add(result.Error, Severity.Error);
+                }
+            }
+            finally
+            {
+                _vEnCours = false;
+            }
+        }
+
+        // Clic sur « Supprimer » d'une ligne du détail : confirmation puis suppression
+        // DÉFINITIVE (le backend rejoue l'imputation de l'échéancier).
+        private async Task SupprimerVersementAsync(VersementDetailItem v)
+        {
+            if (_sel is null) return;
+
+            var ok = await _js.InvokeAsync<bool>("confirm",
+                $"Supprimer définitivement ce versement de {Fmt(v.Montant)} du {v.DateVersement:dd/MM/yyyy} ?");
+            if (!ok) return;
+
+            _vEnCours = true;
+            try
+            {
+                var result = await _versementService.DeleteAsync(_sel.Id, v.Id);
+                if (result.IsSuccessful)
+                {
+                    _snackbar.Add($"Versement de {Fmt(v.Montant)} supprimé.", Severity.Success);
+                    AppliquerReponse(result.Data);
+                    // Si on supprimait le versement en cours d'édition, on quitte ce mode.
+                    if (_vEnEdition == v.Id) NouveauVersement();
                 }
                 else
                 {

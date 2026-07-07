@@ -233,11 +233,23 @@
                         </div>
                     </div>
                     <div class="svt-valider-box">
-                        <MudTooltip Text="Valider le versement">
-                            <MudButton OnClick="ValiderVersementAsync" Variant="Variant.Filled" Color="Color.Primary"
-                                       Size="Size.Small" Disabled="_vEnCours" Class="svt-btn-valider"
-                                       StartIcon="@Icons.Material.Filled.Check">Valider</MudButton>
+                        <MudTooltip Text="@(_vEnEdition is null ? "Valider le versement" : "Enregistrer la modification")">
+                            <MudButton OnClick="ValiderVersementAsync" Variant="Variant.Filled"
+                                       Color="@(_vEnEdition is null ? Color.Primary : Color.Warning)"
+                                       Size="Size.Small" Disabled="_vEnCours"
+                                       Class="@(_vEnEdition is null ? "svt-btn-valider" : "svt-btn-valider svt-btn-modif")"
+                                       StartIcon="@(_vEnEdition is null ? Icons.Material.Filled.Check : Icons.Material.Filled.Save)">
+                                @(_vEnEdition is null ? "Valider" : "Modifier")
+                            </MudButton>
                         </MudTooltip>
+                        @if (_vEnEdition is not null)
+                        {
+                            <MudTooltip Text="Annuler la modification">
+                                <MudButton OnClick="NouveauVersement" Variant="Variant.Outlined" Color="Color.Default"
+                                           Size="Size.Small" Disabled="_vEnCours" Class="svt-btn-annuler ml-2"
+                                           StartIcon="@Icons.Material.Filled.Close">Annuler</MudButton>
+                            </MudTooltip>
+                        }
                         <MudTooltip Text="Imprimer le reçu de paiement (PDF)">
                             <MudButton OnClick="TelechargerRecuAsync" Variant="Variant.Outlined" Color="Color.Primary"
                                        Size="Size.Small" Disabled="_recuEnCours" Class="svt-btn-recu ml-2"
@@ -292,18 +304,23 @@
             @* --- Détail des versements : meme largeur et meme position que la zone bleue
                    (colonne vide a gauche = gabarit du bloc synthese, slot vide a droite). --- *@
             <div class="svt-zone svt-zone-bas">
-                <div class="svt-resume-spacer"></div>
+                @* Zone vide sous « Point de l'élève » : accueille l'assistante Sophia
+                   (bulle ancrée ici, plus flottante par-dessus le menu). *@
+                <div class="svt-resume-spacer svt-chat-host">
+                    <ChatWidget Anchored="true" />
+                </div>
                 <div class="svt-detail-col">
                     <div class="svt-detail-titre">Détail des versements</div>
                     <div class="svt-detail acc-grid">
                 <MudTable Items="_versements" Dense="true" Hover="true" Bordered="true">
                     <HeaderContent>
                         <MudTh Style="text-align:right; width:110px;">MONTANT</MudTh>
-                        <MudTh Style="width:110px;">Date</MudTh>
-                        <MudTh Style="width:120px;">Mode de paiement</MudTh>
-                        <MudTh Style="width:130px;">Nature du versement</MudTh>
-                        <MudTh Style="width:90px;">Statut élève</MudTh>
-                        <MudTh>Ref Opération</MudTh>
+                        <MudTh Style="width:100px;">Date</MudTh>
+                        <MudTh Style="width:88px;">Mode paiement</MudTh>
+                        <MudTh Style="width:96px;">Nature versement</MudTh>
+                        <MudTh Style="width:80px;">Statut élève</MudTh>
+                        <MudTh Style="width:84px;">Ref Opération</MudTh>
+                        <MudTh Style="width:78px; text-align:center;">Actions</MudTh>
                     </HeaderContent>
                     <RowTemplate>
                         <MudTd Style="text-align:right; font-weight:600;">@Fmt(context.Montant)</MudTd>
@@ -314,6 +331,18 @@
                            payé par statut élève », pas le statut technique du versement. *@
                         <MudTd>@_sel?.Statut</MudTd>
                         <MudTd>@(context.ReferencePaiement == "-" ? "" : context.ReferencePaiement)</MudTd>
+                        <MudTd Style="text-align:center; white-space:nowrap;">
+                            <MudTooltip Text="Modifier ce versement">
+                                <MudIconButton Icon="@Icons.Material.Filled.Edit" Size="Size.Small"
+                                               Color="Color.Primary" Disabled="_vEnCours"
+                                               OnClick="@(() => EditerVersement(context))" />
+                            </MudTooltip>
+                            <MudTooltip Text="Supprimer définitivement ce versement">
+                                <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                               Color="Color.Error" Disabled="_vEnCours"
+                                               OnClick="@(() => SupprimerVersementAsync(context))" />
+                            </MudTooltip>
+                        </MudTd>
                     </RowTemplate>
                     <NoRecordsContent>
                         <MudText Class="pa-2">Aucun versement pour cet élève.</MudText>

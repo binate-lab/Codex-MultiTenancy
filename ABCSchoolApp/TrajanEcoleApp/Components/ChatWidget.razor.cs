@@ -1,4 +1,5 @@
 using TrajanEcole.Shared.Library.Models.Requests.Chat;
+using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Web;
 using Microsoft.AspNetCore.Components.Routing;
 using MudBlazor;
@@ -12,14 +13,31 @@ namespace TrajanEcoleApp.Components
         private string _input = string.Empty;
         private readonly List<ChatMessageDto> _messages = [];
 
-        // Position horizontale de la bulle flottante : a GAUCHE sur la page versement
-        // (/scolarites), pour la loger du cote de « Point de l'eleve » ; a DROITE partout
-        // ailleurs (defaut). _navigation vient de _Imports.razor (@inject global).
-        private string PositionHorizontale =>
+        // Mode « ancre » : la bulle n'est plus flottante (position: fixed) mais logee DANS
+        // son conteneur (position: absolute), pour l'inserer dans la zone vide sous « Point
+        // de l'eleve » de la page /scolarites. Defaut = false (bulle flottante classique).
+        [Parameter] public bool Anchored { get; set; }
+
+        // Vrai quand on est sur la page des versements (/scolarites).
+        private bool EstSurScolarites =>
             _navigation.ToBaseRelativePath(_navigation.Uri).TrimStart('/')
-                .StartsWith("scolarites", StringComparison.OrdinalIgnoreCase)
-                ? "left: 24px;"
-                : "right: 24px;";
+                .StartsWith("scolarites", StringComparison.OrdinalIgnoreCase);
+
+        // La bulle FLOTTANTE globale (vit dans le layout, Anchored=false) s'efface sur
+        // /scolarites : c'est la version ANCREE de la page (Anchored=true) qui prend le
+        // relais, dans la zone vide. Partout ailleurs, seule la flottante s'affiche.
+        private bool DoitAfficher => Anchored || !EstSurScolarites;
+
+        // Style de la bulle (bouton rond) : ancree dans le conteneur, ou flottante a droite.
+        private string StyleBouton => Anchored
+            ? "position: absolute; bottom: 12px; left: 12px;"
+            : "position: fixed; bottom: 24px; right: 24px;";
+
+        // Style du panneau ouvert : ancre au-dessus de la bulle (peut deborder a droite,
+        // z-index eleve), ou flottant a droite comme avant.
+        private string StylePanneau => Anchored
+            ? "position: absolute; bottom: 80px; left: 12px; width: 360px; max-width: calc(100vw - 32px); height: 460px; max-height: 68vh;"
+            : "position: fixed; bottom: 90px; right: 24px; width: 360px; max-width: calc(100vw - 32px); height: 520px; max-height: calc(100vh - 130px);";
 
         // La bulle vit dans le layout (montee une fois) : on re-rend a chaque navigation
         // pour reevaluer sa position quand on entre/sort de /scolarites.

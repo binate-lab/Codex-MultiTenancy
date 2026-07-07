@@ -5,6 +5,8 @@ namespace App.Infrastructure.Services.Eleves
 
     public class VersementDetailItem
     {
+        // Identifiant du versement — cible des operations Modifier / Supprimer.
+        public Guid Id { get; set; }
         public decimal Montant { get; set; }
         public DateTime DateVersement { get; set; }
         public string MoyenPaiement { get; set; } = string.Empty;
@@ -60,6 +62,13 @@ namespace App.Infrastructure.Services.Eleves
         // Enregistre un versement (valide + impute sur l'echeancier cote backend).
         Task<VersementOpResult> CreateAsync(Guid eleveId, decimal montant, DateTime? date,
             string nature, string moyenPaiement, string referenceOperation);
+
+        // Modifie un versement existant (le backend rejoue toute l'imputation).
+        Task<VersementOpResult> UpdateAsync(Guid eleveId, Guid versementId, decimal montant, DateTime? date,
+            string nature, string moyenPaiement, string referenceOperation);
+
+        // Supprime DEFINITIVEMENT un versement (le backend rejoue toute l'imputation).
+        Task<VersementOpResult> DeleteAsync(Guid eleveId, Guid versementId);
 
         // Recu de paiement PDF (situation du compte : versements + synthese + echeancier).
         // ecole = nom d'affichage de l'etablissement ; logoBase64 = logo ecole (data-URI

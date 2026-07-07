@@ -56,6 +56,59 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
+        public async Task<VersementOpResult> UpdateAsync(Guid eleveId, Guid versementId, decimal montant,
+            DateTime? date, string nature, string moyenPaiement, string referenceOperation)
+        {
+            try
+            {
+                var reponse = await _httpClient.PutAsJsonAsync(
+                    $"eleves/{eleveId}/versements/{versementId}", new
+                    {
+                        montant,
+                        dateVersement = date,
+                        nature,
+                        moyenPaiement,
+                        referenceOperation,
+                    });
+
+                if (reponse.IsSuccessStatusCode)
+                {
+                    var data = await reponse.Content.ReadFromJsonAsync<VersementsEleveReponse>();
+                    return new VersementOpResult(true, null, data);
+                }
+
+                var texte = await reponse.Content.ReadAsStringAsync();
+                return new VersementOpResult(false,
+                    string.IsNullOrWhiteSpace(texte) ? $"Erreur {(int)reponse.StatusCode}" : texte.Trim('"'));
+            }
+            catch (Exception ex)
+            {
+                return new VersementOpResult(false, $"Service indisponible : {ex.Message}");
+            }
+        }
+
+        public async Task<VersementOpResult> DeleteAsync(Guid eleveId, Guid versementId)
+        {
+            try
+            {
+                var reponse = await _httpClient.DeleteAsync($"eleves/{eleveId}/versements/{versementId}");
+
+                if (reponse.IsSuccessStatusCode)
+                {
+                    var data = await reponse.Content.ReadFromJsonAsync<VersementsEleveReponse>();
+                    return new VersementOpResult(true, null, data);
+                }
+
+                var texte = await reponse.Content.ReadAsStringAsync();
+                return new VersementOpResult(false,
+                    string.IsNullOrWhiteSpace(texte) ? $"Erreur {(int)reponse.StatusCode}" : texte.Trim('"'));
+            }
+            catch (Exception ex)
+            {
+                return new VersementOpResult(false, $"Service indisponible : {ex.Message}");
+            }
+        }
+
         public async Task<byte[]> GetRecuPdfAsync(Guid eleveId, string ecole, string logoBase64)
         {
             try
