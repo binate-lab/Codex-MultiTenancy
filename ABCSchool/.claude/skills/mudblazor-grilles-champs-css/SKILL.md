@@ -34,6 +34,38 @@ skill, tu gagneras des allers-retours.
 > atteint les GRILLES mais PAS la racine des champs MudBlazor. Les champs se pilotent
 > depuis le CSS GLOBAL (`wwwroot/index.html`).**
 
+## Protocole d'intake — « fais-moi une grille »
+
+Quand l'utilisateur demande de **construire une grille** (typiquement : « fais-moi une grille
+avec mudblazor-grilles-champs-css »), NE code PAS tout de suite. Cadrer d'abord évite les
+allers-retours. Déroulé :
+
+1. **Poser le contrat en 10 points** ci-dessous, en proposant un **défaut sensé** pour chacun
+   (indiqués entre parenthèses). L'utilisateur ne corrige que ce qui diffère — il peut dire
+   « défauts partout sauf colonnes X/Y ». Ne transforme pas ça en interrogatoire : propose,
+   il ajuste.
+2. **Renvoyer un récap validé** dans un tableau à 2 colonnes `| Point | Décision |` avant de
+   coder.
+3. Une fois le tableau validé, **faire le job** (recettes ci-dessous).
+
+**Le contrat (10 points) :**
+
+| # | Point | À préciser (défaut) |
+|---|---|---|
+| 1 | Source des données | Service/endpoint + **clé unique par ligne** (nécessaire pour Ctrl+' / navigation clavier) |
+| 2 | Page hôte | Dans une page `.acc-window` (look Access, champs forcés à 22px) ou non ? → décide CSS global vs scopé |
+| 3 | Colonnes | Pour chacune : libellé, largeur, **lecture seule ou éditable** ; si éditable, le **type** (texte / déroulante + source des options / case / numérique) |
+| 4 | Style / hauteur | Hauteur de ligne (**défaut 26px**) ; colonnes spéciales (jaune, MAJUSCULES) |
+| 5 | Filtres | Colonnes filtrées ; type (texte souple sans accents / déroulante) ; **cascade** éventuelle ; tous sur une ligne ; **bouton EFFACER** (défaut oui) |
+| 6 | Pager | Oui/non ; taille de page ; libellé FR (**« Lignes par page »**) |
+| 7 | Actions par ligne | **MudMenu 3-points (MoreVert)** ? quelles actions (Modifier / Supprimer / Copier…) |
+| 8 | Ergonomies tableur | Navigation clavier Haut/Bas ? Ctrl+' (copie du dessus) ? Scroll horizontal ? (défaut : non, sauf demande) |
+| 9 | Maître → détail | Clic sur une ligne → actionne une **grille B** / un panneau ? si oui, colonnes + source de B |
+| 10 | Persistance | Éditions de cellule **sauvées en base** (quel endpoint) ou **en mémoire** ? |
+
+Les recettes qui suivent couvrent chacun de ces points ; les défauts (26px, recherche sans
+accents, EFFACER, pager FR) sont ceux du projet.
+
 ## Pourquoi (le modèle mental qui débloque tout)
 
 Le CSS scopé Blazor ajoute un attribut de scope (`b-xxxxx`) aux éléments **rendus dans le
