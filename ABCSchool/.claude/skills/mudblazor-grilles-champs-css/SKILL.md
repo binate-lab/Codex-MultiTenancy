@@ -4,11 +4,15 @@ description: >
   Styliser les GRILLES (MudTable) et les CHAMPS (MudTextField/MudSelect/MudNumericField)
   du front Blazor WASM MudBlazor (TrajanEcoleApp / ABCSchool) sans retomber dans les pièges
   CSS récurrents : hauteur de ligne d'une grille, compacter/rapetisser un champ ou un filtre,
-  taille de police/largeur d'un champ, traduire ou rétrécir un MudTablePager. Déclenche ce
-  skill dès qu'on touche à l'APPARENCE d'une grille ou d'un champ MudBlazor sur ce front —
-  et SURTOUT dès que « ma règle CSS ne s'applique pas », « le champ reste trop grand /
-  à 22px », « la largeur ne change pas », « aligner les lignes sur X px », « mettre les
-  filtres sur une ligne », même sans citer « MudBlazor », « scopé » ou « ::deep ». Ce skill
+  taille de police/largeur d'un champ, traduire ou rétrécir un MudTablePager. Couvre aussi
+  les ergonomies de grille « façon tableur » : barre de défilement horizontale, navigation
+  clavier Haut/Bas entre lignes, et copier la valeur de la cellule du dessus (Ctrl+' / ditto).
+  Déclenche ce skill dès qu'on touche à l'APPARENCE ou à l'ERGONOMIE CLAVIER d'une grille ou
+  d'un champ MudBlazor sur ce front — et SURTOUT dès que « ma règle CSS ne s'applique pas »,
+  « le champ reste trop grand / à 22px », « la largeur ne change pas », « aligner les lignes
+  sur X px », « mettre les filtres sur une ligne », « scroll horizontal de la grille »,
+  « me déplacer au clavier entre les lignes », « copier la cellule du dessus / recopier la
+  valeur d'au-dessus », même sans citer « MudBlazor », « scopé » ou « ::deep ». Ce skill
   encode POURQUOI le CSS scopé Blazor échoue sur les composants MudBlazor et OÙ mettre la
   règle pour qu'elle prenne. N'utilise PAS ce skill pour : de la logique métier (filtrage,
   calcul) ; styliser un élément HTML pur hors MudBlazor ; changer le thème global via le
@@ -167,6 +171,107 @@ Notes tirées de l'expérience :
 .acc-window .mud-table-pagination .mud-toolbar { min-height: 40px !important; height: 40px !important; }
 ```
 
+## Recette 4 — Barre de défilement horizontale d'une grille
+
+Pour qu'une grille montre une barre de défilement quand ses colonnes dépassent la largeur
+(ex. colonnes ajoutées plus tard), cible le **conteneur** de la MudTable en CSS scopé
+(c'est une grille → le scopé marche) :
+
+```css
+.acc-grid-eleves ::deep .mud-table-container { overflow-x: auto; }
+```
+
+## Recette 5 — Grille « façon tableur » : navigation clavier + copie de la cellule du dessus
+
+Deux ergonomies qui vont ensemble sur une grille éditable : **Flèche Haut/Bas** déplace le
+focus d'une ligne à l'autre, et **Ctrl+'** recopie la valeur de la cellule juste au-dessus
+(comme le « ditto » d'Excel). Réf. réelle : la grille élèves de `Pages/Scolarites/Scolarites.razor`
++ le handler `svtGrilleEleves` dans `wwwroot/index.html`.
+
+**Le principe qui débloque tout** : le JS gère la DÉTECTION clavier (il connaît la structure
+`<tr>`/`<td>` du tableau) mais délègue la MODIFICATION à Blazor. Pourquoi ? Parce que copier
+une valeur au niveau du DOM ne met **pas** à jour un `MudSelect` (colonnes Statut/Niveau/Classe) :
+sa valeur liée vit côté Blazor, pas dans un `<input>`. Il faut donc modifier le **modèle**.
+Le pont : chaque cellule éditable porte `data-col` (la colonne) + `data-eleve-id` (la ligne),
+le JS lit ces attributs et rappelle une méthode `[JSInvokable]` qui écrit dans le modèle.
+
+**1. Marquer les cellules éditables** (MudTd propage les attributs `data-*` sur le `<td>`) :
+
+```razor
+<MudTd DataLabel="Classe" data-col="Classe" data-eleve-id="@context.Id"> … </MudTd>
+```
+
+**2. Le pont Blazor** (code-behind) — `DotNetObjectReference` enregistré au 1er rendu, méthode
+`[JSInvokable]`, et `IDisposable` pour libérer la ref :
+
+```csharp
+public partial class MaPage : IDisposable
+{
+    private DotNetObjectReference<MaPage>? _dotnetRef;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            _dotnetRef = DotNetObjectReference.Create(this);
+            await _js.InvokeVoidAsync("svtGrilleEleves.init", _dotnetRef);
+        }
+    }
+
+    [JSInvokable]
+    public async Task CopierCelluleDuHaut(string sourceId, string cibleId, string col)
+    {
+        // retrouver les 2 lignes par Id dans la source de la grille, copier la propriété
+        // correspondant à `col` (réutilise les handlers d'édition existants pour les effets
+        // de bord : persistance du tél, cascade niveau→classe…), puis StateHasChanged().
+    }
+
+    public void Dispose() => _dotnetRef?.Dispose();
+}
+```
+
+**3. Le handler JS** (dans `index.html`, en phase capture) — navigation + détection Ctrl+' :
+
+```js
+window.svtGrilleEleves = { _ref: null, init: function (r) { this._ref = r; } };
+(function () {
+    function celluleColonne(tr, col){ return tr ? tr.querySelector('td[data-col="'+col+'"]') : null; }
+    function focusable(td){ return td && (td.querySelector('input:not([type=hidden]):not([disabled])')
+                                       || td.querySelector('[tabindex]:not([tabindex="-1"])')); }
+    document.addEventListener('keydown', function (e) {
+        var td = e.target.closest && e.target.closest('td[data-col]');
+        if (!td || !td.closest('.acc-grid-eleves')) return;
+        var col = td.getAttribute('data-col'), tr = td.closest('tr');
+        if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+            if (document.querySelector('.mud-popover-open .mud-list')) return; // déroulante ouverte : natif
+            var voisin = e.key === 'ArrowUp' ? tr.previousElementSibling : tr.nextElementSibling;
+            var cible = focusable(celluleColonne(voisin, col));
+            if (cible) { e.preventDefault(); e.stopPropagation(); cible.focus(); } // stop = MudSelect n'ouvre pas sa liste
+            return;
+        }
+        if (e.ctrlKey && (e.key === "'" || e.code === 'Digit4')) {   // ' = touche 4 de l'AZERTY
+            var tdHaut = celluleColonne(tr.previousElementSibling, col);
+            if (!tdHaut) return;                                     // 1re ligne : rien au-dessus
+            e.preventDefault(); e.stopPropagation();
+            window.svtGrilleEleves._ref && window.svtGrilleEleves._ref
+                .invokeMethodAsync('CopierCelluleDuHaut', tdHaut.getAttribute('data-eleve-id'),
+                                   td.getAttribute('data-eleve-id'), col).catch(function(){});
+        }
+    }, true);
+})();
+```
+
+Points d'attention (tirés du vécu) :
+- **`e.stopPropagation()`** dans la branche flèches, sinon le `MudSelect` ouvre sa liste sur
+  la même touche. Et **garde `.mud-popover-open .mud-list`** : si une déroulante est déjà
+  ouverte, on rend les flèches au comportement natif (choisir une option).
+- **Focus des cellules déroulantes** : le vrai `<input>` d'un MudSelect est `type=hidden` →
+  vise `[tabindex]` en repli (le div focusable de l'activateur).
+- **Bords** : 1re ligne, ou ligne du dessus sur une autre page du pager (non rendue) → pas de
+  copie. La détection `previousElementSibling` reste dans le `<tbody>` visible.
+- Le handler est **global** (une seule fois dans `index.html`) mais borné à `.acc-grid-eleves`
+  (no-op ailleurs) ; adapte ce sélecteur à ta grille.
+
 ## Cadence de rechargement (sinon tu testes dans le vide)
 
 Le piège qui fait croire qu'« aucune règle ne marche » : le mauvais rechargement.
@@ -193,6 +298,8 @@ l'onglet **Styles** (absente = pas chargée/scope raté ; barrée = battue en sp
 - `Pages/Economat/Echeancier.razor` + `.razor.css` — **la grille 26px canonique** (`.ech-grid`).
 - `Pages/Structures/Structures.razor.css` — `.str-grid` (3 grilles d'un coup).
 - `Pages/Economat/NaturesVersement.razor(.css)` — wrapper `.nat-grid` ajouté après coup.
-- `Pages/Scolarites/Scolarites.razor(.cs/.css)` — filtres, grille élèves dans `.acc-window`, pager.
-- `wwwroot/index.html` (bloc `<style>`) — **toutes les règles globales** de champs/filtres/pager
-  et la règle `.acc-window … 22px` à connaître.
+- `Pages/Scolarites/Scolarites.razor(.cs/.css)` — filtres, grille élèves dans `.acc-window`,
+  pager, cellules `data-col`/`data-eleve-id`, pont `[JSInvokable] CopierCelluleDuHaut`.
+- `wwwroot/index.html` — dans le `<style>` : **toutes les règles globales** de champs/filtres/pager
+  et la règle `.acc-window … 22px` ; dans le `<script>` : le handler clavier `svtGrilleEleves`
+  (navigation Haut/Bas + Ctrl+').
