@@ -39,11 +39,11 @@
             <RowTemplate>
                 <MudTd DataLabel="Ordre" Style="text-align:center;">
                     <MudNumericField T="int" @bind-Value="context.Ordre" HideSpinButtons="false" Min="0"
-                                     Variant="Variant.Text" Margin="Margin.Dense" Style="width:70px;" />
+                                     Variant="Variant.Text" Underline="false" Margin="Margin.Dense" Style="width:70px;" />
                 </MudTd>
                 <MudTd DataLabel="Libellé">
                     <MudTextField T="string" @bind-Value="context.Libelle"
-                                  Variant="Variant.Text" Margin="Margin.Dense" />
+                                  Variant="Variant.Text" Underline="false" Margin="Margin.Dense" />
                 </MudTd>
                 <MudTd DataLabel="Visible" Style="text-align:center;">
                     <MudCheckBox T="bool" @bind-Value="context.OK" Dense="true" Color="Color.Primary" />
