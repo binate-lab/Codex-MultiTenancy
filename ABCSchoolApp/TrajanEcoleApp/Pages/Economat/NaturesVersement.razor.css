@@ -1,0 +1,15 @@
+/* Grille des natures de versement : lignes à 26px (alignées sur les grilles
+   Modalités de versement / Structures). */
+.nat-grid ::deep td {
+    padding: 0 8px !important;
+    height: 26px !important;
+    white-space: nowrap;
+}
+
+/* Champs éditables des cellules (Ordre, Libellé) compactés pour tenir dans 26px. */
+.nat-grid ::deep td .mud-input-slot,
+.nat-grid ::deep td .mud-input-control {
+    min-height: 20px !important;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
