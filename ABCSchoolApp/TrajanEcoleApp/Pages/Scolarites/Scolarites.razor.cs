@@ -1,4 +1,5 @@
 using System.Globalization;
+using App.Infrastructure.Services.Economat;
 using App.Infrastructure.Services.Eleves;
 using App.Infrastructure.Services.Structures;
 using Microsoft.AspNetCore.Components;
@@ -12,7 +13,20 @@ namespace TrajanEcoleApp.Pages.Scolarites
         [Inject] private IScolariteEleveService _scolariteEleveService { get; set; } = default!;
         [Inject] private IStructureService _structureService { get; set; } = default!;
         [Inject] private IVersementService _versementService { get; set; } = default!;
+        [Inject] private INatureVersementService _natureService { get; set; } = default!;
         [Inject] private IJSRuntime _js { get; set; } = default!;
+
+        // Natures de versement configurables de l'école (module Economat) : alimentent la
+        // déroulante « Nature du versement ». On ne garde que les natures visibles (OK),
+        // triées par Ordre.
+        private List<NatureVersementItem> _natures = new();
+
+        // Libellé de la nature proposée par défaut à l'ouverture d'une saisie = la nature
+        // d'inscription si définie, sinon la première visible.
+        private string NatureParDefaut() =>
+            _natures.FirstOrDefault(n => n.EstInscription)?.Libelle
+            ?? _natures.FirstOrDefault()?.Libelle
+            ?? string.Empty;
 
         // Année scolaire en cours (bandeau) — même source que SchoolNavMenu.
         private string _annee = "—";
@@ -67,6 +81,11 @@ namespace TrajanEcoleApp.Pages.Scolarites
             var cycles = await _structureService.GetCyclesAsync();
             _niveaux = cycles.SelectMany(c => c.Niveaux).Select(n => n.Code).ToList();
             _classesRef = await _structureService.GetClassesAsync(_annee == "—" ? null : _annee);
+
+            // Natures de versement configurables (module Economat) : déroulante de saisie.
+            var natures = await _natureService.GetNaturesAsync();
+            _natures = natures.Where(n => n.OK).OrderBy(n => n.Ordre).ToList();
+            _vNature = NatureParDefaut();
 
             // Nom de l'école active (en-tête du reçu PDF).
             if (!string.IsNullOrWhiteSpace(codeEts))
@@ -186,7 +205,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         // Champs de saisie du sous-form bleu ciel.
         private decimal _vMontant;
         private DateTime? _vDate = DateTime.Today;
-        private string _vNature = "Inscription";
+        private string _vNature = string.Empty;   // fixé après chargement des natures
         private string _vMode = "Espèce";
         private string _vRef = string.Empty;
         private bool _vEnCours;
@@ -239,7 +258,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         {
             _vMontant = 0;
             _vDate = DateTime.Today;
-            _vNature = "Inscription";
+            _vNature = NatureParDefaut();
             _vMode = "Espèce";
             _vRef = string.Empty;
             _vEnEdition = null;
@@ -416,7 +435,9 @@ namespace TrajanEcoleApp.Pages.Scolarites
             if (_sel is null) return;
 
             // Combien de versements d'inscription déjà enregistrés pour cet élève ?
-            var nbInscription = _versements.Count(v => v.Nature == "Inscription");
+            // On compare au libellé de LA nature d'inscription configurée (pas au mot figé).
+            var libInscription = _natures.FirstOrDefault(n => n.EstInscription)?.Libelle ?? "Inscription";
+            var nbInscription = _versements.Count(v => v.Nature == libInscription);
             if (nbInscription == 0)
             {
                 _snackbar.Add("Aucun versement d'inscription : pas de SMS pour l'instant.", Severity.Info);
@@ -473,14 +494,6 @@ namespace TrajanEcoleApp.Pages.Scolarites
             }
             return sb.ToString().Normalize(System.Text.NormalizationForm.FormC);
         }
-
-        // Libellé d'affichage des natures (les valeurs sont les noms de l'enum backend).
-        private static string AfficherNature(string nature) => nature switch
-        {
-            "Scolarite" => "Scolarité",
-            "Arriere" => "Arriéré",
-            _ => nature,
-        };
 
         // Libellé et couleur du statut d'une échéance (valeurs = noms de l'enum backend).
         private static string AfficherStatut(string statut) => statut switch

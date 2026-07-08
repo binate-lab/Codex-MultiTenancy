@@ -207,13 +207,13 @@
                             </div>
                             <div class="svt-ligne">
                                 <label>Nature du versement :</label>
+                                @* Natures alimentées par le référentiel configurable de l'école
+                                   (module Economat → Nature versement) : lignes « Visible », triées. *@
                                 <MudSelect T="string" @bind-Value="_vNature" Variant="Variant.Outlined" Margin="Margin.Dense" Class="svt-nav-nature">
-                                    <MudSelectItem Value="@("Inscription")">Inscription</MudSelectItem>
-                                    <MudSelectItem Value="@("Scolarite")">Scolarité</MudSelectItem>
-                                    <MudSelectItem Value="@("Transport")">Transport</MudSelectItem>
-                                    <MudSelectItem Value="@("Arriere")">Arriéré</MudSelectItem>
-                                    <MudSelectItem Value="@("Cantine")">Cantine</MudSelectItem>
-                                    <MudSelectItem Value="@("Autre")">Autre</MudSelectItem>
+                                    @foreach (var n in _natures)
+                                    {
+                                        <MudSelectItem Value="@n.Libelle">@n.Libelle</MudSelectItem>
+                                    }
                                 </MudSelect>
                             </div>
                             <div class="svt-ligne svt-ligne-resserre">
@@ -326,7 +326,7 @@
                         <MudTd Style="text-align:right; font-weight:600;">@Fmt(context.Montant)</MudTd>
                         <MudTd>@context.DateVersement.ToString("dd/MM/yyyy")</MudTd>
                         <MudTd>@context.MoyenPaiement</MudTd>
-                        <MudTd>@AfficherNature(context.Nature)</MudTd>
+                        <MudTd>@context.Nature</MudTd>
                         @* Statut de l'ELEVE (Aff/Naff) — sert au futur point global « Total
                            payé par statut élève », pas le statut technique du versement. *@
                         <MudTd>@_sel?.Statut</MudTd>

@@ -117,6 +117,14 @@ namespace App.Infrastructure.Extensions
                 })
                 .AddHttpMessageHandler<AuthenticationHeaderHandler>();
 
+            // Client typie dedie au module Economat de Scolarite.Api : natures de versement.
+            builder.Services
+                .AddHttpClient<INatureVersementService, NatureVersementService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
             builder.Services.AddHttpClientInterceptor();
 
             return builder;
