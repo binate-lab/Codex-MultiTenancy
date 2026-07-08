@@ -509,6 +509,72 @@
             document.body.removeChild(a);
             URL.revokeObjectURL(url);
         };
+
+        // Grille élèves (/scolarites) pilotée comme un tableur :
+        //  - Flèche Haut / Bas : déplace le focus vers la cellule de MÊME colonne dans la
+        //    ligne adjacente (data-col identique). En veille si une déroulante est ouverte
+        //    (les flèches servent alors à choisir dans la liste).
+        //  - Ctrl+' (apostrophe = touche 4 de l'AZERTY) : recopie dans la cellule courante
+        //    la valeur de la cellule juste au-dessus, via un rappel .NET — indispensable pour
+        //    les colonnes déroulantes (Statut/Niveau/Classe) que le DOM seul ne mettrait pas à jour.
+        window.svtGrilleEleves = {
+            _ref: null,
+            init: function (dotNetRef) { this._ref = dotNetRef; }
+        };
+
+        (function () {
+            // Cellule de même colonne dans une ligne <tr> voisine.
+            function celluleColonne(tr, col) {
+                return tr ? tr.querySelector('td[data-col="' + col + '"]') : null;
+            }
+            // Élément focusable d'une cellule : input visible, sinon le div[tabindex] du MudSelect.
+            function focusable(td) {
+                if (!td) { return null; }
+                return td.querySelector('input:not([type=hidden]):not([disabled])')
+                    || td.querySelector('[tabindex]:not([tabindex="-1"])');
+            }
+
+            document.addEventListener('keydown', function (e) {
+                var el = e.target;
+                if (!el || !el.closest) { return; }
+                var td = el.closest('td[data-col]');
+                if (!td || !td.closest('.acc-grid-eleves')) { return; }
+
+                var col = td.getAttribute('data-col');
+                var tr = td.closest('tr');
+
+                // Navigation Haut / Bas entre lignes.
+                if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+                    // Déroulante réellement ouverte : on laisse les flèches naviguer la liste.
+                    if (document.querySelector('.mud-popover-open .mud-list')) { return; }
+                    var voisin = e.key === 'ArrowUp' ? tr.previousElementSibling : tr.nextElementSibling;
+                    var cible = focusable(celluleColonne(voisin, col));
+                    if (cible) {
+                        e.preventDefault();
+                        e.stopPropagation(); // sinon MudSelect ouvrirait sa liste sur la même flèche
+                        cible.focus();
+                    }
+                    return;
+                }
+
+                // Ctrl+' : copier la valeur de la cellule du dessus (touche « ' » / 4 AZERTY).
+                if (e.ctrlKey && (e.key === "'" || e.code === 'Digit4')) {
+                    var tdHaut = celluleColonne(tr.previousElementSibling, col);
+                    if (!tdHaut) { return; } // première ligne (ou ligne du dessus non rendue) : rien à copier
+                    e.preventDefault();
+                    e.stopPropagation();
+                    var sourceId = tdHaut.getAttribute('data-eleve-id');
+                    var cibleId = td.getAttribute('data-eleve-id');
+                    if (window.svtGrilleEleves._ref && sourceId && cibleId) {
+                        try {
+                            window.svtGrilleEleves._ref
+                                .invokeMethodAsync('CopierCelluleDuHaut', sourceId, cibleId, col)
+                                .catch(function () { });
+                        } catch (err) { }
+                    }
+                }
+            }, true);
+        })();
     </script>
 </body>
 

@@ -100,6 +100,12 @@
     background: #a3182f !important;
 }
 
+/* Grille élèves : barre de défilement horizontale si les colonnes dépassent la largeur
+   (pour voir d'éventuelles colonnes supplémentaires à droite). */
+.acc-grid-eleves ::deep .mud-table-container {
+    overflow-x: auto;
+}
+
 /* Cases Ã  cocher "Inscrit" lisibles sur fond rouge */
 .acc-grid ::deep td .mud-icon-root {
     color: #ffffff !important;

@@ -8,7 +8,7 @@ using MudBlazor;
 
 namespace TrajanEcoleApp.Pages.Scolarites
 {
-    public partial class Scolarites
+    public partial class Scolarites : IDisposable
     {
         [Inject] private IScolariteEleveService _scolariteEleveService { get; set; } = default!;
         [Inject] private IStructureService _structureService { get; set; } = default!;
@@ -78,6 +78,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private string _fClasse = string.Empty;
         private string _fStatut = "Tous";
         private string _fInscrit = "Tous";
+        private string _fActif = "Tous";
 
         // Élèves de l'école, chargés depuis Scolarite.Api (ScolariteDb) dans OnInitializedAsync.
         private List<EleveScolariteRow> _all = new();
@@ -157,7 +158,8 @@ namespace TrajanEcoleApp.Pages.Scolarites
                 && (string.IsNullOrWhiteSpace(_fNiveau) || e.Niveau == _fNiveau)
                 && (string.IsNullOrWhiteSpace(_fClasse) || e.Classe == _fClasse)
                 && (_fStatut == "Tous" || e.Statut == _fStatut)
-                && (_fInscrit == "Tous" || (_fInscrit == "Oui") == e.Inscrit));
+                && (_fInscrit == "Tous" || (_fInscrit == "Oui") == e.Inscrit)
+                && (_fActif == "Tous" || (_fActif == "Oui") == e.Actif));
 
         // « contient » tolérant aux accents et à la casse : on retire les accents des deux
         // côtés (SansAccents) puis on compare sans tenir compte de la casse. Un critère vide
@@ -172,7 +174,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private void Effacer()
         {
             _fNumOrdre = _fNom = _fPrenoms = _fMatricule = _fNiveau = _fClasse = string.Empty;
-            _fStatut = _fInscrit = "Tous";
+            _fStatut = _fInscrit = _fActif = "Tous";
         }
 
         private void Fermer() => _navigation.NavigateTo("/ecole");
@@ -223,6 +225,57 @@ namespace TrajanEcoleApp.Pages.Scolarites
         {
             row.Classe = nouveau;
         }
+
+        // ================== Navigation clavier & copie « cellule du dessus » ==================
+        // La grille se pilote comme un tableur : Haut/Bas déplacent le focus d'une ligne à
+        // l'autre (côté JS, cf. index.html), et Ctrl+' recopie la valeur de la cellule juste
+        // au-dessus. Le JS détecte la touche et connaît la colonne + les Id des deux lignes
+        // (via data-col / data-eleve-id) ; il rappelle ici pour modifier le MODÈLE Blazor —
+        // c'est indispensable pour les colonnes déroulantes (Statut/Niveau/Classe), qu'un
+        // simple copier-coller de valeur DOM ne mettrait pas à jour.
+        private DotNetObjectReference<Scolarites>? _dotnetRef;
+
+        protected override async Task OnAfterRenderAsync(bool firstRender)
+        {
+            if (firstRender)
+            {
+                _dotnetRef = DotNetObjectReference.Create(this);
+                await _js.InvokeVoidAsync("svtGrilleEleves.init", _dotnetRef);
+            }
+        }
+
+        // Appelé depuis le JS (Ctrl+') : copie la valeur de la colonne `col` de l'élève
+        // `sourceId` (ligne du dessus) vers l'élève `cibleId` (ligne courante).
+        [JSInvokable]
+        public async Task CopierCelluleDuHaut(string sourceId, string cibleId, string col)
+        {
+            if (!Guid.TryParse(sourceId, out var sId) || !Guid.TryParse(cibleId, out var cId))
+                return;
+
+            var source = _all.FirstOrDefault(e => e.Id == sId);
+            var cible = _all.FirstOrDefault(e => e.Id == cId);
+            if (source is null || cible is null || source == cible) return;
+
+            switch (col)
+            {
+                case "Tel":
+                    await OnTelChanged(cible, source.TelCorrespondant);  // recopie + persiste
+                    break;
+                case "Statut":
+                    cible.Statut = source.Statut;
+                    break;
+                case "Niveau":
+                    OnNiveauChanged(cible, source.Niveau);               // + invalide la classe si besoin
+                    break;
+                case "Classe":
+                    cible.Classe = source.Classe;
+                    break;
+            }
+
+            StateHasChanged();
+        }
+
+        public void Dispose() => _dotnetRef?.Dispose();
 
         // ================== Versements de l'élève sélectionné ==================
 

@@ -87,6 +87,15 @@
                     <MudSelectItem Value="@("Non")">Non</MudSelectItem>
                 </MudSelect>
             </div>
+            <div class="acc-fgroup">
+                <label class="acc-flabel">Actif :</label>
+                <MudSelect @bind-Value="_fActif" T="string" Dense="true"
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                    <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
+                    <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
+                    <MudSelectItem Value="@("Non")">Non</MudSelectItem>
+                </MudSelect>
+            </div>
             <MudButton OnClick="Effacer" Variant="Variant.Outlined" Size="Size.Small"
                        StartIcon="@Icons.Material.Filled.FilterAltOff" Class="ml-auto">Effacer</MudButton>
         </div>
@@ -112,7 +121,7 @@
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Matricule">@context.Matricule</MudTd>
-                <MudTd DataLabel="Tél. Correspondant">
+                <MudTd DataLabel="Tél. Correspondant" data-col="Tel" data-eleve-id="@context.Id">
                     <MudTextField T="string" Value="@context.TelCorrespondant"
                                   ValueChanged="@(v => OnTelChanged(context, v))"
                                   Immediate="false" Margin="Margin.Dense"
@@ -129,7 +138,7 @@
                     <MudIcon Size="Size.Small"
                              Icon="@(context.Inscrit ? Icons.Material.Filled.CheckBox : Icons.Material.Filled.CheckBoxOutlineBlank)" />
                 </MudTd>
-                <MudTd DataLabel="Statut">
+                <MudTd DataLabel="Statut" data-col="Statut" data-eleve-id="@context.Id">
                     <MudSelect T="string" Value="@context.Statut"
                                ValueChanged="@(v => OnStatutChanged(context, v))"
                                Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
@@ -138,7 +147,7 @@
                         <MudSelectItem Value="@("Naff")">Naff</MudSelectItem>
                     </MudSelect>
                 </MudTd>
-                <MudTd DataLabel="Niveau">
+                <MudTd DataLabel="Niveau" data-col="Niveau" data-eleve-id="@context.Id">
                     <MudSelect T="string" Value="@context.Niveau"
                                ValueChanged="@(v => OnNiveauChanged(context, v))"
                                Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
@@ -149,7 +158,7 @@
                         }
                     </MudSelect>
                 </MudTd>
-                <MudTd DataLabel="Classe">
+                <MudTd DataLabel="Classe" data-col="Classe" data-eleve-id="@context.Id">
                     @* Classe = sélecteur alimenté par le référentiel structures (classes du
                        niveau de la ligne, pour l'année en cours) — plus de saisie libre. *@
                     <MudSelect T="string" Value="@context.Classe"
