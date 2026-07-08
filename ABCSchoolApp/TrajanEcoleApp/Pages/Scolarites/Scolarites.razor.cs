@@ -49,10 +49,28 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private IEnumerable<ClasseItem> ClassesPour(string niveau) =>
             _classesRef.Where(c => c.NiveauCode == niveau);
 
+        // Classes proposées par le FILTRE Classe : celles du niveau filtré si un niveau est
+        // choisi, sinon toutes les classes de l'école (cascade Niveau -> Classe).
+        private IEnumerable<ClasseItem> ClassesFiltre =>
+            string.IsNullOrWhiteSpace(_fNiveau) ? _classesRef : ClassesPour(_fNiveau);
+
+        // Changement du filtre Niveau : on répercute et on vide le filtre Classe s'il ne
+        // fait plus partie des classes du nouveau niveau.
+        private void OnFiltreNiveauChanged(string niveau)
+        {
+            _fNiveau = niveau ?? string.Empty;
+            if (!string.IsNullOrWhiteSpace(_fClasse)
+                && !ClassesFiltre.Any(c => c.Libelle == _fClasse))
+            {
+                _fClasse = string.Empty;
+            }
+        }
+
         // Format monétaire façon Access : « 35 000 F » (espace comme séparateur de milliers).
         private static readonly CultureInfo _fr = CultureInfo.GetCultureInfo("fr-FR");
 
         // ---- État des filtres (barre de recherche) ----
+        private string _fNumOrdre = string.Empty;
         private string _fNom = string.Empty;
         private string _fPrenoms = string.Empty;
         private string _fMatricule = string.Empty;
@@ -116,7 +134,8 @@ namespace TrajanEcoleApp.Pages.Scolarites
                     e.Niveau,
                     e.Classe,
                     e.Solde,            // colonne « Net à payer » ≈ solde restant
-                    e.FraisScolarite    // colonne « Inscription » ≈ frais (à affiner plus tard)
+                    e.FraisScolarite,   // colonne « Inscription » ≈ frais (à affiner plus tard)
+                    e.NumOrdre          // N° Inscription
                 )).ToList();
             }
 
@@ -125,23 +144,34 @@ namespace TrajanEcoleApp.Pages.Scolarites
         }
 
         // Filtre client sur la source. Tous les critères se cumulent (ET).
+        // Les champs texte (Nom, Prénoms, Classe) sont comparés de façon souple :
+        // insensible aux accents ET à la casse (« eleve » trouve « Élève »).
         private IEnumerable<EleveScolariteRow> Filtered =>
             _all.Where(e =>
-                (string.IsNullOrWhiteSpace(_fNom)
-                    || e.Nom.Contains(_fNom, StringComparison.OrdinalIgnoreCase))
-                && (string.IsNullOrWhiteSpace(_fPrenoms)
-                    || e.Prenoms.Contains(_fPrenoms, StringComparison.OrdinalIgnoreCase))
+                (string.IsNullOrWhiteSpace(_fNumOrdre)
+                    || e.NumOrdre.ToString().Contains(_fNumOrdre.Trim()))
+                && ContientSouple(e.Nom, _fNom)
+                && ContientSouple(e.Prenoms, _fPrenoms)
                 && (string.IsNullOrWhiteSpace(_fMatricule)
                     || Compact(e.Matricule).Contains(Compact(_fMatricule), StringComparison.OrdinalIgnoreCase))
                 && (string.IsNullOrWhiteSpace(_fNiveau) || e.Niveau == _fNiveau)
-                && (string.IsNullOrWhiteSpace(_fClasse)
-                    || e.Classe.Contains(_fClasse, StringComparison.OrdinalIgnoreCase))
+                && (string.IsNullOrWhiteSpace(_fClasse) || e.Classe == _fClasse)
                 && (_fStatut == "Tous" || e.Statut == _fStatut)
                 && (_fInscrit == "Tous" || (_fInscrit == "Oui") == e.Inscrit));
 
+        // « contient » tolérant aux accents et à la casse : on retire les accents des deux
+        // côtés (SansAccents) puis on compare sans tenir compte de la casse. Un critère vide
+        // ne filtre rien.
+        private static bool ContientSouple(string source, string recherche)
+        {
+            if (string.IsNullOrWhiteSpace(recherche)) return true;
+            return SansAccents(source ?? string.Empty)
+                .Contains(SansAccents(recherche), StringComparison.OrdinalIgnoreCase);
+        }
+
         private void Effacer()
         {
-            _fNom = _fPrenoms = _fMatricule = _fNiveau = _fClasse = string.Empty;
+            _fNumOrdre = _fNom = _fPrenoms = _fMatricule = _fNiveau = _fClasse = string.Empty;
             _fStatut = _fInscrit = "Tous";
         }
 
@@ -532,11 +562,12 @@ namespace TrajanEcoleApp.Pages.Scolarites
             public string Classe { get; set; }
             public decimal NetAPayer { get; set; }   // rafraîchi après chaque versement (reste à payer)
             public decimal Inscription { get; set; } // frais de l'année (échéancier généré)
+            public int NumOrdre { get; }             // N° Inscription (unique par école)
 
             public EleveScolariteRow(
                 Guid id, string matricule, string telCorrespondant, string nom, string prenoms,
                 bool actif, bool inscrit, string statut, string niveau, string classe,
-                decimal netAPayer, decimal inscription)
+                decimal netAPayer, decimal inscription, int numOrdre)
             {
                 Id = id;
                 Matricule = matricule;
@@ -550,6 +581,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
                 Classe = classe;
                 NetAPayer = netAPayer;
                 Inscription = inscription;
+                NumOrdre = numOrdre;
             }
         }
     }

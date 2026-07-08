@@ -27,5 +27,6 @@ namespace App.Infrastructure.Services.Eleves
         string Niveau,
         string Classe,
         decimal FraisScolarite,
-        decimal Solde);
+        decimal Solde,
+        int NumOrdre);   // N° Inscription (unique par ecole)
 }

@@ -19,11 +19,14 @@
 
         <!-- ============ Barre de filtres ============ -->
         <div class="acc-filterbar">
+            @* Tous les filtres sur UNE ligne, dans l'ordre de tabulation
+               (Nom -> Prénoms -> Matricule -> N° Inscription -> Niveau -> Classe ->
+               Statut -> Inscrit). Le Tab / Shift+Tab suit naturellement l'ordre du DOM. *@
             <div class="acc-fgroup">
                 <label class="acc-flabel">Nom :</label>
                 <MudTextField @bind-Value="_fNom" Immediate="true" Clearable="true"
                               Placeholder="Nom…"
-                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield" />
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fmaj" />
             </div>
             <div class="acc-fgroup">
                 <label class="acc-flabel">Prénoms :</label>
@@ -34,11 +37,17 @@
             <div class="acc-fgroup">
                 <label class="acc-flabel">Matricule :</label>
                 <MudTextField @bind-Value="_fMatricule" Immediate="true" Clearable="true"
-                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-yellow" />
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-yellow acc-fmatricule" />
+            </div>
+            <div class="acc-fgroup">
+                <label class="acc-flabel">N° Inscription :</label>
+                <MudTextField @bind-Value="_fNumOrdre" Immediate="true" Clearable="true"
+                              Placeholder="N°…"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-yellow acc-fnumordre" />
             </div>
             <div class="acc-fgroup">
                 <label class="acc-flabel">Niveau :</label>
-                <MudSelect @bind-Value="_fNiveau" T="string" Clearable="true" Dense="true"
+                <MudSelect Value="_fNiveau" ValueChanged="OnFiltreNiveauChanged" T="string" Clearable="true" Dense="true"
                            Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
                     <MudSelectItem Value="@("")">Tous</MudSelectItem>
                     @foreach (var n in _niveaux)
@@ -49,8 +58,16 @@
             </div>
             <div class="acc-fgroup">
                 <label class="acc-flabel">Classe :</label>
-                <MudTextField @bind-Value="_fClasse" Immediate="true" Clearable="true"
-                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow" />
+                @* Déroulante en cascade : ne montre que les classes du niveau filtré
+                   (toutes les classes si aucun niveau n'est choisi). *@
+                <MudSelect @bind-Value="_fClasse" T="string" Clearable="true" Dense="true"
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow acc-fclasse">
+                    <MudSelectItem Value="@("")">Toutes</MudSelectItem>
+                    @foreach (var cl in ClassesFiltre)
+                    {
+                        <MudSelectItem Value="@cl.Libelle">@cl.Libelle</MudSelectItem>
+                    }
+                </MudSelect>
             </div>
             <div class="acc-fgroup">
                 <label class="acc-flabel">Statut :</label>
@@ -77,7 +94,7 @@
         <!-- ============ Zone rouge : liste des élèves ============ -->
         <!-- La table est enveloppée dans un div qui porte l'attribut de scope CSS :
              c'est lui qui permet aux sélecteurs ::deep d'atteindre les <td> de MudTable. -->
-        <div class="acc-grid mt-1">
+        <div class="acc-grid acc-grid-eleves mt-1">
         <MudTable T="EleveScolariteRow" Items="Filtered" Dense="true" Hover="true" Bordered="true"
                   RowsPerPage="5" OnRowClick="OnRowClick" RowClassFunc="ClasseLigne">
             <HeaderContent>
@@ -152,7 +169,7 @@
                 <MudText Class="pa-2">Aucun élève ne correspond au filtre.</MudText>
             </NoRecordsContent>
             <PagerContent>
-                <MudTablePager PageSizeOptions="new[] { 5, 10, 25 }" />
+                <MudTablePager PageSizeOptions="new[] { 5, 10, 25 }" RowsPerPageString="Lignes par page" />
             </PagerContent>
         </MudTable>
         </div>
@@ -169,7 +186,7 @@
         {
             <div class="svt-titre">
                 Les versements de :&nbsp;<b>@_sel.Nom @_sel.Prenoms</b>&nbsp;
-                <span class="svt-titre-niveau">en : @_sel.Classe</span>
+                <span class="svt-titre-niveau">en : @_sel.Classe (N° @_sel.NumOrdre)</span>
             </div>
 
             <div class="svt-zone">

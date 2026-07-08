@@ -10,6 +10,89 @@
     <link href="_content/MudBlazor/MudBlazor.min.css" rel="stylesheet" />
     <link href="TrajanEcoleApp.styles.css" rel="stylesheet" />
     <style>
+        /* Barre de filtres /scolarites : tous les champs (.acc-ffield) — Nom, Prénoms,
+           Matricule, Niveau, Classe, Statut, Inscrit. La page (.acc-window) force TOUS ses
+           champs à 22px (look Access) ; pour n'agir QUE sur les filtres on préfixe par
+           .acc-window (spécificité supérieure). Règle GLOBALE (hors CSS scopé, sans ::deep)
+           car le bundle scopé n'atteint pas l'input interne de MudBlazor. Texte 18px,
+           champ aplati à 30px. */
+        .acc-window .acc-ffield input,
+        .acc-window .acc-ffield .mud-input-slot,
+        .acc-window .acc-ffield .mud-select-input {
+            font-size: 18px !important;
+            line-height: 1.1 !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+        .acc-window .acc-ffield input {
+            height: 30px !important;
+        }
+        .acc-window .acc-ffield .mud-input-slot,
+        .acc-window .acc-ffield .mud-input.mud-input-outlined,
+        .acc-window .acc-ffield .mud-input-control-input-container {
+            min-height: 30px !important;
+        }
+
+        /* Filtre Nom affiché en MAJUSCULES (la valeur reste inchangée, la recherche est
+           déjà insensible à la casse). */
+        .acc-window .acc-fmaj input {
+            text-transform: uppercase !important;
+        }
+
+        /* Largeurs des filtres (globales : les règles de largeur scopées n'atteignent pas
+           la racine MudBlazor). Défaut compact pour tenir sur une seule ligne ; les largeurs
+           spécifiques ci-dessous l'emportent (même spécificité, définies après). */
+        .acc-window .acc-ffield {
+            width: 130px !important;
+            min-width: 130px !important;
+            max-width: 130px !important;
+        }
+        .acc-window .acc-fmatricule,
+        .acc-window .acc-fnumordre {
+            width: 125px !important;
+            min-width: 125px !important;
+            max-width: 125px !important;
+        }
+        .acc-window .acc-fclasse {
+            width: 110px !important;
+            min-width: 110px !important;
+            max-width: 110px !important;
+        }
+
+        /* Pager de la grille élèves : le sélecteur « rows per page » (5) était aussi happé
+           par les 22px du look Access. On le ramène à la taille du texte « 1-5 of 34 » (14px). */
+        .acc-window .mud-table-pagination input,
+        .acc-window .mud-table-pagination .mud-input-slot,
+        .acc-window .mud-table-pagination .mud-select-input {
+            font-size: 14px !important;
+        }
+
+        /* Hauteur du bloc pager réduite (52px -> 40px). */
+        .acc-window .mud-table-pagination,
+        .acc-window .mud-table-pagination .mud-toolbar {
+            min-height: 40px !important;
+            height: 40px !important;
+        }
+
+        /* Grille liste élèves : lignes à 26px (alignées sur la grille Modalités de versement).
+           Les champs des cellules (happés par les 22px « Access ») sont compactés pour tenir. */
+        .acc-window .acc-grid-eleves td {
+            height: 26px !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+        .acc-window .acc-grid-eleves td input,
+        .acc-window .acc-grid-eleves td .mud-input-slot,
+        .acc-window .acc-grid-eleves td .mud-select-input {
+            font-size: 14px !important;
+            min-height: 20px !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+        }
+        .acc-window .acc-grid-eleves td .mud-input-control,
+        .acc-window .acc-grid-eleves td .mud-input {
+            min-height: 20px !important;
+        }
         /* AppBar de l'espace école (.school-shell) : barre FLOTTANTE arrondie.
            Hauteur = nombre d'or (phi ≈ 1.618) × 3 × 32px ≈ 155.33px.
            Marge 12px tout autour + 12px de jeu sous la barre => le tiroir et le
