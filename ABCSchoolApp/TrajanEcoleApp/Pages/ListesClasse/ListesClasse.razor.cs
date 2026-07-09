@@ -44,9 +44,10 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private string _fInscrit = "Tous";
         private string _fActif = "Tous";
 
-        // Page courante de la grille (0-based) — pilotée par @bind-CurrentPage. On la remet à 0
-        // à chaque changement de filtre, sinon on peut rester sur une page devenue vide.
+        // Page courante (0-based) et taille de page de la grille : pilotées par la MudTable.
+        // On les suit pour recaler la sélection sur le 1er élève de la page affichée.
         private int _page;
+        private int _rowsPerPage = 10;
 
         protected override async Task OnInitializedAsync()
         {
@@ -84,7 +85,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
 
             // À l'affichage : on sélectionne déjà le 1er élève filtré et on montre sa fiche
             // (pas besoin d'attendre un clic).
-            _sel = Filtered.FirstOrDefault();
+            SelectionnerPremierDePage();
         }
 
         // Statut élève : Pedagogie renvoie l'entier de l'enum StatutEleve (Aff=1, Naff=2).
@@ -201,7 +202,27 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private void AppliquerFiltre()
         {
             _page = 0;
-            _sel = Filtered.FirstOrDefault();
+            SelectionnerPremierDePage();
+        }
+
+        // Sélectionne le 1er élève de la PAGE actuellement affichée (les éléments visibles vont
+        // de _page*_rowsPerPage à +_rowsPerPage dans la liste filtrée).
+        private void SelectionnerPremierDePage() =>
+            _sel = Filtered.Skip(_page * _rowsPerPage).FirstOrDefault();
+
+        // Flèches du pager : on suit la page et on recale la fiche sur le 1er élève affiché.
+        private void OnPageChanged(int page)
+        {
+            _page = page;
+            SelectionnerPremierDePage();
+        }
+
+        // Changement de taille de page (5/10/25…) : on revient page 1 et on recale la fiche.
+        private void OnRowsPerPageChanged(int taille)
+        {
+            _rowsPerPage = taille;
+            _page = 0;
+            SelectionnerPremierDePage();
         }
 
         // Handlers des filtres à valeur simple (Classe/Statut/Inscrit/Actif) : on passe par

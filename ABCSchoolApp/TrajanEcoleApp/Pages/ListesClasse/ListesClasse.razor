@@ -96,7 +96,8 @@
              La colonne étant bornée, la grille défile horizontalement (overflow-x). -->
         <div class="acc-grid acc-grid-eleves">
         <MudTable T="EleveRow" Items="Filtered" Dense="true" Hover="true" Bordered="true"
-                  RowsPerPage="10" @bind-CurrentPage="_page"
+                  RowsPerPage="_rowsPerPage" RowsPerPageChanged="OnRowsPerPageChanged"
+                  CurrentPage="_page" CurrentPageChanged="OnPageChanged"
                   OnRowClick="OnRowClick" RowClassFunc="LigneClass">
             @* Largeurs FIXES : indispensables au gel des 7 premières colonnes (table-layout:fixed
                + sticky left en CSS). Ne pas les changer sans ajuster les offsets left du .razor.css. *@
