@@ -112,6 +112,20 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
+        public async Task<bool> MajCycleNiveauAsync(Guid eleveId, int cycle, string niveau)
+        {
+            try
+            {
+                var resp = await _httpClient.PutAsJsonAsync(
+                    $"eleves/{eleveId}/cycle-niveau", new { cycle, niveau });
+                return resp.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private record CreateEleveResponse(Guid Id, int NumOrdre);
         private record MatriculeExisteResponse(bool Existe);
         private record PedagogieElevesResponse(List<ElevePedagogieItem> Eleves);

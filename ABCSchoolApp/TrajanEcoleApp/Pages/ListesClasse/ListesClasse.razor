@@ -125,8 +125,44 @@
                 <MudTd DataLabel="Matricule" Class="acc-cell-matricule">@FormatMatricule(context.Matricule)</MudTd>
                 <MudTd DataLabel="Nom" Class="acc-cell-nom">@context.Nom</MudTd>
                 <MudTd DataLabel="Prénoms" Class="acc-cell-prenom">@context.Prenoms</MudTd>
-                <MudTd DataLabel="Cycle">@context.Cycle</MudTd>
-                <MudTd DataLabel="Niveau">@context.Niveau</MudTd>
+                <MudTd DataLabel="Cycle" data-col="Cycle" data-eleve-id="@context.Id">
+                    @* Éditable seulement en école publique (sinon lecture seule : échéancier). *@
+                    @if (_ecolePublique)
+                    {
+                        <MudSelect T="int" Value="@context.Cycle"
+                                   ValueChanged="@(v => OnCycleChanged(context, v))"
+                                   Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                                   Class="acc-cell-select">
+                            @foreach (var c in _cycles)
+                            {
+                                <MudSelectItem Value="@c.Numero">@c.Numero</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
+                    else
+                    {
+                        @context.Cycle
+                    }
+                </MudTd>
+                <MudTd DataLabel="Niveau" data-col="Niveau" data-eleve-id="@context.Id">
+                    @if (_ecolePublique)
+                    {
+                        @* Cascade : niveaux du cycle de la ligne. *@
+                        <MudSelect T="string" Value="@context.Niveau"
+                                   ValueChanged="@(v => OnNiveauChanged(context, v))"
+                                   Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                                   Class="acc-cell-select">
+                            @foreach (var n in NiveauxDuCycleNumero(context.Cycle))
+                            {
+                                <MudSelectItem Value="@n">@n</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
+                    else
+                    {
+                        @context.Niveau
+                    }
+                </MudTd>
                 <MudTd DataLabel="Classe" data-col="Classe" data-eleve-id="@context.Id">
                     @* Classe éditable : déroulante alimentée par le référentiel Structures
                        (classes du niveau de la ligne). *@
@@ -142,13 +178,20 @@
                 </MudTd>
                 <MudTd DataLabel="Série">@context.Serie</MudTd>
                 <MudTd DataLabel="Statut" data-col="Statut" data-eleve-id="@context.Id">
-                    <MudSelect T="string" Value="@context.Statut"
-                               ValueChanged="@(v => OnStatutChanged(context, v))"
-                               Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
-                               Class="acc-cell-select">
-                        <MudSelectItem Value="@("Aff")">Aff</MudSelectItem>
-                        <MudSelectItem Value="@("Naff")">Naff</MudSelectItem>
-                    </MudSelect>
+                    @if (_ecolePublique)
+                    {
+                        <MudSelect T="string" Value="@context.Statut"
+                                   ValueChanged="@(v => OnStatutChanged(context, v))"
+                                   Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                                   Class="acc-cell-select">
+                            <MudSelectItem Value="@("Aff")">Aff</MudSelectItem>
+                            <MudSelectItem Value="@("Naff")">Naff</MudSelectItem>
+                        </MudSelect>
+                    }
+                    else
+                    {
+                        @context.Statut
+                    }
                 </MudTd>
                 <MudTd DataLabel="Sexe" Style="text-align:center">@context.Sexe</MudTd>
                 <MudTd DataLabel="Date naiss.">@(context.DateNaissance?.ToString("dd/MM/yyyy"))</MudTd>

@@ -21,6 +21,10 @@ namespace App.Infrastructure.Services.Eleves
         // Persiste dans Pedagogie les editions en ligne de la grille « Liste de classe ».
         Task<bool> MajStatutAsync(Guid eleveId, string statut);
         Task<bool> MajClasseAsync(Guid eleveId, string classe);
+
+        // Cycle + Niveau (edition reservee aux ecoles publiques). Remet la classe a vide cote
+        // backend (le niveau change). Retourne false si refuse (400 : cycle/niveau invalide).
+        Task<bool> MajCycleNiveauAsync(Guid eleveId, int cycle, string niveau);
     }
 
     // Resultat simple : Eleves.Api renvoie 201 + { id, numOrdre }, sans ResponseWrapper.

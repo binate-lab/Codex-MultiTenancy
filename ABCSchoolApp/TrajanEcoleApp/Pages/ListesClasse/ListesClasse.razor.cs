@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using MudBlazor;
+using TrajanEcole.Shared.Library.Enums;
 
 namespace TrajanEcoleApp.Pages.ListesClasse
 {
@@ -26,6 +27,11 @@ namespace TrajanEcoleApp.Pages.ListesClasse
 
         // Année scolaire en cours (bandeau) — même source que SchoolNavMenu.
         private string _annee = "—";
+
+        // École PUBLIQUE ? Régit l'édition de Cycle / Niveau / Statut : éditables uniquement en
+        // public (en privé, l'échéancier en dépend → colonnes en lecture seule). La Classe reste
+        // éditable dans les deux cas.
+        private bool _ecolePublique;
 
         // Référentiel Structures de l'école : cycles (avec leurs niveaux) + classes de l'année.
         // Alimente les filtres en cascade et la déroulante Classe des lignes.
@@ -60,6 +66,17 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             if (annee.IsSuccessful && annee.Data is not null)
             {
                 _annee = annee.Data.Libelle;
+            }
+
+            // Statut de l'école active (Public/Prive) : gouverne l'édition Cycle/Niveau/Statut.
+            if (!string.IsNullOrWhiteSpace(codeEts))
+            {
+                var ecoles = await _schoolService.GetMineAsync();
+                if (ecoles.IsSuccessful && ecoles.Data is not null)
+                {
+                    var ecole = ecoles.Data.FirstOrDefault(s => s.CodeEts == codeEts);
+                    _ecolePublique = ecole?.Statut == StatutEcole.Public;
+                }
             }
 
             // Référentiel Structures : cycles + niveaux (dans l'ordre configuré) + classes.
@@ -327,6 +344,55 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             }
         }
 
+        // ---- Cycle / Niveau (éditables seulement en école publique) ----
+
+        // Cycle du référentiel par son n° ; niveaux (codes) d'un cycle ; cycle d'un niveau.
+        private CycleItem? CyclePourNumero(int numero) =>
+            _cycles.FirstOrDefault(c => c.Numero == numero);
+        private IEnumerable<string> NiveauxDuCycleNumero(int numero) =>
+            CyclePourNumero(numero)?.Niveaux.OrderBy(n => n.Ordre).Select(n => n.Code)
+            ?? Enumerable.Empty<string>();
+        private int? CycleDuNiveau(string code) =>
+            _cycles.FirstOrDefault(c => c.Niveaux.Any(n => n.Code == code))?.Numero;
+
+        // Changement de Cycle : on répercute, on cale le Niveau sur le 1er niveau du cycle et on
+        // vide la Classe (le backend fait de même). Persistance atomique Cycle+Niveau ; rollback
+        // complet si échec.
+        private async Task OnCycleChanged(EleveRow row, int nouveauCycle)
+        {
+            if (nouveauCycle == row.Cycle) return;
+
+            var (ancienCycle, ancienNiveau, ancienneClasse) = (row.Cycle, row.Niveau, row.Classe);
+
+            row.Cycle = nouveauCycle;
+            row.Niveau = NiveauxDuCycleNumero(nouveauCycle).FirstOrDefault() ?? string.Empty;
+            row.Classe = string.Empty;
+
+            if (!await _eleveService.MajCycleNiveauAsync(row.Id, row.Cycle, row.Niveau))
+            {
+                (row.Cycle, row.Niveau, row.Classe) = (ancienCycle, ancienNiveau, ancienneClasse);
+                _snackbar.Add("Impossible d'enregistrer le cycle.", Severity.Error);
+            }
+        }
+
+        // Changement de Niveau : on aligne le Cycle sur celui du niveau et on vide la Classe.
+        private async Task OnNiveauChanged(EleveRow row, string nouveauNiveau)
+        {
+            if (nouveauNiveau == row.Niveau) return;
+
+            var (ancienCycle, ancienNiveau, ancienneClasse) = (row.Cycle, row.Niveau, row.Classe);
+
+            row.Niveau = nouveauNiveau;
+            row.Cycle = CycleDuNiveau(nouveauNiveau) ?? row.Cycle;
+            row.Classe = string.Empty;
+
+            if (!await _eleveService.MajCycleNiveauAsync(row.Id, row.Cycle, row.Niveau))
+            {
+                (row.Cycle, row.Niveau, row.Classe) = (ancienCycle, ancienNiveau, ancienneClasse);
+                _snackbar.Add("Impossible d'enregistrer le niveau.", Severity.Error);
+            }
+        }
+
         // ---- Actions par ligne (menu 3-points) ----
 
         // Fiche élève : pas encore de page dédiée -> stub informatif.
@@ -373,8 +439,15 @@ namespace TrajanEcoleApp.Pages.ListesClasse
 
             switch (col)
             {
+                // Statut / Cycle / Niveau : éditables (donc copiables) uniquement en école publique.
                 case "Statut":
-                    await OnStatutChanged(cible, source.Statut);   // recopie + persiste (+ rollback)
+                    if (_ecolePublique) await OnStatutChanged(cible, source.Statut);
+                    break;
+                case "Cycle":
+                    if (_ecolePublique) await OnCycleChanged(cible, source.Cycle);
+                    break;
+                case "Niveau":
+                    if (_ecolePublique) await OnNiveauChanged(cible, source.Niveau);
                     break;
                 case "Classe":
                     // On ne recopie la classe que si elle est valide pour le niveau de la cible.
@@ -397,8 +470,8 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             public string Matricule { get; }
             public string Nom { get; }
             public string Prenoms { get; }
-            public int Cycle { get; }           // N° de cycle (Pedagogie renvoie l'entier)
-            public string Niveau { get; }       // lecture seule (fige les classes proposées)
+            public int Cycle { get; set; }      // N° de cycle (éditable en école publique)
+            public string Niveau { get; set; }  // éditable en école publique (cascade → classes)
             public string Serie { get; }
             public string Classe { get; set; }
             public string Statut { get; set; }
