@@ -107,11 +107,45 @@
     overflow-x: auto;
 }
 
-/* La table prend sa largeur NATURELLE (somme des colonnes) et non 100 % du conteneur :
-   dans une colonne bornée, elle déborde donc et le conteneur défile horizontalement. */
+/* Table en largeur FIXE (somme des colonnes) + table-layout:fixed : chaque colonne a une
+   largeur EXACTE (condition nécessaire au gel des 1res colonnes). La table déborde de la
+   colonne bornée → le conteneur défile horizontalement. */
 .acc-grid-eleves ::deep .mud-table-root {
-    width: max-content;
-    min-width: 100%;
+    table-layout: fixed;
+    width: 1432px;   /* = somme des 17 largeurs de colonnes (cf. MudTh Style) */
+}
+
+.acc-grid-eleves ::deep th,
+.acc-grid-eleves ::deep td {
+    box-sizing: border-box;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* ---- Gel des 7 premières colonnes (N° Inscr · Matricule · Nom · Prénoms · Cycle · Niveau ·
+   Classe) : elles restent visibles pendant le défilement horizontal (position:sticky). Les
+   offsets `left` = somme cumulée des largeurs des colonnes précédentes (60,116,130,150,56,72).
+   Toute modif de largeur dans le .razor DOIT être répercutée ici. ---- */
+.acc-grid-eleves ::deep th:nth-child(-n+7),
+.acc-grid-eleves ::deep td:nth-child(-n+7) {
+    position: sticky;
+    z-index: 2;
+}
+.acc-grid-eleves ::deep th:nth-child(-n+7) {
+    z-index: 3;   /* l'en-tête figé passe au-dessus des cellules figées */
+}
+.acc-grid-eleves ::deep th:nth-child(1), .acc-grid-eleves ::deep td:nth-child(1) { left: 0; }
+.acc-grid-eleves ::deep th:nth-child(2), .acc-grid-eleves ::deep td:nth-child(2) { left: 60px; }
+.acc-grid-eleves ::deep th:nth-child(3), .acc-grid-eleves ::deep td:nth-child(3) { left: 176px; }
+.acc-grid-eleves ::deep th:nth-child(4), .acc-grid-eleves ::deep td:nth-child(4) { left: 306px; }
+.acc-grid-eleves ::deep th:nth-child(5), .acc-grid-eleves ::deep td:nth-child(5) { left: 456px; }
+.acc-grid-eleves ::deep th:nth-child(6), .acc-grid-eleves ::deep td:nth-child(6) { left: 512px; }
+.acc-grid-eleves ::deep th:nth-child(7), .acc-grid-eleves ::deep td:nth-child(7) { left: 584px; }
+
+/* Trait de césure à droite de la dernière colonne figée (repère visuel au défilement). */
+.acc-grid-eleves ::deep th:nth-child(7),
+.acc-grid-eleves ::deep td:nth-child(7) {
+    border-right: 2px solid #5f6b73 !important;
 }
 
 /* Matricule : cellule sur fond jaune (look Access), texte foncé pour rester lisible. */

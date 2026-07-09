@@ -90,6 +90,32 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         // Statut élève : Pedagogie renvoie l'entier de l'enum StatutEleve (Aff=1, Naff=2).
         private static string StatutLibelle(int statut) => statut == 1 ? "Aff" : "Naff";
 
+        // Formate le matricule national façon Access : « 22654456M » -> « 22 654 456 M »
+        // (chiffres groupés par 3 depuis la droite, lettre(s) de contrôle finale séparée(s)).
+        private static string FormatMatricule(string mat)
+        {
+            if (string.IsNullOrWhiteSpace(mat)) return mat ?? string.Empty;
+            var compact = mat.Replace(" ", string.Empty);
+
+            // Sépare la lettre de contrôle finale (partie non chiffrée) des chiffres de tête.
+            var i = compact.Length;
+            while (i > 0 && !char.IsDigit(compact[i - 1])) i--;
+            var digits = compact[..i];
+            var suffixe = compact[i..];
+
+            if (digits.Length == 0 || !digits.All(char.IsDigit))
+                return compact;   // format inattendu : on renvoie tel quel (sans espaces)
+
+            var sb = new System.Text.StringBuilder();
+            for (var k = 0; k < digits.Length; k++)
+            {
+                if (k > 0 && (digits.Length - k) % 3 == 0) sb.Append(' ');
+                sb.Append(digits[k]);
+            }
+
+            return string.IsNullOrEmpty(suffixe) ? sb.ToString() : $"{sb} {suffixe}";
+        }
+
         // ---- Cascade des filtres (Cycle -> Niveau -> Classe) ----
 
         // Codes des niveaux d'un cycle donné (par son Id), dans l'ordre.

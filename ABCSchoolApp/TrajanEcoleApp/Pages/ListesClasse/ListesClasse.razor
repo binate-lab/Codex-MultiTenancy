@@ -98,33 +98,34 @@
         <MudTable T="EleveRow" Items="Filtered" Dense="true" Hover="true" Bordered="true"
                   RowsPerPage="10" @bind-CurrentPage="_page"
                   OnRowClick="OnRowClick" RowClassFunc="LigneClass">
+            @* Largeurs FIXES : indispensables au gel des 7 premières colonnes (table-layout:fixed
+               + sticky left en CSS). Ne pas les changer sans ajuster les offsets left du .razor.css. *@
             <HeaderContent>
-                <MudTh Style="width:64px; text-align:right">N° Inscr.</MudTh>
-                <MudTh Style="width:104px">Matricule</MudTh>
-                <MudTh>Nom</MudTh>
-                <MudTh>Prénoms</MudTh>
-                <MudTh Style="width:64px">Cycle</MudTh>
-                <MudTh Style="width:74px">Niveau</MudTh>
-                <MudTh Style="width:52px">Série</MudTh>
-                <MudTh Style="width:70px">Classe</MudTh>
-                <MudTh Style="width:70px">Statut</MudTh>
-                <MudTh Style="width:44px; text-align:center">Sexe</MudTh>
-                <MudTh Style="width:88px">Date naiss.</MudTh>
+                <MudTh Style="width:60px; text-align:right">N° Inscr.</MudTh>
+                <MudTh Style="width:116px">Matricule</MudTh>
+                <MudTh Style="width:130px">Nom</MudTh>
+                <MudTh Style="width:150px">Prénoms</MudTh>
+                <MudTh Style="width:56px">Cycle</MudTh>
+                <MudTh Style="width:72px">Niveau</MudTh>
+                <MudTh Style="width:78px">Classe</MudTh>
+                <MudTh Style="width:60px">Série</MudTh>
+                <MudTh Style="width:74px">Statut</MudTh>
+                <MudTh Style="width:50px; text-align:center">Sexe</MudTh>
+                <MudTh Style="width:92px">Date naiss.</MudTh>
                 <MudTh Style="width:120px">Lieu naiss.</MudTh>
                 <MudTh Style="width:96px">Nationalité</MudTh>
-                <MudTh Style="width:104px">Tél.</MudTh>
-                <MudTh Style="width:52px; text-align:center">Inscrit</MudTh>
-                <MudTh Style="width:52px; text-align:center">Actif</MudTh>
-                <MudTh Style="width:48px; text-align:center">Actions</MudTh>
+                <MudTh Style="width:110px">Tél.</MudTh>
+                <MudTh Style="width:56px; text-align:center">Inscrit</MudTh>
+                <MudTh Style="width:56px; text-align:center">Actif</MudTh>
+                <MudTh Style="width:56px; text-align:center">Actions</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="N° Inscr." Style="text-align:right">@context.NumOrdre</MudTd>
-                <MudTd DataLabel="Matricule" Class="acc-cell-matricule">@context.Matricule</MudTd>
+                <MudTd DataLabel="Matricule" Class="acc-cell-matricule">@FormatMatricule(context.Matricule)</MudTd>
                 <MudTd DataLabel="Nom" Class="acc-cell-nom">@context.Nom</MudTd>
                 <MudTd DataLabel="Prénoms" Class="acc-cell-prenom">@context.Prenoms</MudTd>
                 <MudTd DataLabel="Cycle">@context.Cycle</MudTd>
                 <MudTd DataLabel="Niveau">@context.Niveau</MudTd>
-                <MudTd DataLabel="Série">@context.Serie</MudTd>
                 <MudTd DataLabel="Classe" data-col="Classe" data-eleve-id="@context.Id">
                     @* Classe éditable : déroulante alimentée par le référentiel Structures
                        (classes du niveau de la ligne). *@
@@ -138,6 +139,7 @@
                         }
                     </MudSelect>
                 </MudTd>
+                <MudTd DataLabel="Série">@context.Serie</MudTd>
                 <MudTd DataLabel="Statut" data-col="Statut" data-eleve-id="@context.Id">
                     <MudSelect T="string" Value="@context.Statut"
                                ValueChanged="@(v => OnStatutChanged(context, v))"
@@ -235,7 +237,7 @@
                                 <div class="lc-field"><span>Sexe</span><b>@_sel.Sexe</b></div>
                                 <div class="lc-field"><span>Né(e) le</span><b>@(_sel.DateNaissance?.ToString("dd/MM/yyyy"))</b></div>
                                 <div class="lc-field"><span>Nationalité</span><b>@_sel.Nationalite</b></div>
-                                <div class="lc-field lc-field-large"><span>Matricule</span><b>@_sel.Matricule</b></div>
+                                <div class="lc-field lc-field-large"><span>Matricule</span><b>@FormatMatricule(_sel.Matricule)</b></div>
                                 <div class="lc-field lc-field-large"><span>Lieu naiss.</span><b>@_sel.LieuNaissance</b></div>
                                 <div class="lc-field"><span>Cycle</span><b>@_sel.Cycle</b></div>
                                 <div class="lc-field"><span>Niveau</span><b>@_sel.Niveau</b></div>
