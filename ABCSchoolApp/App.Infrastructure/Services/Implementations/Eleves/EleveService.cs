@@ -54,7 +54,25 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
+        public async Task<IReadOnlyList<ElevePedagogieItem>> GetElevesAsync(string codeEts)
+        {
+            try
+            {
+                // GET /eleves?codeEts=... (Pedagogie.Api / ListesDeClasse). Reponse enveloppee
+                // { "eleves": [ ... ] }. Le JWT ecole-scoped est propage par l'AuthHeaderHandler.
+                var url = $"eleves?codeEts={Uri.EscapeDataString(codeEts)}";
+                var data = await _httpClient.GetFromJsonAsync<PedagogieElevesResponse>(url);
+                return data?.Eleves ?? new List<ElevePedagogieItem>();
+            }
+            catch
+            {
+                // Indisponible (service down, non autorise…) : grille vide plutot qu'une erreur.
+                return new List<ElevePedagogieItem>();
+            }
+        }
+
         private record CreateEleveResponse(Guid Id, int NumOrdre);
         private record MatriculeExisteResponse(bool Existe);
+        private record PedagogieElevesResponse(List<ElevePedagogieItem> Eleves);
     }
 }

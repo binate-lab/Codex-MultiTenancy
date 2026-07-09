@@ -1,0 +1,166 @@
+/* Page « Liste de classe » — même calque Access (palette gris-bleu + grille rouge) que
+   /scolarites. Le CSS scopé ne traverse pas les composants MudBlazor : l'enveloppe et la
+   grille sont re-déclarées ici (les règles GLOBALES de compacité 26px + matricule vivent
+   dans wwwroot/index.html, via la classe .acc-grid-eleves). */
+
+/* ---- Enveloppe façon Access ---- */
+.acc-window {
+    background: #d9e2e8;
+    border: 1px solid #9fb0bb;
+    padding: 10px 14px 14px;
+    color: #1c2b36;
+    font-size: 0.8rem;
+}
+
+.acc-titlebar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    margin-bottom: 6px;
+}
+
+.acc-title {
+    font-weight: 700;
+    font-size: 1.2rem;
+    color: #1c2b36;
+}
+
+.acc-year {
+    border: 2px solid #3c7d7d;
+    border-radius: 4px;
+    padding: 2px 16px;
+    font-weight: 700;
+    font-style: italic;
+    color: #2f7d7d;
+    background: #cfd9df;
+    letter-spacing: 1px;
+}
+
+/* ---- Barre de filtres ---- */
+.acc-filterbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: flex-end;
+    gap: 8px 14px;
+    background: #cfd9df;
+    border: 1px solid #9fb0bb;
+    border-radius: 4px;
+    padding: 8px 10px;
+    margin-bottom: 4px;
+}
+
+.acc-fgroup {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.acc-flabel {
+    font-weight: 700;
+    font-size: 0.72rem;
+    color: #243b4a;
+    white-space: nowrap;
+}
+
+.acc-ffield {
+    width: 190px;
+}
+
+.acc-fnarrow {
+    width: 110px;
+}
+
+.acc-ffield ::deep .mud-input-slot,
+.acc-ffield ::deep .mud-select-input {
+    font-size: 0.78rem;
+    padding-top: 1px;
+    padding-bottom: 1px;
+    background: #ffffff;
+}
+
+/* ---- Grille rouge (roster, façon Access) ---- */
+.acc-grid ::deep .mud-table-root {
+    font-size: 0.78rem;
+}
+
+.acc-grid ::deep th {
+    background: #5f6b73 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    white-space: nowrap;
+}
+
+.acc-grid ::deep td {
+    background: #8a1327 !important;
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    border-color: #a83b4a !important;
+    white-space: nowrap;
+}
+
+.acc-grid ::deep tr:hover td {
+    background: #a3182f !important;
+}
+
+/* Barre de défilement horizontale si les colonnes dépassent la largeur. */
+.acc-grid-eleves ::deep .mud-table-container {
+    overflow-x: auto;
+}
+
+/* Matricule : cellule sur fond jaune (look Access), texte foncé pour rester lisible. */
+.acc-grid ::deep td.acc-cell-matricule {
+    background: #f5e08c !important;
+    color: #1c2b36 !important;
+}
+
+/* Icônes (cases Inscrit / Actif) lisibles sur fond rouge. */
+.acc-grid ::deep td .mud-icon-root {
+    color: #ffffff !important;
+}
+
+/* Sélecteurs éditables (Statut / Classe) : texte blanc, compact, aligné sur la cellule. */
+.acc-grid ::deep td .mud-input-slot,
+.acc-grid ::deep td .mud-select-input,
+.acc-grid ::deep td .mud-input {
+    color: #ffffff !important;
+    font-weight: 700;
+    font-size: inherit !important;
+}
+
+.acc-grid ::deep .acc-cell-select {
+    width: 70px;
+}
+
+/* Pas de trait de soulignement sous les sélecteurs Statut / Classe. */
+.acc-grid ::deep td .mud-input.mud-input-underline::before,
+.acc-grid ::deep td .mud-input.mud-input-underline::after {
+    border-bottom: none !important;
+}
+
+/* Lignes compactes : rembourrage vertical réduit (le 26px final vient du global index.html). */
+.acc-grid ::deep td,
+.acc-grid ::deep th {
+    padding-top: 1px !important;
+    padding-bottom: 1px !important;
+}
+
+.acc-grid ::deep td .mud-input-control {
+    margin-top: 0 !important;
+}
+
+.acc-grid ::deep td .mud-input-slot {
+    min-height: 22px;
+}
+
+/* ---- Pied de grille ---- */
+.acc-gridfoot {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 4px 2px 0;
+}
+
+.acc-demo-note {
+    font-style: italic;
+    color: #8a5a00;
+}
