@@ -201,12 +201,12 @@
 /* ==================== Grille (gauche) + Fiche Élève (droite) ==================== */
 
 /* Rangée : grille à gauche (bornée → défilement horizontal), fiche à droite.
-   align-items:stretch → les deux colonnes démarrent en haut au même niveau ET prennent
-   la même hauteur (celle de la grille, la plus haute). */
+   align-items:flex-start → la fiche prend sa hauteur NATURELLE (≈ demi-page), alignée en
+   haut avec la grille (plus d'étirement à la hauteur de la grille). */
 .lc-layout {
     display: flex;
     gap: 12px;
-    align-items: stretch;
+    align-items: flex-start;
     margin-top: 4px;
 }
 
@@ -297,8 +297,8 @@
 
 .lc-fiche-corps {
     display: flex;
-    gap: 16px;
-    padding: 14px 16px;
+    gap: 14px;
+    padding: 8px 16px;
     align-items: flex-start;
 }
 
@@ -400,14 +400,14 @@
    (border-top bord à bord du cadre). */
 .lc-tuteur {
     border-top: 2px solid #9fb0bb;
-    padding: 10px 16px 14px;
+    padding: 4px 16px 8px;   /* resserré contre le trait de séparation */
 }
 
 .lc-tuteur-titre {
     font-weight: 700;
     font-size: 0.9rem;
     color: #7a1f1f;
-    margin-bottom: 6px;
+    margin-bottom: 3px;
 }
 
 .lc-tuteur-corps {
