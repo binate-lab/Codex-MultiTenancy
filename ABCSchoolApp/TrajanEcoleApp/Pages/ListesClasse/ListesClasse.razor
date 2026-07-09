@@ -29,7 +29,7 @@
                     <MudSelectItem Value="@("")">Tous</MudSelectItem>
                     @foreach (var c in _cycles)
                     {
-                        <MudSelectItem Value="@c.Id.ToString()">@c.Libelle</MudSelectItem>
+                        <MudSelectItem Value="@c.Id.ToString()">@c.Numero</MudSelectItem>
                     }
                 </MudSelect>
             </div>
@@ -48,7 +48,7 @@
             <div class="acc-fgroup">
                 <label class="acc-flabel">Classe :</label>
                 @* Cascade : classes du niveau filtré, sinon du cycle filtré, sinon toutes. *@
-                <MudSelect @bind-Value="_fClasse" T="string" Clearable="true" Dense="true"
+                <MudSelect Value="_fClasse" ValueChanged="OnFiltreClasseChanged" T="string" Clearable="true" Dense="true"
                            Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow acc-fclasse">
                     <MudSelectItem Value="@("")">Toutes</MudSelectItem>
                     @foreach (var cl in ClassesFiltre)
@@ -59,7 +59,7 @@
             </div>
             <div class="acc-fgroup">
                 <label class="acc-flabel">Statut :</label>
-                <MudSelect @bind-Value="_fStatut" T="string" Dense="true"
+                <MudSelect Value="_fStatut" ValueChanged="OnFiltreStatutChanged" T="string" Dense="true"
                            Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
                     <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
                     <MudSelectItem Value="@("Aff")">Aff</MudSelectItem>
@@ -68,7 +68,7 @@
             </div>
             <div class="acc-fgroup">
                 <label class="acc-flabel">Inscrit :</label>
-                <MudSelect @bind-Value="_fInscrit" T="string" Dense="true"
+                <MudSelect Value="_fInscrit" ValueChanged="OnFiltreInscritChanged" T="string" Dense="true"
                            Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
                     <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
                     <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
@@ -77,7 +77,7 @@
             </div>
             <div class="acc-fgroup">
                 <label class="acc-flabel">Actif :</label>
-                <MudSelect @bind-Value="_fActif" T="string" Dense="true"
+                <MudSelect Value="_fActif" ValueChanged="OnFiltreActifChanged" T="string" Dense="true"
                            Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
                     <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
                     <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
@@ -88,12 +88,16 @@
                        StartIcon="@Icons.Material.Filled.FilterAltOff" Class="ml-auto">Effacer</MudButton>
         </div>
 
-        <!-- ============ Grille rouge : roster des élèves ============ -->
+        <!-- ============ Grille (gauche) + Fiche Élève (droite), côte à côte ============ -->
+        <div class="lc-layout">
+        <div class="lc-grid-col">
         <!-- Le div wrapper porte le scope CSS (::deep) ET la classe .acc-grid-eleves ciblée
-             par les règles globales (26px) et le handler clavier de wwwroot/index.html. -->
-        <div class="acc-grid acc-grid-eleves mt-1">
+             par les règles globales (26px) et le handler clavier de wwwroot/index.html.
+             La colonne étant bornée, la grille défile horizontalement (overflow-x). -->
+        <div class="acc-grid acc-grid-eleves">
         <MudTable T="EleveRow" Items="Filtered" Dense="true" Hover="true" Bordered="true"
-                  RowsPerPage="10">
+                  RowsPerPage="10" @bind-CurrentPage="_page"
+                  OnRowClick="OnRowClick" RowClassFunc="LigneClass">
             <HeaderContent>
                 <MudTh Style="width:64px; text-align:right">N° Inscr.</MudTh>
                 <MudTh Style="width:104px">Matricule</MudTh>
@@ -118,7 +122,7 @@
                 <MudTd DataLabel="Matricule" Class="acc-cell-matricule">@context.Matricule</MudTd>
                 <MudTd DataLabel="Nom" Class="acc-cell-nom">@context.Nom</MudTd>
                 <MudTd DataLabel="Prénoms" Class="acc-cell-prenom">@context.Prenoms</MudTd>
-                <MudTd DataLabel="Cycle">@context.CycleLibelle</MudTd>
+                <MudTd DataLabel="Cycle">@context.Cycle</MudTd>
                 <MudTd DataLabel="Niveau">@context.Niveau</MudTd>
                 <MudTd DataLabel="Série">@context.Serie</MudTd>
                 <MudTd DataLabel="Classe" data-col="Classe" data-eleve-id="@context.Id">
@@ -180,6 +184,66 @@
                 Source : Pédagogie (PedagogieDb). Statut / Classe éditables (Ctrl+' = recopie du dessus).
             </MudText>
         </div>
+        </div><!-- /lc-grid-col -->
+
+        @* ============ Fiche Élève, à droite de la grille (calque du « Point de l'élève » du
+               form Versements) : cadre photo d'identité (35×45) + état civil. ============ *@
+        @if (_sel is not null)
+        {
+            <div class="lc-fiche-col">
+                <div class="lc-fiche">
+                    <div class="lc-fiche-titre">Fiche Élève</div>
+                    <div class="lc-fiche-corps">
+                        <div class="lc-photo">
+                            @{
+                                var src = PhotoSrc(_sel);
+                            }
+                            @if (src is not null)
+                            {
+                                <img src="@src" alt="Photo de @_sel.Nom @_sel.Prenoms" />
+                            }
+                            else
+                            {
+                                <div class="lc-photo-vide">
+                                    <MudIcon Icon="@Icons.Material.Filled.PersonOutline" Size="Size.Large" />
+                                    <div>Pas de photo</div>
+                                </div>
+                            }
+                        </div>
+                        <div class="lc-fiche-detail">
+                            <div class="lc-nom">@_sel.Nom @_sel.Prenoms</div>
+                            <div class="lc-grid">
+                                <div class="lc-field"><span>N° Inscr.</span><b>@_sel.NumOrdre</b></div>
+                                <div class="lc-field"><span>Sexe</span><b>@_sel.Sexe</b></div>
+                                <div class="lc-field"><span>Né(e) le</span><b>@(_sel.DateNaissance?.ToString("dd/MM/yyyy"))</b></div>
+                                <div class="lc-field"><span>Nationalité</span><b>@_sel.Nationalite</b></div>
+                                <div class="lc-field lc-field-large"><span>Matricule</span><b>@_sel.Matricule</b></div>
+                                <div class="lc-field lc-field-large"><span>Lieu naiss.</span><b>@_sel.LieuNaissance</b></div>
+                                <div class="lc-field"><span>Cycle</span><b>@_sel.Cycle</b></div>
+                                <div class="lc-field"><span>Niveau</span><b>@_sel.Niveau</b></div>
+                                <div class="lc-field"><span>Classe</span><b>@_sel.Classe</b></div>
+                                <div class="lc-field"><span>Série</span><b>@_sel.Serie</b></div>
+                                <div class="lc-field"><span>Statut</span><b>@_sel.Statut</b></div>
+                                <div class="lc-field"><span>Inscrit</span><b>@(_sel.Inscrit ? "Oui" : "Non")</b></div>
+                                <div class="lc-field"><span>Actif</span><b>@(_sel.Actif ? "Oui" : "Non")</b></div>
+                                <div class="lc-field"><span>Tél.</span><b>@_sel.Telephone</b></div>
+                            </div>
+                        </div>
+                    </div>
+
+                    @* Tuteur : sous le corps (photo + détail), séparé par un trait pleine largeur. *@
+                    <div class="lc-tuteur">
+                        <div class="lc-tuteur-titre">Tuteur</div>
+                        <div class="lc-tuteur-corps">
+                            <div class="lc-field"><span>Nom</span><b>@_sel.TuteurNom @_sel.TuteurPrenom</b></div>
+                            <div class="lc-field"><span>Tél.</span><b>@_sel.TuteurTel1</b></div>
+                            <div class="lc-field"><span>WhatsApp</span><b>@_sel.TuteurTel2</b></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        }
+        </div><!-- /lc-layout -->
 
     </div>
 </MudPaper>

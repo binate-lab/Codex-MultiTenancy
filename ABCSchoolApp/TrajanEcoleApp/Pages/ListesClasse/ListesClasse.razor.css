@@ -107,6 +107,13 @@
     overflow-x: auto;
 }
 
+/* La table prend sa largeur NATURELLE (somme des colonnes) et non 100 % du conteneur :
+   dans une colonne bornée, elle déborde donc et le conteneur défile horizontalement. */
+.acc-grid-eleves ::deep .mud-table-root {
+    width: max-content;
+    min-width: 100%;
+}
+
 /* Matricule : cellule sur fond jaune (look Access), texte foncé pour rester lisible. */
 .acc-grid ::deep td.acc-cell-matricule {
     background: #f5e08c !important;
@@ -163,4 +170,162 @@
 .acc-demo-note {
     font-style: italic;
     color: #8a5a00;
+}
+
+/* ==================== Grille (gauche) + Fiche Élève (droite) ==================== */
+
+/* Rangée : grille à gauche (bornée → défilement horizontal), fiche à droite.
+   align-items:stretch → les deux colonnes démarrent en haut au même niveau ET prennent
+   la même hauteur (celle de la grille, la plus haute). */
+.lc-layout {
+    display: flex;
+    gap: 12px;
+    align-items: stretch;
+    margin-top: 4px;
+}
+
+/* Colonne grille : prend l'espace restant ; min-width:0 est LA clé pour que le conteneur
+   MudTable (overflow-x:auto) puisse être plus étroit que la table et défiler. */
+.lc-grid-col {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+/* Colonne fiche : largeur fixe, à droite ; display:flex pour que le cadre s'étire en hauteur. */
+.lc-fiche-col {
+    flex: 0 0 auto;
+    display: flex;
+}
+
+/* Cadre gris-bleu façon « Point de l'élève ». S'étire à la hauteur de la grille (flex child). */
+.lc-fiche {
+    background: #e8eef2;
+    border: 1px solid #9fb0bb;
+    width: 520px;
+}
+
+/* Bandeau titre bord à bord (calque .svt-resume-titre). */
+.lc-fiche-titre {
+    padding: 6px 16px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    text-align: center;
+    color: #1c2b36;
+    background: #cfd9df;
+    border-bottom: 2px solid #9fb0bb;
+}
+
+.lc-fiche-corps {
+    display: flex;
+    gap: 16px;
+    padding: 14px 16px;
+    align-items: flex-start;
+}
+
+/* Cadre PHOTO D'IDENTITÉ : ratio 35×45 mm (132×170 px ≈ 96 dpi). */
+.lc-photo {
+    flex: 0 0 auto;
+    width: 132px;
+    height: 170px;
+    border: 1px solid #9fb0bb;
+    background: #ffffff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+}
+
+.lc-photo img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Placeholder quand l'élève n'a pas de photo. */
+.lc-photo-vide {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 4px;
+    font-size: 0.72rem;
+    color: #5a748a;
+    text-align: center;
+    padding: 6px;
+}
+
+/* Mini-fiche à droite de la photo : nom en tête + grille d'état civil. */
+.lc-fiche-detail {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    min-width: 0;
+}
+
+.lc-nom {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #7a1f1f;
+    border-bottom: 1px solid #9fb0bb;
+    padding-bottom: 4px;
+}
+
+/* Grille 2 colonnes de champs libellé/valeur (façon fiche d'identité). */
+.lc-grid {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(160px, 1fr));
+    gap: 4px 20px;
+    font-size: 0.82rem;
+}
+
+.lc-field {
+    display: flex;
+    gap: 8px;
+    align-items: baseline;
+    border-bottom: 1px dotted #b9c6ce;
+    padding: 1px 0;
+}
+
+/* Champ qui occupe toute la largeur (ex. Lieu de naissance, souvent long). */
+.lc-field-large {
+    grid-column: 1 / -1;
+}
+
+.lc-field span {
+    flex: 0 0 84px;
+    color: #5a748a;
+}
+
+.lc-field b {
+    color: #1c2b36;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Bloc Tuteur : sous le corps (photo + détail), séparé par un trait pleine largeur
+   (border-top bord à bord du cadre). */
+.lc-tuteur {
+    border-top: 2px solid #9fb0bb;
+    padding: 10px 16px 14px;
+}
+
+.lc-tuteur-titre {
+    font-weight: 700;
+    font-size: 0.9rem;
+    color: #7a1f1f;
+    margin-bottom: 6px;
+}
+
+.lc-tuteur-corps {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    font-size: 0.82rem;
+}
+
+/* Ligne sélectionnée dans la grille rouge : bleu foncé (définie APRÈS .acc-grid td pour
+   l'emporter à spécificité égale). */
+::deep .lc-ligne-sel td {
+    background: #1b4f72 !important;
+    color: #ffffff !important;
 }

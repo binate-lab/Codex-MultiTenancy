@@ -39,5 +39,11 @@ namespace App.Infrastructure.Services.Eleves
         int Statut,
         bool IsInscrit,
         bool IsActif,
-        string Telephone);
+        string Telephone,
+        string ImageFile,   // photo de l'élève (data URL / chemin / base64) — souvent vide tant que l'upload n'existe pas
+        TuteurItem? Tuteur);   // correspondant / tuteur (nom + téléphones)
+
+    // Sous-objet tuteur (calque partiel de ParentDto renvoyé par Pedagogie) : ce dont la
+    // fiche a besoin (Telephone1 = tél., Telephone2 = WhatsApp).
+    public record TuteurItem(string? Nom, string? Prenom, string? Telephone1, string? Telephone2);
 }

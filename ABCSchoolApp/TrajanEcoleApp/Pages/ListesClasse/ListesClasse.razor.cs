@@ -42,6 +42,10 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private string _fInscrit = "Tous";
         private string _fActif = "Tous";
 
+        // Page courante de la grille (0-based) — pilotée par @bind-CurrentPage. On la remet à 0
+        // à chaque changement de filtre, sinon on peut rester sur une page devenue vide.
+        private int _page;
+
         protected override async Task OnInitializedAsync()
         {
             // École active = claim « school » (= CodeEts) du JWT école-scoped.
@@ -69,16 +73,17 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 var eleves = await _eleveService.GetElevesAsync(codeEts);
                 _all = eleves.Select(e => new EleveRow(
                     e.Id, e.NumOrdre, e.Matricule, e.Nom, e.Prenom,
-                    CycleLibelle(e.Cycle), e.Niveau, e.Serie, e.Classe,
+                    e.Cycle, e.Niveau, e.Serie, e.Classe,
                     StatutLibelle(e.Statut), e.Sexe, e.DateNaissance, e.LieuNaissance,
-                    e.Nationalite, e.Telephone, e.IsInscrit, e.IsActif)).ToList();
+                    e.Nationalite, e.Telephone, e.IsInscrit, e.IsActif, e.ImageFile,
+                    e.Tuteur?.Nom ?? string.Empty, e.Tuteur?.Prenom ?? string.Empty,
+                    e.Tuteur?.Telephone1 ?? string.Empty, e.Tuteur?.Telephone2 ?? string.Empty)).ToList();
             }
-        }
 
-        // Libellé du cycle (référentiel Structures) à partir de son numéro : Pedagogie renvoie
-        // le cycle en entier. Repli sur le numéro si absent du référentiel.
-        private string CycleLibelle(int numero) =>
-            _cycles.FirstOrDefault(c => c.Numero == numero)?.Libelle ?? numero.ToString();
+            // À l'affichage : on sélectionne déjà le 1er élève filtré et on montre sa fiche
+            // (pas besoin d'attendre un clic).
+            _sel = Filtered.FirstOrDefault();
+        }
 
         // Statut élève : Pedagogie renvoie l'entier de l'enum StatutEleve (Aff=1, Naff=2).
         private static string StatutLibelle(int statut) => statut == 1 ? "Aff" : "Naff";
@@ -125,6 +130,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 _fNiveau = string.Empty;
             if (!string.IsNullOrWhiteSpace(_fClasse) && !ClassesFiltre.Any(c => c.Libelle == _fClasse))
                 _fClasse = string.Empty;
+            AppliquerFiltre();
         }
 
         // Changement du filtre Niveau : vide le filtre Classe s'il ne fait plus partie
@@ -134,6 +140,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             _fNiveau = niveau ?? string.Empty;
             if (!string.IsNullOrWhiteSpace(_fClasse) && !ClassesFiltre.Any(c => c.Libelle == _fClasse))
                 _fClasse = string.Empty;
+            AppliquerFiltre();
         }
 
         // Filtre client sur la source. Tous les critères se cumulent (ET).
@@ -150,9 +157,46 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         {
             _fCycleId = _fNiveau = _fClasse = string.Empty;
             _fStatut = _fInscrit = _fActif = "Tous";
+            AppliquerFiltre();
         }
 
         private void Fermer() => _navigation.NavigateTo("/ecole");
+
+        // ---- Sélection d'un élève (clic sur une ligne) → Fiche Élève ----
+        private EleveRow? _sel;
+
+        private void OnRowClick(TableRowClickEventArgs<EleveRow> args) => _sel = args.Item;
+
+        // À appeler après TOUT changement de filtre : revient à la 1re page et recale la
+        // sélection (donc la fiche) sur le 1er élève de la liste filtrée. Un clic ligne reste
+        // prioritaire tant qu'on ne retouche pas les filtres.
+        private void AppliquerFiltre()
+        {
+            _page = 0;
+            _sel = Filtered.FirstOrDefault();
+        }
+
+        // Handlers des filtres à valeur simple (Classe/Statut/Inscrit/Actif) : on passe par
+        // Value/ValueChanged (et non @bind-Value:after, qui ne se déclenche pas de façon fiable
+        // sur MudSelect) pour garantir le recalage de la fiche.
+        private void OnFiltreClasseChanged(string v) { _fClasse = v ?? string.Empty; AppliquerFiltre(); }
+        private void OnFiltreStatutChanged(string v) { _fStatut = v ?? "Tous"; AppliquerFiltre(); }
+        private void OnFiltreInscritChanged(string v) { _fInscrit = v ?? "Tous"; AppliquerFiltre(); }
+        private void OnFiltreActifChanged(string v) { _fActif = v ?? "Tous"; AppliquerFiltre(); }
+
+        // Surligne la ligne sélectionnée dans la grille rouge.
+        private string LigneClass(EleveRow row, int _) => row == _sel ? "lc-ligne-sel" : string.Empty;
+
+        // Source affichable de la photo : data URL / http / chemin absolu tels quels ; sinon
+        // on suppose du base64 nu et on préfixe. Null si vide → placeholder « Pas de photo ».
+        private static string? PhotoSrc(EleveRow row)
+        {
+            var img = row?.ImageFile;
+            if (string.IsNullOrWhiteSpace(img)) return null;
+            if (img.StartsWith("data:") || img.StartsWith("http", StringComparison.OrdinalIgnoreCase) || img.StartsWith("/"))
+                return img;
+            return $"data:image/jpeg;base64,{img}";
+        }
 
         // ---- Éditions en ligne (en mémoire pour l'instant) ----
         private void OnStatutChanged(EleveRow row, string nouveau) => row.Statut = nouveau;
@@ -225,7 +269,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             public string Matricule { get; }
             public string Nom { get; }
             public string Prenoms { get; }
-            public string CycleLibelle { get; }
+            public int Cycle { get; }           // N° de cycle (Pedagogie renvoie l'entier)
             public string Niveau { get; }       // lecture seule (fige les classes proposées)
             public string Serie { get; }
             public string Classe { get; set; }
@@ -237,19 +281,25 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             public string Telephone { get; }
             public bool Inscrit { get; }
             public bool Actif { get; }
+            public string ImageFile { get; }   // photo de l'élève (souvent vide pour l'instant)
+            public string TuteurNom { get; }
+            public string TuteurPrenom { get; }
+            public string TuteurTel1 { get; }   // tél.
+            public string TuteurTel2 { get; }   // WhatsApp
 
             public EleveRow(
                 Guid id, int numOrdre, string matricule, string nom, string prenoms,
-                string cycleLibelle, string niveau, string serie, string classe,
+                int cycle, string niveau, string serie, string classe,
                 string statut, string sexe, DateTime? dateNaissance, string lieuNaissance,
-                string nationalite, string telephone, bool inscrit, bool actif)
+                string nationalite, string telephone, bool inscrit, bool actif, string imageFile,
+                string tuteurNom, string tuteurPrenom, string tuteurTel1, string tuteurTel2)
             {
                 Id = id;
                 NumOrdre = numOrdre;
                 Matricule = matricule;
                 Nom = nom;
                 Prenoms = prenoms;
-                CycleLibelle = cycleLibelle;
+                Cycle = cycle;
                 Niveau = niveau;
                 Serie = serie;
                 Classe = classe;
@@ -261,6 +311,11 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 Telephone = telephone;
                 Inscrit = inscrit;
                 Actif = actif;
+                ImageFile = imageFile;
+                TuteurNom = tuteurNom;
+                TuteurPrenom = tuteurPrenom;
+                TuteurTel1 = tuteurTel1;
+                TuteurTel2 = tuteurTel2;
             }
         }
     }
