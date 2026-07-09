@@ -13,6 +13,10 @@ namespace App.Infrastructure.Services.Eleves
         // Liste des eleves d'une ecole (CodeEts) depuis Pedagogie.Api (PedagogieDb) :
         // referentiel complet (page « Liste de classe »). Liste vide si indisponible.
         Task<IReadOnlyList<ElevePedagogieItem>> GetElevesAsync(string codeEts);
+
+        // Enregistre la photo d'un eleve (base64 data URL) dans Pedagogie (Eleve.ImageFile).
+        // Retourne true si l'enregistrement a reussi.
+        Task<bool> MajPhotoAsync(Guid eleveId, string imageFile);
     }
 
     // Resultat simple : Eleves.Api renvoie 201 + { id, numOrdre }, sans ResponseWrapper.

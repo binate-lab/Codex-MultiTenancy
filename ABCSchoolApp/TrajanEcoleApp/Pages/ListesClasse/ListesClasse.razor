@@ -194,21 +194,39 @@
                 <div class="lc-fiche">
                     <div class="lc-fiche-titre">Fiche Élève</div>
                     <div class="lc-fiche-corps">
-                        <div class="lc-photo">
-                            @{
-                                var src = PhotoSrc(_sel);
-                            }
-                            @if (src is not null)
-                            {
-                                <img src="@src" alt="Photo de @_sel.Nom @_sel.Prenoms" />
-                            }
-                            else
-                            {
-                                <div class="lc-photo-vide">
-                                    <MudIcon Icon="@Icons.Material.Filled.PersonOutline" Size="Size.Large" />
-                                    <div>Pas de photo</div>
-                                </div>
-                            }
+                        <div class="lc-photo-col">
+                            <div class="lc-photo">
+                                @{
+                                    var src = PhotoSrc(_sel);
+                                }
+                                @if (src is not null)
+                                {
+                                    <img src="@src" alt="Photo de @_sel.Nom @_sel.Prenoms" />
+                                }
+                                else
+                                {
+                                    <div class="lc-photo-vide">
+                                        <MudIcon Icon="@Icons.Material.Filled.PersonOutline" Size="Size.Large" />
+                                        <div>Pas de photo</div>
+                                    </div>
+                                }
+                            </div>
+                            @* Bouton juste sous la photo : ouvre la fenêtre de fichiers Windows
+                               (InputFile caché activé par le label). *@
+                            <InputFile id="lc-photo-input" OnChange="OnPhotoSelected" accept="image/*" style="display:none" />
+                            <MudTooltip Text="Ajouter une photo">
+                                <MudButton HtmlTag="label" for="lc-photo-input"
+                                           Variant="Variant.Outlined" Size="Size.Small"
+                                           StartIcon="@Icons.Material.Filled.AddAPhoto"
+                                           Class="lc-photo-btn">Ajouter</MudButton>
+                            </MudTooltip>
+                            <MudTooltip Text="Supprimer la photo">
+                                <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Error"
+                                           StartIcon="@Icons.Material.Filled.Delete"
+                                           Disabled="@string.IsNullOrEmpty(_sel.ImageFile)"
+                                           OnClick="SupprimerPhoto"
+                                           Class="lc-photo-btn">Supprimer</MudButton>
+                            </MudTooltip>
                         </div>
                         <div class="lc-fiche-detail">
                             <div class="lc-nom">@_sel.Nom @_sel.Prenoms</div>

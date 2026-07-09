@@ -1,6 +1,8 @@
+using System.IO;
 using App.Infrastructure.Services.Eleves;
 using App.Infrastructure.Services.Structures;
 using Microsoft.AspNetCore.Components;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using MudBlazor;
 
@@ -187,6 +189,59 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         // Surligne la ligne sélectionnée dans la grille rouge.
         private string LigneClass(EleveRow row, int _) => row == _sel ? "lc-ligne-sel" : string.Empty;
 
+        // Ajout/modification de la photo : le fichier choisi (fenêtre Windows) est redimensionné,
+        // encodé en base64 (data URL) — comme les photos de profil de l'app — puis enregistré
+        // dans Pedagogie (Eleve.ImageFile). Le navigateur ne donne pas le chemin Windows réel,
+        // on stocke donc le CONTENU de l'image (seul moyen fiable de l'afficher ensuite).
+        private async Task OnPhotoSelected(InputFileChangeEventArgs args)
+        {
+            if (_sel is null) return;
+
+            try
+            {
+                var img = await args.File.RequestImageFileAsync(args.File.ContentType, 512, 512);
+                using var stream = img.OpenReadStream(maxAllowedSize: 5 * 1024 * 1024);
+                using var ms = new MemoryStream();
+                await stream.CopyToAsync(ms);
+                var dataUrl = $"data:{img.ContentType};base64,{Convert.ToBase64String(ms.ToArray())}";
+
+                if (await _eleveService.MajPhotoAsync(_sel.Id, dataUrl))
+                {
+                    _sel.ImageFile = dataUrl;   // affichage immédiat (PhotoSrc gère les data URL)
+                    _snackbar.Add("Photo enregistrée.", Severity.Success);
+                }
+                else
+                {
+                    _snackbar.Add("Impossible d'enregistrer la photo.", Severity.Error);
+                }
+            }
+            catch (Exception ex)
+            {
+                _snackbar.Add($"Photo : {ex.Message}", Severity.Error);
+            }
+        }
+
+        // Suppression de la photo : on vide Eleve.ImageFile en base (réutilise le même endpoint
+        // PUT avec une chaîne vide) après confirmation.
+        private async Task SupprimerPhoto()
+        {
+            if (_sel is null || string.IsNullOrEmpty(_sel.ImageFile)) return;
+
+            var ok = await _js.InvokeAsync<bool>("confirm",
+                $"Supprimer la photo de {_sel.Nom} {_sel.Prenoms} ?");
+            if (!ok) return;
+
+            if (await _eleveService.MajPhotoAsync(_sel.Id, string.Empty))
+            {
+                _sel.ImageFile = string.Empty;   // repasse au placeholder « Pas de photo »
+                _snackbar.Add("Photo supprimée.", Severity.Success);
+            }
+            else
+            {
+                _snackbar.Add("Impossible de supprimer la photo.", Severity.Error);
+            }
+        }
+
         // Source affichable de la photo : data URL / http / chemin absolu tels quels ; sinon
         // on suppose du base64 nu et on préfixe. Null si vide → placeholder « Pas de photo ».
         private static string? PhotoSrc(EleveRow row)
@@ -281,7 +336,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             public string Telephone { get; }
             public bool Inscrit { get; }
             public bool Actif { get; }
-            public string ImageFile { get; }   // photo de l'élève (souvent vide pour l'instant)
+            public string ImageFile { get; set; }   // photo de l'élève (base64 data URL), éditable via upload
             public string TuteurNom { get; }
             public string TuteurPrenom { get; }
             public string TuteurTel1 { get; }   // tél.

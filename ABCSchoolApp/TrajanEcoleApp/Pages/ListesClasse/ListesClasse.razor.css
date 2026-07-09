@@ -222,6 +222,20 @@
     align-items: flex-start;
 }
 
+/* Colonne photo : la photo + le bouton « Ajouter » empilés, centrés. */
+.lc-photo-col {
+    flex: 0 0 auto;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+}
+
+/* Bouton d'ajout de photo : largeur du cadre photo. */
+.lc-photo-btn {
+    width: 132px;
+}
+
 /* Cadre PHOTO D'IDENTITÉ : ratio 35×45 mm (132×170 px ≈ 96 dpi). */
 .lc-photo {
     flex: 0 0 auto;
