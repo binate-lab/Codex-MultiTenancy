@@ -279,9 +279,32 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             return $"data:image/jpeg;base64,{img}";
         }
 
-        // ---- Éditions en ligne (en mémoire pour l'instant) ----
-        private void OnStatutChanged(EleveRow row, string nouveau) => row.Statut = nouveau;
-        private void OnClasseChanged(EleveRow row, string nouveau) => row.Classe = nouveau;
+        // ---- Éditions en ligne, PERSISTÉES dans Pedagogie (rollback si l'appel échoue) ----
+        private async Task OnStatutChanged(EleveRow row, string nouveau)
+        {
+            var ancien = row.Statut;
+            if (nouveau == ancien) return;
+
+            row.Statut = nouveau;
+            if (!await _eleveService.MajStatutAsync(row.Id, nouveau))
+            {
+                row.Statut = ancien;   // restaure l'ancienne valeur
+                _snackbar.Add("Impossible d'enregistrer le statut.", Severity.Error);
+            }
+        }
+
+        private async Task OnClasseChanged(EleveRow row, string nouveau)
+        {
+            var ancien = row.Classe;
+            if (nouveau == ancien) return;
+
+            row.Classe = nouveau;
+            if (!await _eleveService.MajClasseAsync(row.Id, nouveau))
+            {
+                row.Classe = ancien;
+                _snackbar.Add("Impossible d'enregistrer la classe.", Severity.Error);
+            }
+        }
 
         // ---- Actions par ligne (menu 3-points) ----
 
@@ -317,30 +340,29 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         }
 
         [JSInvokable]
-        public Task CopierCelluleDuHaut(string sourceId, string cibleId, string col)
+        public async Task CopierCelluleDuHaut(string sourceId, string cibleId, string col)
         {
             if (!Guid.TryParse(sourceId, out var sId) || !Guid.TryParse(cibleId, out var cId))
-                return Task.CompletedTask;
+                return;
 
             var source = _all.FirstOrDefault(e => e.Id == sId);
             var cible = _all.FirstOrDefault(e => e.Id == cId);
             if (source is null || cible is null || source == cible)
-                return Task.CompletedTask;
+                return;
 
             switch (col)
             {
                 case "Statut":
-                    cible.Statut = source.Statut;
+                    await OnStatutChanged(cible, source.Statut);   // recopie + persiste (+ rollback)
                     break;
                 case "Classe":
                     // On ne recopie la classe que si elle est valide pour le niveau de la cible.
                     if (ClassesPour(cible.Niveau).Any(c => c.Libelle == source.Classe))
-                        cible.Classe = source.Classe;
+                        await OnClasseChanged(cible, source.Classe);
                     break;
             }
 
             StateHasChanged();
-            return Task.CompletedTask;
         }
 
         public void Dispose() => _dotnetRef?.Dispose();

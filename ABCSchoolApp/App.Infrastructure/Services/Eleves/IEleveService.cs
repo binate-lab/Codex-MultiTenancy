@@ -17,6 +17,10 @@ namespace App.Infrastructure.Services.Eleves
         // Enregistre la photo d'un eleve (base64 data URL) dans Pedagogie (Eleve.ImageFile).
         // Retourne true si l'enregistrement a reussi.
         Task<bool> MajPhotoAsync(Guid eleveId, string imageFile);
+
+        // Persiste dans Pedagogie les editions en ligne de la grille « Liste de classe ».
+        Task<bool> MajStatutAsync(Guid eleveId, string statut);
+        Task<bool> MajClasseAsync(Guid eleveId, string classe);
     }
 
     // Resultat simple : Eleves.Api renvoie 201 + { id, numOrdre }, sans ResponseWrapper.

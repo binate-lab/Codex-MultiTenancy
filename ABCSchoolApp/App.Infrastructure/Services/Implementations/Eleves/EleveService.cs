@@ -86,6 +86,32 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
+        public async Task<bool> MajStatutAsync(Guid eleveId, string statut)
+        {
+            try
+            {
+                var resp = await _httpClient.PutAsJsonAsync($"eleves/{eleveId}/statut", new { statut });
+                return resp.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> MajClasseAsync(Guid eleveId, string classe)
+        {
+            try
+            {
+                var resp = await _httpClient.PutAsJsonAsync($"eleves/{eleveId}/classe", new { classe });
+                return resp.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private record CreateEleveResponse(Guid Id, int NumOrdre);
         private record MatriculeExisteResponse(bool Existe);
         private record PedagogieElevesResponse(List<ElevePedagogieItem> Eleves);
