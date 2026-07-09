@@ -575,6 +575,29 @@
                 }
             }, true);
         })();
+
+        // ==== Gel des colonnes de la grille « Liste de classe » ====
+        // Mesure la largeur des 7 premières colonnes (ligne d'en-tête) et publie les offsets
+        // CUMULÉS en variables CSS --lc-fz-1..7 sur chaque wrapper .acc-grid-eleves. Le CSS
+        // scopé applique `left: var(--lc-fz-n)` aux cellules figées (position:sticky). Ainsi
+        // le gel reste exact même quand les colonnes s'adaptent au contenu (largeur auto).
+        // Rappelé au rendu Blazor (lcFreeze.apply) et au redimensionnement de la fenêtre.
+        window.lcFreeze = {
+            apply: function () {
+                document.querySelectorAll('.acc-grid-eleves').forEach(function (wrap) {
+                    var row = wrap.querySelector('thead tr');
+                    if (!row) { return; }
+                    var cells = row.children, left = 0;
+                    for (var i = 0; i < 7 && i < cells.length; i++) {
+                        wrap.style.setProperty('--lc-fz-' + (i + 1), left + 'px');
+                        left += cells[i].getBoundingClientRect().width;
+                    }
+                });
+            }
+        };
+        window.addEventListener('resize', function () {
+            if (window.lcFreeze) { window.lcFreeze.apply(); }
+        });
     </script>
 </body>
 

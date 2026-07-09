@@ -310,6 +310,10 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 _dotnetRef = DotNetObjectReference.Create(this);
                 await _js.InvokeVoidAsync("svtGrilleEleves.init", _dotnetRef);
             }
+
+            // Recale les offsets des colonnes figées (largeurs mesurées) après chaque rendu :
+            // filtre, pagination, tri… peuvent changer la largeur des colonnes.
+            await _js.InvokeVoidAsync("lcFreeze.apply");
         }
 
         [JSInvokable]

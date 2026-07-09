@@ -107,25 +107,17 @@
     overflow-x: auto;
 }
 
-/* Table en largeur FIXE (somme des colonnes) + table-layout:fixed : chaque colonne a une
-   largeur EXACTE (condition nécessaire au gel des 1res colonnes). La table déborde de la
-   colonne bornée → le conteneur défile horizontalement. */
+/* Table à largeur NATURELLE (layout auto) : chaque colonne s'adapte à son contenu (aucune
+   troncature). La table déborde de la colonne bornée → le conteneur défile horizontalement. */
 .acc-grid-eleves ::deep .mud-table-root {
-    table-layout: fixed;
-    width: 1432px;   /* = somme des 17 largeurs de colonnes (cf. MudTh Style) */
-}
-
-.acc-grid-eleves ::deep th,
-.acc-grid-eleves ::deep td {
-    box-sizing: border-box;
-    overflow: hidden;
-    text-overflow: ellipsis;
+    width: max-content;
+    min-width: 100%;
 }
 
 /* ---- Gel des 7 premières colonnes (N° Inscr · Matricule · Nom · Prénoms · Cycle · Niveau ·
-   Classe) : elles restent visibles pendant le défilement horizontal (position:sticky). Les
-   offsets `left` = somme cumulée des largeurs des colonnes précédentes (60,116,130,150,56,72).
-   Toute modif de largeur dans le .razor DOIT être répercutée ici. ---- */
+   Classe) : elles restent visibles au défilement horizontal (position:sticky). Les offsets
+   `left` sont MESURÉS au rendu par lcFreeze (index.html) et injectés en variables CSS
+   --lc-fz-1..7 sur le wrapper → exacts même quand les colonnes s'élargissent au contenu. ---- */
 .acc-grid-eleves ::deep th:nth-child(-n+7),
 .acc-grid-eleves ::deep td:nth-child(-n+7) {
     position: sticky;
@@ -134,13 +126,13 @@
 .acc-grid-eleves ::deep th:nth-child(-n+7) {
     z-index: 3;   /* l'en-tête figé passe au-dessus des cellules figées */
 }
-.acc-grid-eleves ::deep th:nth-child(1), .acc-grid-eleves ::deep td:nth-child(1) { left: 0; }
-.acc-grid-eleves ::deep th:nth-child(2), .acc-grid-eleves ::deep td:nth-child(2) { left: 60px; }
-.acc-grid-eleves ::deep th:nth-child(3), .acc-grid-eleves ::deep td:nth-child(3) { left: 176px; }
-.acc-grid-eleves ::deep th:nth-child(4), .acc-grid-eleves ::deep td:nth-child(4) { left: 306px; }
-.acc-grid-eleves ::deep th:nth-child(5), .acc-grid-eleves ::deep td:nth-child(5) { left: 456px; }
-.acc-grid-eleves ::deep th:nth-child(6), .acc-grid-eleves ::deep td:nth-child(6) { left: 512px; }
-.acc-grid-eleves ::deep th:nth-child(7), .acc-grid-eleves ::deep td:nth-child(7) { left: 584px; }
+.acc-grid-eleves ::deep th:nth-child(1), .acc-grid-eleves ::deep td:nth-child(1) { left: var(--lc-fz-1, 0); }
+.acc-grid-eleves ::deep th:nth-child(2), .acc-grid-eleves ::deep td:nth-child(2) { left: var(--lc-fz-2, 0); }
+.acc-grid-eleves ::deep th:nth-child(3), .acc-grid-eleves ::deep td:nth-child(3) { left: var(--lc-fz-3, 0); }
+.acc-grid-eleves ::deep th:nth-child(4), .acc-grid-eleves ::deep td:nth-child(4) { left: var(--lc-fz-4, 0); }
+.acc-grid-eleves ::deep th:nth-child(5), .acc-grid-eleves ::deep td:nth-child(5) { left: var(--lc-fz-5, 0); }
+.acc-grid-eleves ::deep th:nth-child(6), .acc-grid-eleves ::deep td:nth-child(6) { left: var(--lc-fz-6, 0); }
+.acc-grid-eleves ::deep th:nth-child(7), .acc-grid-eleves ::deep td:nth-child(7) { left: var(--lc-fz-7, 0); }
 
 /* Trait de césure à droite de la dernière colonne figée (repère visuel au défilement). */
 .acc-grid-eleves ::deep th:nth-child(7),
