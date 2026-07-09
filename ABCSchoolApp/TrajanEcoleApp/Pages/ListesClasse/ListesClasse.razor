@@ -211,6 +211,7 @@
                              AnchorOrigin="Origin.BottomLeft" TransformOrigin="Origin.TopLeft">
                         <MudMenuItem Icon="@Icons.Material.Filled.Person" OnClick="@(() => VoirFiche(context))">Voir la fiche</MudMenuItem>
                         <MudMenuItem Icon="@Icons.Material.Filled.MoveDown" OnClick="@(() => AllerClasse(context))">Changer de classe</MudMenuItem>
+                        <MudMenuItem Icon="@Icons.Material.Filled.Badge" OnClick="@(() => ImprimerFiche(context))">Imprimer Fiche Élève</MudMenuItem>
                         <MudMenuItem Icon="@Icons.Material.Filled.Print" OnClick="ImprimerAsync">Imprimer la liste</MudMenuItem>
                     </MudMenu>
                 </MudTd>
@@ -238,7 +239,24 @@
         {
             <div class="lc-fiche-col">
                 <div class="lc-fiche">
-                    <div class="lc-fiche-titre">Fiche Élève</div>
+                    @* En-tête calqué sur le reçu de versement : école + année à gauche, logo au
+                       centre, titre + date à droite. *@
+                    <div class="lc-entete">
+                        <div class="lc-entete-gauche">
+                            <div class="lc-entete-ecole">@(string.IsNullOrWhiteSpace(_nomEcole) ? "ÉCOLE / ÉTABLISSEMENT" : _nomEcole)</div>
+                            <div class="lc-entete-annee">Année scolaire : @_annee</div>
+                        </div>
+                        <div class="lc-entete-logo">
+                            @if (!string.IsNullOrWhiteSpace(_logoEcole))
+                            {
+                                <img src="@_logoEcole" alt="Logo" />
+                            }
+                        </div>
+                        <div class="lc-entete-droite">
+                            <div class="lc-entete-titre">FICHE ÉLÈVE</div>
+                            <div class="lc-entete-date">Date : @DateTime.Now.ToString("dd/MM/yyyy")</div>
+                        </div>
+                    </div>
                     <div class="lc-fiche-corps">
                         <div class="lc-photo-col">
                             <div class="lc-photo">
@@ -298,10 +316,27 @@
                     @* Tuteur : sous le corps (photo + détail), séparé par un trait pleine largeur. *@
                     <div class="lc-tuteur">
                         <div class="lc-tuteur-titre">Tuteur</div>
+                        @* Tuteur éditable : persistance au blur (Immediate=false), rollback si échec. *@
                         <div class="lc-tuteur-corps">
-                            <div class="lc-field"><span>Nom</span><b>@_sel.TuteurNom @_sel.TuteurPrenom</b></div>
-                            <div class="lc-field"><span>Tél.</span><b>@_sel.TuteurTel1</b></div>
-                            <div class="lc-field"><span>WhatsApp</span><b>@_sel.TuteurTel2</b></div>
+                            @* Nom et Prénom concaténés sur la même ligne (deux champs côte à côte). *@
+                            <div class="lc-field"><span>Nom</span>
+                                <MudTextField Value="@_sel.TuteurNom" ValueChanged="@(v => OnTuteurChanged("Nom", v))"
+                                              T="string" Immediate="false" Margin="Margin.Dense"
+                                              Variant="Variant.Text" Class="lc-tuteur-input" />
+                                <MudTextField Value="@_sel.TuteurPrenom" ValueChanged="@(v => OnTuteurChanged("Prenom", v))"
+                                              T="string" Immediate="false" Margin="Margin.Dense"
+                                              Variant="Variant.Text" Class="lc-tuteur-input" />
+                            </div>
+                            <div class="lc-field"><span>Tél.</span>
+                                <MudTextField Value="@_sel.TuteurTel1" ValueChanged="@(v => OnTuteurChanged("Tel1", v))"
+                                              T="string" Immediate="false" Margin="Margin.Dense"
+                                              Variant="Variant.Text" Class="lc-tuteur-input" />
+                            </div>
+                            <div class="lc-field"><span>WhatsApp</span>
+                                <MudTextField Value="@_sel.TuteurTel2" ValueChanged="@(v => OnTuteurChanged("Tel2", v))"
+                                              T="string" Immediate="false" Margin="Margin.Dense"
+                                              Variant="Variant.Text" Class="lc-tuteur-input" />
+                            </div>
                         </div>
                     </div>
                 </div>

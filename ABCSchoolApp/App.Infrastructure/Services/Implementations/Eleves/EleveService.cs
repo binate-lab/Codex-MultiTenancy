@@ -126,6 +126,21 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
+        public async Task<bool> MajTuteurAsync(Guid eleveId, string nom, string prenom, string telephone1, string telephone2)
+        {
+            try
+            {
+                var resp = await _httpClient.PutAsJsonAsync(
+                    $"eleves/{eleveId}/tuteur",
+                    new { nom, prenom, telephone1, telephone2 });
+                return resp.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         private record CreateEleveResponse(Guid Id, int NumOrdre);
         private record MatriculeExisteResponse(bool Existe);
         private record PedagogieElevesResponse(List<ElevePedagogieItem> Eleves);

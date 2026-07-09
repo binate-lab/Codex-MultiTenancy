@@ -33,6 +33,10 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         // éditable dans les deux cas.
         private bool _ecolePublique;
 
+        // Nom + logo de l'école active (en-tête « type reçu » de la Fiche Élève).
+        private string _nomEcole = string.Empty;
+        private string _logoEcole = string.Empty;
+
         // Référentiel Structures de l'école : cycles (avec leurs niveaux) + classes de l'année.
         // Alimente les filtres en cascade et la déroulante Classe des lignes.
         private IReadOnlyList<CycleItem> _cycles = new List<CycleItem>();
@@ -76,6 +80,8 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 {
                     var ecole = ecoles.Data.FirstOrDefault(s => s.CodeEts == codeEts);
                     _ecolePublique = ecole?.Statut == StatutEcole.Public;
+                    _nomEcole = ecole?.Name ?? string.Empty;
+                    _logoEcole = ecole?.Logo ?? string.Empty;
                 }
             }
 
@@ -393,6 +399,41 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             }
         }
 
+        // ---- Tuteur (correspondant) éditable dans la fiche, persisté dans Pédagogie ----
+        private async Task OnTuteurChanged(string champ, string valeur)
+        {
+            if (_sel is null) return;
+
+            // Sauvegarde pour rollback en cas d'échec.
+            var (n, p, t1, t2) = (_sel.TuteurNom, _sel.TuteurPrenom, _sel.TuteurTel1, _sel.TuteurTel2);
+
+            switch (champ)
+            {
+                case "Nom": _sel.TuteurNom = valeur; break;
+                case "Prenom": _sel.TuteurPrenom = valeur; break;
+                case "Tel1": _sel.TuteurTel1 = valeur; break;
+                case "Tel2": _sel.TuteurTel2 = valeur; break;
+            }
+
+            if (!await _eleveService.MajTuteurAsync(
+                    _sel.Id, _sel.TuteurNom, _sel.TuteurPrenom, _sel.TuteurTel1, _sel.TuteurTel2))
+            {
+                (_sel.TuteurNom, _sel.TuteurPrenom, _sel.TuteurTel1, _sel.TuteurTel2) = (n, p, t1, t2);
+                _snackbar.Add("Impossible d'enregistrer le tuteur.", Severity.Error);
+            }
+        }
+
+        // ---- Impression de la Fiche Élève ----
+        // On sélectionne l'élève (sa fiche s'affiche), puis on imprime au rendu suivant (le
+        // drapeau garantit que la fiche du BON élève est dans le DOM avant window.print).
+        private bool _imprimerFicheDemande;
+
+        private void ImprimerFiche(EleveRow row)
+        {
+            _sel = row;
+            _imprimerFicheDemande = true;
+        }
+
         // ---- Actions par ligne (menu 3-points) ----
 
         // Fiche élève : pas encore de page dédiée -> stub informatif.
@@ -424,6 +465,13 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             // Recale les offsets des colonnes figées (largeurs mesurées) après chaque rendu :
             // filtre, pagination, tri… peuvent changer la largeur des colonnes.
             await _js.InvokeVoidAsync("lcFreeze.apply");
+
+            // Impression de la fiche demandée : la fiche du bon élève est maintenant rendue.
+            if (_imprimerFicheDemande)
+            {
+                _imprimerFicheDemande = false;
+                await _js.InvokeVoidAsync("lcImprimerFiche");
+            }
         }
 
         [JSInvokable]
@@ -483,10 +531,10 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             public bool Inscrit { get; }
             public bool Actif { get; }
             public string ImageFile { get; set; }   // photo de l'élève (base64 data URL), éditable via upload
-            public string TuteurNom { get; }
-            public string TuteurPrenom { get; }
-            public string TuteurTel1 { get; }   // tél.
-            public string TuteurTel2 { get; }   // WhatsApp
+            public string TuteurNom { get; set; }
+            public string TuteurPrenom { get; set; }
+            public string TuteurTel1 { get; set; }   // tél.
+            public string TuteurTel2 { get; set; }   // WhatsApp
 
             public EleveRow(
                 Guid id, int numOrdre, string matricule, string nom, string prenoms,

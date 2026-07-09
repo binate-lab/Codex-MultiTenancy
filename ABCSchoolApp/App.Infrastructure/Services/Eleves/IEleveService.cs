@@ -25,6 +25,9 @@ namespace App.Infrastructure.Services.Eleves
         // Cycle + Niveau (edition reservee aux ecoles publiques). Remet la classe a vide cote
         // backend (le niveau change). Retourne false si refuse (400 : cycle/niveau invalide).
         Task<bool> MajCycleNiveauAsync(Guid eleveId, int cycle, string niveau);
+
+        // Tuteur (correspondant) : Nom / Prenom / Tel1 (tel) / Tel2 (WhatsApp).
+        Task<bool> MajTuteurAsync(Guid eleveId, string nom, string prenom, string telephone1, string telephone2);
     }
 
     // Resultat simple : Eleves.Api renvoie 201 + { id, numOrdre }, sans ResponseWrapper.

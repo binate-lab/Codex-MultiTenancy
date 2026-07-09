@@ -230,6 +230,60 @@
     width: 520px;
 }
 
+/* En-tête calqué sur le reçu de versement : école + année (gauche), logo (centre),
+   titre + date (droite). */
+.lc-entete {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 8px 12px;
+    background: #cfd9df;
+    border-bottom: 2px solid #9fb0bb;
+}
+
+.lc-entete-gauche {
+    flex: 1 1 0;
+    min-width: 0;
+}
+
+.lc-entete-logo {
+    flex: 0 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.lc-entete-logo img {
+    max-height: 56px;
+    max-width: 90px;
+    object-fit: contain;
+}
+
+.lc-entete-droite {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: right;
+}
+
+.lc-entete-ecole {
+    font-weight: 700;
+    font-size: 1rem;
+    color: #1c2b36;
+}
+
+.lc-entete-annee,
+.lc-entete-date {
+    font-size: 0.72rem;
+    color: #5a748a;
+}
+
+.lc-entete-titre {
+    font-weight: 700;
+    font-size: 0.95rem;
+    color: #7a1f1f;
+    letter-spacing: 1px;
+}
+
 /* Bandeau titre bord à bord (calque .svt-resume-titre). */
 .lc-fiche-titre {
     padding: 6px 16px;

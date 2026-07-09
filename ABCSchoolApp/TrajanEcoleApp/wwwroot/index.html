@@ -225,6 +225,40 @@
             color: #6D071A !important;
             letter-spacing: 1px;
         }
+
+        /* Champs Tuteur éditables de la Fiche Élève (Liste de classe) : compacts, occupent la
+           largeur restante de la ligne libellé/champ. Règle GLOBALE (les champs MudBlazor ne se
+           laissent pas piloter par le CSS scopé). */
+        .lc-tuteur-input {
+            flex: 1 1 auto;
+            min-width: 0;
+        }
+        .lc-tuteur-input input,
+        .lc-tuteur-input .mud-input-slot {
+            font-size: 0.82rem !important;
+            padding-top: 0 !important;
+            padding-bottom: 0 !important;
+            min-height: 22px !important;
+        }
+
+        /* Impression de la Fiche Élève seule : on masque tout le reste et on épingle la fiche
+           en haut à gauche. Activé par la classe body « lc-print-fiche » (posée le temps du print). */
+        @media print {
+            body.lc-print-fiche * {
+                visibility: hidden !important;
+            }
+            body.lc-print-fiche .lc-fiche,
+            body.lc-print-fiche .lc-fiche * {
+                visibility: visible !important;
+            }
+            body.lc-print-fiche .lc-fiche {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 520px;
+                box-shadow: none;
+            }
+        }
     </style>
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
     <link rel="apple-touch-icon" sizes="192x192" href="icon-192.png" />
@@ -598,6 +632,14 @@
         window.addEventListener('resize', function () {
             if (window.lcFreeze) { window.lcFreeze.apply(); }
         });
+
+        // Impression de la Fiche Élève seule : on masque le reste via la classe body
+        // « lc-print-fiche » (règles @media print dans le <style>), on imprime, on rétablit.
+        window.lcImprimerFiche = function () {
+            document.body.classList.add('lc-print-fiche');
+            window.print();
+            document.body.classList.remove('lc-print-fiche');
+        };
     </script>
 </body>
 
