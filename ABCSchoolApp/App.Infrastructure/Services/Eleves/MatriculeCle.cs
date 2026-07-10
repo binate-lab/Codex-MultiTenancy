@@ -48,19 +48,22 @@ namespace App.Infrastructure.Services.Eleves
             return b + Cle(b);
         }
 
-        // Génère un matricule dont le préfixe = 2 derniers chiffres de l'année de début de
-        // l'année scolaire (« 2025-2026 » -> « 25 »). Repli aléatoire si non parsable.
+        // Génère un matricule dont le préfixe = 2 derniers chiffres de l'année de fin de
+        // l'année scolaire (« 2025-2026 » -> « 26 »). Repli aléatoire si non parsable.
         public static string GenererPourAnnee(string? anneeScolaire) =>
             Generer(PrefixeDepuisAnnee(anneeScolaire));
 
-        // « 2025-2026 » -> 25 (2 derniers chiffres du 1er millésime). 0 si introuvable.
+        // « 2025-2026 » -> 26 (2 derniers chiffres du DERNIER millésime). 0 si introuvable.
         public static int PrefixeDepuisAnnee(string? anneeScolaire)
         {
             if (!string.IsNullOrWhiteSpace(anneeScolaire))
             {
+                // Dernier groupe de chiffres (millésime de fin) : on lit depuis la fin.
                 var digits = new string(anneeScolaire
+                    .Reverse()
                     .SkipWhile(c => !char.IsDigit(c))
                     .TakeWhile(char.IsDigit)
+                    .Reverse()
                     .ToArray());
                 if (digits.Length >= 2 && int.TryParse(digits, out var y))
                     return y % 100;
