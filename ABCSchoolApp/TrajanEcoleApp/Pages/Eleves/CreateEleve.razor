@@ -43,6 +43,10 @@
                                 <MudTextField @bind-Value="Eleve.NumeroMatricule" @bind-Value:after="NettoyerMatricule" For="@(() => Eleve.NumeroMatricule)"
                                               Variant="Variant.Outlined" Margin="Margin.Dense"
                                               Class="acc-field acc-yellow acc-matricule" />
+                                <MudTooltip Text="Générer un matricule valide (test / numérotation interne)">
+                                    <MudIconButton Icon="@Icons.Material.Filled.Autorenew" Size="Size.Small"
+                                                   OnClick="GenererMatricule" aria-label="Générer un matricule" />
+                                </MudTooltip>
                             </div>
                             <div class="acc-row">
                                 <label class="acc-label">Nom:</label>
