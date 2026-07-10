@@ -208,7 +208,28 @@ namespace TrajanEcoleApp.Pages.Eleves
             if (string.IsNullOrEmpty(Eleve.NumeroMatricule))
                 return;
 
-            Eleve.NumeroMatricule = FormaterMatricule(Eleve.NumeroMatricule);
+            // Forme canonique (sans espaces, majuscules) pour l'analyse.
+            var brut = Eleve.NumeroMatricule.Replace(" ", string.Empty).ToUpperInvariant();
+            var chiffres = new string(brut.TakeWhile(char.IsDigit).ToArray());
+            var suffixe = brut[chiffres.Length..];
+
+            // Auto-cle : des que les 8 chiffres sont saisis, on calcule la lettre de cle.
+            // Suffixe absent -> on complete silencieusement ; suffixe incoherent -> on corrige.
+            if (chiffres.Length == 8)
+            {
+                var cle = MatriculeCle.Cle(chiffres).ToString();
+                if (suffixe.Length == 0)
+                {
+                    brut = chiffres + cle;
+                }
+                else if (!suffixe.Equals(cle, StringComparison.OrdinalIgnoreCase))
+                {
+                    brut = chiffres + cle;
+                    _snackbar.Add($"Clé de contrôle corrigée : {suffixe} → {cle}.", Severity.Info);
+                }
+            }
+
+            Eleve.NumeroMatricule = FormaterMatricule(brut);
 
             // Controle en direct du doublon : on interroge Pedagogie avec la forme canonique
             // (sans espaces, majuscules) — celle qui sera stockee. Si deja pris dans l'ecole,
@@ -221,6 +242,26 @@ namespace TrajanEcoleApp.Pages.Eleves
                     $"Risque de doublon : le matricule national « {Eleve.NumeroMatricule} » est déjà utilisé par un élève de cette école.",
                     Severity.Warning);
             }
+        }
+
+        // Bouton « Générer » : matricule aléatoire valide (8 chiffres + clé) et unique dans
+        // l'école. Réutilise le contrôle MatriculeExiste pour éviter un doublon (test/démo ou
+        // numérotation interne — un vrai matricule national se SAISIT). Se déclenche sur clic.
+        private async Task GenererMatricule()
+        {
+            var candidat = MatriculeCle.Generer();
+
+            if (!string.IsNullOrWhiteSpace(Eleve.CodeEts))
+            {
+                for (var essai = 0; essai < 20
+                        && await _eleveService.MatriculeExisteAsync(Eleve.CodeEts, candidat); essai++)
+                {
+                    candidat = MatriculeCle.Generer();
+                }
+            }
+
+            Eleve.NumeroMatricule = FormaterMatricule(candidat);
+            _snackbar.Add($"Matricule généré : {Eleve.NumeroMatricule}", Severity.Success);
         }
 
         // « 24568951n » / « 24 568 951 N » -> « 24 568 951 N ».
