@@ -141,8 +141,35 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
+        public async Task<RegenererMatriculesResult> RegenererMatriculesAsync(bool complet)
+        {
+            try
+            {
+                // POST /eleves/matricules/regenerer?complet=... (sans corps). Le JWT ecole-scoped
+                // est propage par l'AuthHeaderHandler ; l'ecole est deduite des claims cote serveur.
+                var resp = await _httpClient.PostAsync(
+                    $"eleves/matricules/regenerer?complet={(complet ? "true" : "false")}", null);
+
+                if (!resp.IsSuccessStatusCode)
+                {
+                    var error = await resp.Content.ReadAsStringAsync();
+                    return new RegenererMatriculesResult(false, 0, 0, 0,
+                        string.IsNullOrWhiteSpace(error) ? $"Echec ({(int)resp.StatusCode})" : error);
+                }
+
+                var data = await resp.Content.ReadFromJsonAsync<RegenererResponse>();
+                return new RegenererMatriculesResult(true,
+                    data?.Total ?? 0, data?.Corriges ?? 0, data?.Regenerations ?? 0);
+            }
+            catch (Exception ex)
+            {
+                return new RegenererMatriculesResult(false, 0, 0, 0, ex.Message);
+            }
+        }
+
         private record CreateEleveResponse(Guid Id, int NumOrdre);
         private record MatriculeExisteResponse(bool Existe);
         private record PedagogieElevesResponse(List<ElevePedagogieItem> Eleves);
+        private record RegenererResponse(int Total, int Corriges, int Regenerations);
     }
 }

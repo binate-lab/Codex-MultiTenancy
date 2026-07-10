@@ -37,6 +37,9 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private string _nomEcole = string.Empty;
         private string _logoEcole = string.Empty;
 
+        // CodeEts de l'école active (claim « school ») — mémorisé pour recharger le roster.
+        private string _codeEts = string.Empty;
+
         // Référentiel Structures de l'école : cycles (avec leurs niveaux) + classes de l'année.
         // Alimente les filtres en cascade et la déroulante Classe des lignes.
         private IReadOnlyList<CycleItem> _cycles = new List<CycleItem>();
@@ -64,6 +67,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             // École active = claim « school » (= CodeEts) du JWT école-scoped.
             var user = await _applicationStateProvider.GetAuthenticationStateProviderUserAsync();
             var codeEts = user.FindFirst("school")?.Value ?? string.Empty;
+            _codeEts = codeEts;
 
             // Année scolaire en cours (bandeau).
             var annee = await _anneeScolaireService.GetAnneeEnCoursAsync();
@@ -94,17 +98,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             _classesRef = await _structureService.GetClassesAsync(_annee == "—" ? null : _annee);
 
             // Chargement des élèves de l'école depuis Pedagogie.Api (PedagogieDb).
-            if (!string.IsNullOrWhiteSpace(codeEts))
-            {
-                var eleves = await _eleveService.GetElevesAsync(codeEts);
-                _all = eleves.Select(e => new EleveRow(
-                    e.Id, e.NumOrdre, e.Matricule, e.Nom, e.Prenom,
-                    e.Cycle, e.Niveau, e.Serie, e.Classe,
-                    StatutLibelle(e.Statut), e.Sexe, e.DateNaissance, e.LieuNaissance,
-                    e.Nationalite, e.Telephone, e.IsInscrit, e.IsActif, e.ImageFile,
-                    e.Tuteur?.Nom ?? string.Empty, e.Tuteur?.Prenom ?? string.Empty,
-                    e.Tuteur?.Telephone1 ?? string.Empty, e.Tuteur?.Telephone2 ?? string.Empty)).ToList();
-            }
+            await ChargerElevesAsync();
 
             // À l'affichage : on sélectionne déjà le 1er élève filtré et on montre sa fiche
             // (pas besoin d'attendre un clic).
@@ -113,6 +107,47 @@ namespace TrajanEcoleApp.Pages.ListesClasse
 
         // Statut élève : Pedagogie renvoie l'entier de l'enum StatutEleve (Aff=1, Naff=2).
         private static string StatutLibelle(int statut) => statut == 1 ? "Aff" : "Naff";
+
+        // (Re)charge le roster de l'école active depuis Pedagogie.Api et le projette en EleveRow.
+        private async Task ChargerElevesAsync()
+        {
+            if (string.IsNullOrWhiteSpace(_codeEts)) return;
+
+            var eleves = await _eleveService.GetElevesAsync(_codeEts);
+            _all = eleves.Select(e => new EleveRow(
+                e.Id, e.NumOrdre, e.Matricule, e.Nom, e.Prenom,
+                e.Cycle, e.Niveau, e.Serie, e.Classe,
+                StatutLibelle(e.Statut), e.Sexe, e.DateNaissance, e.LieuNaissance,
+                e.Nationalite, e.Telephone, e.IsInscrit, e.IsActif, e.ImageFile,
+                e.Tuteur?.Nom ?? string.Empty, e.Tuteur?.Prenom ?? string.Empty,
+                e.Tuteur?.Telephone1 ?? string.Empty, e.Tuteur?.Telephone2 ?? string.Empty)).ToList();
+        }
+
+        // Corrige en masse les clés de contrôle des matricules de l'école (garde les chiffres).
+        // Idempotent : un matricule déjà valide n'est pas modifié. Écrit le journal côté Pedagogie.
+        private async Task RegenererClesAsync()
+        {
+            var ok = await _js.InvokeAsync<bool>("confirm",
+                "Corriger les clés de contrôle de tous les matricules de l'école ?\n" +
+                "Les numéros sont conservés ; seule la lettre de clé est recalculée si elle est incohérente.");
+            if (!ok) return;
+
+            var res = await _eleveService.RegenererMatriculesAsync(complet: false);
+            if (!res.IsSuccessful)
+            {
+                _snackbar.Add($"Correction des clés impossible : {res.Error}", Severity.Error);
+                return;
+            }
+
+            _snackbar.Add(
+                res.Corriges == 0
+                    ? $"Tous les matricules étaient déjà valides ({res.Total})."
+                    : $"{res.Corriges} clé(s) corrigée(s) sur {res.Total}.",
+                Severity.Success);
+
+            await ChargerElevesAsync();   // reflète les nouveaux matricules dans la grille
+            AppliquerFiltre();
+        }
 
         // Formate le matricule national façon Access : « 22654456M » -> « 22 654 456 M »
         // (chiffres groupés par 3 depuis la droite, lettre(s) de contrôle finale séparée(s)).

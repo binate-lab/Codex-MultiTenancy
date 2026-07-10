@@ -28,7 +28,16 @@ namespace App.Infrastructure.Services.Eleves
 
         // Tuteur (correspondant) : Nom / Prenom / Tel1 (tel) / Tel2 (WhatsApp).
         Task<bool> MajTuteurAsync(Guid eleveId, string nom, string prenom, string telephone1, string telephone2);
+
+        // Regenere les matricules de l'ecole courante (portee deduite du token cote serveur).
+        // complet=false : recalcule les cles de controle (garde les chiffres) ; complet=true :
+        // anonymise (chiffres neufs). Ecrit le journal [eleves].[LogsMatricules] cote Pedagogie.
+        Task<RegenererMatriculesResult> RegenererMatriculesAsync(bool complet);
     }
+
+    // Resultat de la regeneration en masse (Pedagogie renvoie { total, corriges, regenerations }).
+    public record RegenererMatriculesResult(
+        bool IsSuccessful, int Total, int Corriges, int Regenerations, string? Error = null);
 
     // Resultat simple : Eleves.Api renvoie 201 + { id, numOrdre }, sans ResponseWrapper.
     // NumOrdre = N° Inscription DEFINITIF attribue par Pedagogie (unique par ecole).
