@@ -249,14 +249,15 @@ namespace TrajanEcoleApp.Pages.Eleves
         // numérotation interne — un vrai matricule national se SAISIT). Se déclenche sur clic.
         private async Task GenererMatricule()
         {
-            var candidat = MatriculeCle.Generer();
+            // Préfixe = 2 derniers chiffres de l'année de fin de l'année scolaire (« 2025-2026 » → « 26 »).
+            var candidat = MatriculeCle.GenererPourAnnee(Eleve.AnneeScolaire);
 
             if (!string.IsNullOrWhiteSpace(Eleve.CodeEts))
             {
                 for (var essai = 0; essai < 20
                         && await _eleveService.MatriculeExisteAsync(Eleve.CodeEts, candidat); essai++)
                 {
-                    candidat = MatriculeCle.Generer();
+                    candidat = MatriculeCle.GenererPourAnnee(Eleve.AnneeScolaire);
                 }
             }
 
