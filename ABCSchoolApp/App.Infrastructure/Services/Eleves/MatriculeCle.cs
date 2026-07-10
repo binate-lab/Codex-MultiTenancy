@@ -39,12 +39,33 @@ namespace App.Infrastructure.Services.Eleves
             return char.ToUpperInvariant(matricule[8]) == Cle(matricule[..8]);
         }
 
-        // Matricule aléatoire valide : année 16..25 + 6 chiffres + clé.
+        // Matricule aléatoire valide : préfixe année (2 chiffres) + 6 chiffres + clé.
+        // annee = 0 -> repli aléatoire 16..25.
         public static string Generer(int annee = 0)
         {
             if (annee == 0) annee = 16 + _rng.Next(0, 10);
-            string b = annee.ToString("D2") + _rng.Next(0, 1_000_000).ToString("D6");
+            string b = (annee % 100).ToString("D2") + _rng.Next(0, 1_000_000).ToString("D6");
             return b + Cle(b);
+        }
+
+        // Génère un matricule dont le préfixe = 2 derniers chiffres de l'année de début de
+        // l'année scolaire (« 2025-2026 » -> « 25 »). Repli aléatoire si non parsable.
+        public static string GenererPourAnnee(string? anneeScolaire) =>
+            Generer(PrefixeDepuisAnnee(anneeScolaire));
+
+        // « 2025-2026 » -> 25 (2 derniers chiffres du 1er millésime). 0 si introuvable.
+        public static int PrefixeDepuisAnnee(string? anneeScolaire)
+        {
+            if (!string.IsNullOrWhiteSpace(anneeScolaire))
+            {
+                var digits = new string(anneeScolaire
+                    .SkipWhile(c => !char.IsDigit(c))
+                    .TakeWhile(char.IsDigit)
+                    .ToArray());
+                if (digits.Length >= 2 && int.TryParse(digits, out var y))
+                    return y % 100;
+            }
+            return 0;
         }
     }
 }
