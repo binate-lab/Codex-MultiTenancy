@@ -48,27 +48,14 @@ namespace App.Infrastructure.Services.Eleves
             return b + Cle(b);
         }
 
-        // Génère un matricule dont le préfixe = 2 derniers chiffres de l'année de fin de
-        // l'année scolaire (« 2025-2026 » -> « 26 »). Repli aléatoire si non parsable.
-        public static string GenererPourAnnee(string? anneeScolaire) =>
-            Generer(PrefixeDepuisAnnee(anneeScolaire));
+        // Préfixe réservé aux matricules PROVISOIRES générés localement (« 80 »). Aucun vrai
+        // matricule national ne commence par 80 (ce serait l'année 2080) : aucune confusion
+        // possible. C'est un faux numéro en attendant l'attribution officielle du ministère —
+        // on le remplacera par le vrai matricule à réception.
+        // (Le jour d'un service national d'allocation, le préfixe = millésime de l'année
+        //  scolaire ; c'est le format du VRAI matricule, à réintroduire à ce moment-là.)
+        public const int PrefixeProvisoire = 80;
 
-        // « 2025-2026 » -> 26 (2 derniers chiffres du DERNIER millésime). 0 si introuvable.
-        public static int PrefixeDepuisAnnee(string? anneeScolaire)
-        {
-            if (!string.IsNullOrWhiteSpace(anneeScolaire))
-            {
-                // Dernier groupe de chiffres (millésime de fin) : on lit depuis la fin.
-                var digits = new string(anneeScolaire
-                    .Reverse()
-                    .SkipWhile(c => !char.IsDigit(c))
-                    .TakeWhile(char.IsDigit)
-                    .Reverse()
-                    .ToArray());
-                if (digits.Length >= 2 && int.TryParse(digits, out var y))
-                    return y % 100;
-            }
-            return 0;
-        }
+        public static string GenererPlaceholder() => Generer(PrefixeProvisoire);
     }
 }

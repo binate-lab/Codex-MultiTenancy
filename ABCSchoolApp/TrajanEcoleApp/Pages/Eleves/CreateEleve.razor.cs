@@ -249,20 +249,21 @@ namespace TrajanEcoleApp.Pages.Eleves
         // numérotation interne — un vrai matricule national se SAISIT). Se déclenche sur clic.
         private async Task GenererMatricule()
         {
-            // Préfixe = 2 derniers chiffres de l'année de fin de l'année scolaire (« 2025-2026 » → « 26 »).
-            var candidat = MatriculeCle.GenererPourAnnee(Eleve.AnneeScolaire);
+            // Matricule PROVISOIRE : préfixe « 80 » réservé (aucun vrai matricule national ne
+            // commence par 80) → on sait que c'est un faux numéro, à remplacer par le n° officiel.
+            var candidat = MatriculeCle.GenererPlaceholder();
 
             if (!string.IsNullOrWhiteSpace(Eleve.CodeEts))
             {
                 for (var essai = 0; essai < 20
                         && await _eleveService.MatriculeExisteAsync(Eleve.CodeEts, candidat); essai++)
                 {
-                    candidat = MatriculeCle.GenererPourAnnee(Eleve.AnneeScolaire);
+                    candidat = MatriculeCle.GenererPlaceholder();
                 }
             }
 
             Eleve.NumeroMatricule = FormaterMatricule(candidat);
-            _snackbar.Add($"Matricule généré : {Eleve.NumeroMatricule}", Severity.Success);
+            _snackbar.Add($"Matricule provisoire généré (préfixe 80, en attendant le n° officiel) : {Eleve.NumeroMatricule}", Severity.Success);
         }
 
         // « 24568951n » / « 24 568 951 N » -> « 24 568 951 N ».
