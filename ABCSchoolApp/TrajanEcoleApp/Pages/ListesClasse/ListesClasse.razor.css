@@ -470,7 +470,7 @@
     width: 210mm;
     max-width: 100%;
     min-height: 297mm;
-    padding: 14mm 12mm;
+    padding: 8mm 12mm 14mm;   /* liste remontée : moins d'espace en haut */
     box-sizing: border-box;
     box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
     font-size: 11px;
@@ -480,16 +480,36 @@
 
 .lc-feuille-entete {
     display: flex;
-    align-items: center;
+    align-items: flex-start;
     gap: 14px;
     border-bottom: 2px solid #333;
     padding-bottom: 8px;
     margin-bottom: 6px;
 }
 
-.lc-feuille-ecole {
+/* Gauche : ministère / DREN. */
+.lc-feuille-ministere {
     flex: 1 1 0;
     min-width: 0;
+}
+
+.lc-feuille-min-titre {
+    font-weight: 700;
+    font-size: 12px;
+    white-space: nowrap;
+}
+
+.lc-feuille-dren {
+    font-size: 11px;
+    color: #444;
+    text-transform: uppercase;
+}
+
+/* Droite : école + année scolaire. */
+.lc-feuille-ecole-droite {
+    flex: 1 1 0;
+    min-width: 0;
+    text-align: right;
 }
 
 .lc-feuille-nom {
@@ -513,12 +533,13 @@
     object-fit: contain;
 }
 
-.lc-feuille-meta {
-    flex: 1 1 0;
-    min-width: 0;
-    text-align: right;
-    font-size: 11px;
-    color: #444;
+/* Ligne titre (classe) + stats, sur une seule ligne. */
+.lc-feuille-barre {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 20px;
+    margin-bottom: 8px;
 }
 
 .lc-feuille-titre {
@@ -528,11 +549,12 @@
     letter-spacing: 1px;
 }
 
-.lc-feuille-soustitre {
-    text-align: center;
-    font-weight: 700;
-    font-size: 12px;
-    margin-bottom: 8px;
+/* Date d'édition, en bas de la liste. */
+.lc-feuille-pied {
+    margin-top: 10px;
+    text-align: right;
+    font-size: 11px;
+    color: #444;
 }
 
 .lc-feuille-table {
@@ -583,6 +605,6 @@
     display: flex;
     gap: 28px;
     justify-content: flex-end;
-    margin-top: 10px;
     font-size: 12px;
+    white-space: nowrap;
 }

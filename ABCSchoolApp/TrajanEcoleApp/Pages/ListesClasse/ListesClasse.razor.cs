@@ -33,9 +33,11 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         // éditable dans les deux cas.
         private bool _ecolePublique;
 
-        // Nom + logo de l'école active (en-tête « type reçu » de la Fiche Élève).
+        // Nom + logo + ville de l'école active (en-tête « type reçu » de la Fiche Élève et
+        // en-tête de la liste imprimée : « MENA-DREN : {Ville} »).
         private string _nomEcole = string.Empty;
         private string _logoEcole = string.Empty;
+        private string _villeEcole = string.Empty;
 
         // CodeEts de l'école active (claim « school ») — mémorisé pour recharger le roster.
         private string _codeEts = string.Empty;
@@ -86,6 +88,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                     _ecolePublique = ecole?.Statut == StatutEcole.Public;
                     _nomEcole = ecole?.Name ?? string.Empty;
                     _logoEcole = ecole?.Logo ?? string.Empty;
+                    _villeEcole = ecole?.Ville ?? string.Empty;
                 }
             }
 
@@ -173,6 +176,18 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             }
 
             return string.IsNullOrEmpty(suffixe) ? sb.ToString() : $"{sb} {suffixe}";
+        }
+
+        // Mise en forme du libellé de classe pour l'impression : les classes de COLLÈGE (cycle 1)
+        // « 6e1 / 5e1 / 4e3 / 3e2 » deviennent « 6è 1 / 5è 1 / 4è 3 / 3è 2 » (e→è + espace avant
+        // la subdivision). Le 2nd cycle (2nde, 1ere, TleA1, TleD3…) n'est PAS concerné : le motif
+        // exige un chiffre de niveau 3–6 suivi de « e » puis d'une subdivision chiffrée.
+        private static string FormatClasse(string classe)
+        {
+            if (string.IsNullOrWhiteSpace(classe)) return classe ?? string.Empty;
+            return System.Text.RegularExpressions.Regex
+                .Replace(classe.Trim(), @"^([3-6])e(?=\d|$)", "$1è ")
+                .Trim();
         }
 
         // ---- Cascade des filtres (Cycle -> Niveau -> Classe) ----
@@ -507,23 +522,6 @@ namespace TrajanEcoleApp.Pages.ListesClasse
 
         private int NbGarcons => ElevesImpression.Count(e => EstGarcon(e.Sexe));
         private int NbFilles => ElevesImpression.Count(e => EstFille(e.Sexe));
-
-        // Rappel lisible des filtres actifs, imprimé en sous-titre de la feuille.
-        private string FiltresLibelle
-        {
-            get
-            {
-                var parts = new List<string>();
-                var cycle = _cycles.FirstOrDefault(c => c.Id.ToString() == _fCycleId);
-                if (cycle is not null) parts.Add($"Cycle {cycle.Numero}");
-                if (!string.IsNullOrWhiteSpace(_fNiveau)) parts.Add($"Niveau {_fNiveau}");
-                if (!string.IsNullOrWhiteSpace(_fClasse)) parts.Add($"Classe {_fClasse}");
-                if (_fStatut != "Tous") parts.Add($"Statut {_fStatut}");
-                if (_fInscrit != "Tous") parts.Add($"Inscrit : {_fInscrit}");
-                if (_fActif != "Tous") parts.Add($"Actif : {_fActif}");
-                return parts.Count == 0 ? "Tous les élèves" : string.Join("  ·  ", parts);
-            }
-        }
 
         // ================== Navigation clavier & copie « cellule du dessus » ==================
         // Réutilise le handler JS global « svtGrilleEleves » (index.html) : Haut/Bas déplacent

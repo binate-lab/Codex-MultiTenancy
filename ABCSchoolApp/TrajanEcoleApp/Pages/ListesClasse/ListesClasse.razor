@@ -373,22 +373,32 @@
             @* La feuille A4 : SEUL élément conservé à l'impression. *@
             <div class="lc-feuille">
                 <div class="lc-feuille-entete">
-                    <div class="lc-feuille-ecole">
-                        <div class="lc-feuille-nom">@(string.IsNullOrWhiteSpace(_nomEcole) ? "ÉCOLE / ÉTABLISSEMENT" : _nomEcole)</div>
-                        <div class="lc-feuille-annee">Année scolaire : @_annee</div>
+                    @* Gauche : autorité de tutelle. *@
+                    <div class="lc-feuille-ministere">
+                        <div class="lc-feuille-min-titre">RÉPUBLIQUE DE CÔTE D'IVOIRE</div>
+                        <div class="lc-feuille-dren">MENA-DREN : <b>@_villeEcole</b></div>
                     </div>
+                    @* Centre : logo de l'école. *@
                     @if (!string.IsNullOrWhiteSpace(_logoEcole))
                     {
                         <div class="lc-feuille-logo"><img src="@_logoEcole" alt="Logo" /></div>
                     }
-                    <div class="lc-feuille-meta">
-                        <div class="lc-feuille-titre">LISTE DE CLASSE</div>
-                        <div>Édité le @DateTime.Now.ToString("dd/MM/yyyy")</div>
+                    @* Droite : école + année scolaire. *@
+                    <div class="lc-feuille-ecole-droite">
+                        <div class="lc-feuille-nom">@(string.IsNullOrWhiteSpace(_nomEcole) ? "ÉCOLE / ÉTABLISSEMENT" : _nomEcole)</div>
+                        <div class="lc-feuille-annee">Année scolaire : @_annee</div>
                     </div>
                 </div>
 
-                @* Sous-titre = rappel des filtres actifs (ce que contient la liste). *@
-                <div class="lc-feuille-soustitre">@FiltresLibelle</div>
+                @* Ligne : titre (classe) à gauche, stats à droite. *@
+                <div class="lc-feuille-barre">
+                    <div class="lc-feuille-titre">LISTE DE CLASSE@(string.IsNullOrWhiteSpace(_fClasse) ? "" : $" : {FormatClasse(_fClasse)}")</div>
+                    <div class="lc-feuille-totaux">
+                        <span>Garçons : <b>@NbGarcons</b></span>
+                        <span>Filles : <b>@NbFilles</b></span>
+                        <span>Total : <b>@ElevesImpression.Count</b></span>
+                    </div>
+                </div>
 
                 <table class="lc-feuille-table">
                     <thead>
@@ -424,11 +434,8 @@
                     </tbody>
                 </table>
 
-                <div class="lc-feuille-totaux">
-                    <span>Garçons : <b>@NbGarcons</b></span>
-                    <span>Filles : <b>@NbFilles</b></span>
-                    <span>Total : <b>@ElevesImpression.Count</b></span>
-                </div>
+                @* Date d'édition en bas de la liste. *@
+                <div class="lc-feuille-pied">Édité le : @DateTime.Now.ToString("dd/MM/yyyy")</div>
             </div>
         </div>
     </div>
