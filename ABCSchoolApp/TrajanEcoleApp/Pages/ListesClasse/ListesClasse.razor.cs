@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.JSInterop;
 using MudBlazor;
 using TrajanEcole.Shared.Library.Enums;
+using TrajanEcole.Shared.Library.Helpers;
 
 namespace TrajanEcoleApp.Pages.ListesClasse
 {
@@ -153,31 +154,9 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             AppliquerFiltre();
         }
 
-        // Formate le matricule national façon Access : « 22654456M » -> « 22 654 456 M »
-        // (chiffres groupés par 3 depuis la droite, lettre(s) de contrôle finale séparée(s)).
-        private static string FormatMatricule(string mat)
-        {
-            if (string.IsNullOrWhiteSpace(mat)) return mat ?? string.Empty;
-            var compact = mat.Replace(" ", string.Empty);
-
-            // Sépare la lettre de contrôle finale (partie non chiffrée) des chiffres de tête.
-            var i = compact.Length;
-            while (i > 0 && !char.IsDigit(compact[i - 1])) i--;
-            var digits = compact[..i];
-            var suffixe = compact[i..];
-
-            if (digits.Length == 0 || !digits.All(char.IsDigit))
-                return compact;   // format inattendu : on renvoie tel quel (sans espaces)
-
-            var sb = new System.Text.StringBuilder();
-            for (var k = 0; k < digits.Length; k++)
-            {
-                if (k > 0 && (digits.Length - k) % 3 == 0) sb.Append(' ');
-                sb.Append(digits[k]);
-            }
-
-            return string.IsNullOrEmpty(suffixe) ? sb.ToString() : $"{sb} {suffixe}";
-        }
+        // Matricule national formaté « 22 654 456 M » — helper partagé (Shared.Library), commun
+        // aux listes et au reçu de paiement.
+        private static string FormatMatricule(string mat) => MatriculeFormatter.Format(mat);
 
         // Mise en forme du libellé de classe pour l'impression : les classes de COLLÈGE (cycle 1)
         // « 6e1 / 5e1 / 4e3 / 3e2 » deviennent « 6è 1 / 5è 1 / 4è 3 / 3è 2 » (e→è + espace avant

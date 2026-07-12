@@ -5,6 +5,7 @@ using App.Infrastructure.Services.Structures;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MudBlazor;
+using TrajanEcole.Shared.Library.Helpers;
 
 namespace TrajanEcoleApp.Pages.Scolarites
 {
@@ -604,31 +605,9 @@ namespace TrajanEcoleApp.Pages.Scolarites
 
         private async Task ImprimerRecuAsync() => await _js.InvokeVoidAsync("svtImprimerRecu");
 
-        // Formate le matricule national façon Access, IDENTIQUE aux listes (page ListesClasse) :
-        // « 22654456M » -> « 22 654 456 M » (chiffres groupés par 3 depuis la droite, lettre(s)
-        // de contrôle finale séparée(s)).
-        private static string FormatMatricule(string mat)
-        {
-            if (string.IsNullOrWhiteSpace(mat)) return mat ?? string.Empty;
-            var compact = mat.Replace(" ", string.Empty);
-
-            var i = compact.Length;
-            while (i > 0 && !char.IsDigit(compact[i - 1])) i--;
-            var digits = compact[..i];
-            var suffixe = compact[i..];
-
-            if (digits.Length == 0 || !digits.All(char.IsDigit))
-                return compact;
-
-            var sb = new System.Text.StringBuilder();
-            for (var k = 0; k < digits.Length; k++)
-            {
-                if (k > 0 && (digits.Length - k) % 3 == 0) sb.Append(' ');
-                sb.Append(digits[k]);
-            }
-
-            return string.IsNullOrEmpty(suffixe) ? sb.ToString() : $"{sb} {suffixe}";
-        }
+        // Matricule national formaté « 22 654 456 M » — helper partagé (Shared.Library), commun
+        // aux listes et au reçu.
+        private static string FormatMatricule(string mat) => MatriculeFormatter.Format(mat);
 
         // ================== Reçu de paiement (PDF) ==================
 
