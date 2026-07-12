@@ -479,9 +479,51 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private void AllerClasse(EleveRow row) =>
             _snackbar.Add("Modifie la classe directement dans la colonne « Classe » (Ctrl+' recopie celle du dessus).", Severity.Info);
 
-        // Impression de la liste : impression navigateur (front seul, réel). Un export
-        // serveur (PDF/Excel) sera câblé plus tard si besoin.
-        private async Task ImprimerAsync() => await _js.InvokeVoidAsync("window.print");
+        // ================== Aperçu + impression de la liste de classe ==================
+        // Modal d'aperçu WYSIWYG (feuille A4) affiché à l'écran, puis impression navigateur qui
+        // n'imprime QUE la feuille (classe body « lc-print-liste », cf. wwwroot/index.html).
+        private bool _apercuOuvert;
+
+        private void OuvrirApercu() => _apercuOuvert = true;
+        private void FermerApercu() => _apercuOuvert = false;
+
+        // Lance l'impression réelle : le helper JS isole « .lc-feuille » le temps du print.
+        private async Task ImprimerListeAsync() => await _js.InvokeVoidAsync("lcImprimerListe");
+
+        // Élèves à imprimer = exactement la sélection filtrée, triée Nom puis Prénoms (ordre
+        // d'une liste de classe). La numérotation N° suit cet ordre.
+        private List<EleveRow> ElevesImpression =>
+            Filtered
+                .OrderBy(e => e.Nom, StringComparer.CurrentCultureIgnoreCase)
+                .ThenBy(e => e.Prenoms, StringComparer.CurrentCultureIgnoreCase)
+                .ToList();
+
+        // Comptage par sexe (robuste aux libellés « M »/« F », « Masculin »/« Féminin »,
+        // « G »/« F ») : on ne regarde que la 1re lettre.
+        private static bool EstFille(string sexe) =>
+            !string.IsNullOrWhiteSpace(sexe) && char.ToUpperInvariant(sexe.Trim()[0]) == 'F';
+        private static bool EstGarcon(string sexe) =>
+            !string.IsNullOrWhiteSpace(sexe) && "MG".Contains(char.ToUpperInvariant(sexe.Trim()[0]));
+
+        private int NbGarcons => ElevesImpression.Count(e => EstGarcon(e.Sexe));
+        private int NbFilles => ElevesImpression.Count(e => EstFille(e.Sexe));
+
+        // Rappel lisible des filtres actifs, imprimé en sous-titre de la feuille.
+        private string FiltresLibelle
+        {
+            get
+            {
+                var parts = new List<string>();
+                var cycle = _cycles.FirstOrDefault(c => c.Id.ToString() == _fCycleId);
+                if (cycle is not null) parts.Add($"Cycle {cycle.Numero}");
+                if (!string.IsNullOrWhiteSpace(_fNiveau)) parts.Add($"Niveau {_fNiveau}");
+                if (!string.IsNullOrWhiteSpace(_fClasse)) parts.Add($"Classe {_fClasse}");
+                if (_fStatut != "Tous") parts.Add($"Statut {_fStatut}");
+                if (_fInscrit != "Tous") parts.Add($"Inscrit : {_fInscrit}");
+                if (_fActif != "Tous") parts.Add($"Actif : {_fActif}");
+                return parts.Count == 0 ? "Tous les élèves" : string.Join("  ·  ", parts);
+            }
+        }
 
         // ================== Navigation clavier & copie « cellule du dessus » ==================
         // Réutilise le handler JS global « svtGrilleEleves » (index.html) : Haut/Bas déplacent

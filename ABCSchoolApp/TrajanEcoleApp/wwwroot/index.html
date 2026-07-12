@@ -258,6 +258,24 @@
                 width: 520px;
                 box-shadow: none;
             }
+
+            /* Impression de la Liste de classe : on masque tout sauf la feuille d'aperçu A4.
+               Activé par la classe body « lc-print-liste » (posée le temps du print). */
+            body.lc-print-liste * {
+                visibility: hidden !important;
+            }
+            body.lc-print-liste .lc-feuille,
+            body.lc-print-liste .lc-feuille * {
+                visibility: visible !important;
+            }
+            body.lc-print-liste .lc-feuille {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                min-height: 0;
+                box-shadow: none;
+            }
         }
     </style>
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
@@ -639,6 +657,14 @@
             document.body.classList.add('lc-print-fiche');
             window.print();
             document.body.classList.remove('lc-print-fiche');
+        };
+
+        // Impression de la Liste de classe : même principe, on isole la feuille d'aperçu A4
+        // (classe body « lc-print-liste ») le temps de l'impression.
+        window.lcImprimerListe = function () {
+            document.body.classList.add('lc-print-liste');
+            window.print();
+            document.body.classList.remove('lc-print-liste');
         };
     </script>
 </body>
