@@ -48,5 +48,20 @@ namespace App.Infrastructure.Services.Implementations.Eleves
                 return false;
             }
         }
+
+        public async Task<bool> MajCodeParentAsync(Guid eleveId, string codeParent)
+        {
+            try
+            {
+                var reponse = await _httpClient.PutAsJsonAsync(
+                    $"eleves/{eleveId}/code-parent",
+                    new { codeParent });
+                return reponse.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
     }
 }

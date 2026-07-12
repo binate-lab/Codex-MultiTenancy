@@ -11,6 +11,10 @@ namespace App.Infrastructure.Services.Eleves
         // Met a jour le telephone du correspondant (colonne editable de la grille).
         // Retourne true si l'enregistrement a reussi.
         Task<bool> MajTelephoneCorrespondantAsync(Guid eleveId, string telephone);
+
+        // Met a jour le CodeParent (fratrie) de l'eleve (colonne editable de la grille).
+        // Retourne true si l'enregistrement a reussi.
+        Task<bool> MajCodeParentAsync(Guid eleveId, string codeParent);
     }
 
     // Projection plate calquee sur EleveListeItem (Scolarite.Api/Eleves/Liste).
@@ -28,5 +32,7 @@ namespace App.Infrastructure.Services.Eleves
         string Classe,
         decimal FraisScolarite,
         decimal Solde,
-        int NumOrdre);   // N° Inscription (unique par ecole)
+        int NumOrdre,    // N° Inscription (unique par ecole)
+        string ZoneTransport,   // zone de transport de l'élève (null = pas de transport)
+        string CodeParent);     // code parent (fratrie) — editable
 }

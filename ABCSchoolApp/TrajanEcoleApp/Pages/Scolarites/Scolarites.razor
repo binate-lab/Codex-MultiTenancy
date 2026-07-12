@@ -118,6 +118,7 @@
             <HeaderContent>
                 <MudTh Style="width:96px">Matricule</MudTh>
                 <MudTh Style="width:104px">Tél. Correspondant</MudTh>
+                <MudTh Style="width:96px">CodeParent</MudTh>
                 <MudTh>Nom</MudTh>
                 <MudTh>Prénoms</MudTh>
                 <MudTh Style="width:52px; text-align:center">Actif</MudTh>
@@ -137,6 +138,13 @@
                                   Immediate="false" Margin="Margin.Dense"
                                   Variant="Variant.Text" Underline="false"
                                   Class="acc-cell-input acc-cell-tel" />
+                </MudTd>
+                <MudTd DataLabel="CodeParent" data-col="CodeParent" data-eleve-id="@context.Id">
+                    <MudTextField T="string" Value="@context.CodeParent"
+                                  ValueChanged="@(v => OnCodeParentChanged(context, v))"
+                                  Immediate="false" Margin="Margin.Dense"
+                                  Variant="Variant.Text" Underline="false"
+                                  Class="acc-cell-input" />
                 </MudTd>
                 <MudTd DataLabel="Nom" Class="acc-cell-nom">@context.Nom</MudTd>
                 <MudTd DataLabel="Prénoms" Class="acc-cell-prenom">@context.Prenoms</MudTd>

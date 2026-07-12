@@ -106,6 +106,13 @@
     overflow-x: auto;
 }
 
+/* Table a largeur NATURELLE : elle deborde du conteneur borne -> defilement horizontal reel
+   (sinon la table se comprime a la largeur du conteneur et rien ne defile). */
+.acc-grid-eleves ::deep .mud-table-root {
+    width: max-content;
+    min-width: 100%;
+}
+
 /* Cases Ã  cocher "Inscrit" lisibles sur fond rouge */
 .acc-grid ::deep td .mud-icon-root {
     color: #ffffff !important;

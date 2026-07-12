@@ -160,7 +160,8 @@ namespace TrajanEcoleApp.Pages.Scolarites
                     e.Solde,            // colonne « Net à payer » ≈ solde restant
                     e.FraisScolarite,   // colonne « Inscription » ≈ frais (à affiner plus tard)
                     e.NumOrdre,         // N° Inscription
-                    e.ZoneTransport     // zone de transport (colonne éditable)
+                    e.ZoneTransport,    // zone de transport (colonne éditable)
+                    e.CodeParent        // code parent / fratrie (colonne éditable)
                 )).ToList();
             }
 
@@ -221,6 +222,23 @@ namespace TrajanEcoleApp.Pages.Scolarites
             {
                 row.TelCorrespondant = ancien;
                 _snackbar.Add("Impossible d'enregistrer le téléphone du correspondant.", Severity.Error);
+            }
+        }
+
+        // Édition en ligne du CodeParent (fratrie) : mise à jour immédiate puis persistance
+        // (Scolarite.Api). Le CodeParent régit la réutilisation des références de paiement.
+        private async Task OnCodeParentChanged(EleveScolariteRow row, string nouveau)
+        {
+            var ancien = row.CodeParent;
+            if (nouveau == ancien) return;
+
+            row.CodeParent = nouveau;
+
+            var ok = await _scolariteEleveService.MajCodeParentAsync(row.Id, nouveau ?? string.Empty);
+            if (!ok)
+            {
+                row.CodeParent = ancien;
+                _snackbar.Add("Impossible d'enregistrer le CodeParent.", Severity.Error);
             }
         }
 
@@ -802,11 +820,13 @@ namespace TrajanEcoleApp.Pages.Scolarites
             public decimal Inscription { get; set; } // frais de l'année (échéancier généré)
             public int NumOrdre { get; }             // N° Inscription (unique par école)
             public string ZoneTransport { get; set; } // zone de transport (vide = aucun) — colonne éditable
+            public string CodeParent { get; set; }   // code parent (fratrie) — colonne éditable
 
             public EleveScolariteRow(
                 Guid id, string matricule, string telCorrespondant, string nom, string prenoms,
                 bool actif, bool inscrit, string statut, string niveau, string classe,
-                decimal netAPayer, decimal inscription, int numOrdre, string zoneTransport)
+                decimal netAPayer, decimal inscription, int numOrdre, string zoneTransport,
+                string codeParent)
             {
                 Id = id;
                 Matricule = matricule;
@@ -822,6 +842,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
                 Inscription = inscription;
                 NumOrdre = numOrdre;
                 ZoneTransport = zoneTransport ?? string.Empty;
+                CodeParent = codeParent ?? string.Empty;
             }
         }
     }
