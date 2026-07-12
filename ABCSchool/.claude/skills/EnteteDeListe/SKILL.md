@@ -9,9 +9,12 @@ description: >
   reçu, procès-verbal, état…) et qu'il faut l'en-tête administratif ivoirien — même sans dire
   « en-tête » : « aperçu avant impression », « feuille A4 à imprimer », « mets l'en-tête
   officiel », « République de Côte d'Ivoire / MENA-DREN », « regrouper école + année en haut »,
-  « imprimer proprement sans la grille de travail ». Le skill encode le MARKUP exact, le CSS de
+  « imprimer proprement sans la grille de travail », « choisir / changer le modèle de liste »,
+  « plusieurs modèles d'impression », « cahier d'appel / liste de présence », « fiche de notes »,
+  « trombinoscope », « imprimer en paysage ». Le skill encode le MARKUP exact, le CSS de
   la feuille A4, le MÉCANISME d'impression (isoler la feuille via une classe body + @media
-  print global) et le formatage des libellés de classe collège (6e1 → 6è 1). N'utilise PAS ce
+  print global), le sélecteur multi-modèles (corps variable, orientation portrait/paysage) et
+  le formatage des libellés de classe collège (6e1 → 6è 1). N'utilise PAS ce
   skill pour : styliser une grille/champ MudBlazor à l'écran (→ mudblazor-grilles-champs-css) ;
   la logique métier (filtrage, calculs, totaux) ; un export PDF/Excel côté serveur ; un autre
   projet que TrajanEcoleApp/ABCSchool.
@@ -208,6 +211,58 @@ private static string FormatClasse(string classe)
         .Trim();
 }
 ```
+
+## Plusieurs modèles sur une même feuille (corps variable)
+
+Une même page d'aperçu peut proposer **plusieurs modèles** de document : seuls le **corps** et
+le **titre** (et parfois l'**orientation**) changent ; l'en-tête officiel, les stats G/F/Total
+et le mécanisme d'impression restent communs. Choix du modèle = une déroulante dans la barre
+d'outils de l'aperçu (hors feuille, donc non imprimée). Réf : page Liste de classe, enum
+`ModeleListe { Classe, Affectes, Appel, Notes, Trombinoscope }`.
+
+Modèles livrés (à réutiliser / imiter) :
+- **Liste de classe** / **Liste des affectés** — tableau état civil (N° · Matricule · Nom &
+  Prénoms · Sexe · Date · Lieu · Nationalité). « Affectés » = même corps mais source filtrée
+  sur `Statut == "Aff"` en plus des filtres de la page.
+- **Liste d'appel** = **LISTE DE PRÉSENCE**, **paysage** : cahier hebdomadaire N° · Matricule ·
+  Nom & Prénoms + `JoursAppel` × `CreneauxAppel` (5 jours Lun→Ven × 9 créneaux 7à8…17à18),
+  cases vides à cocher, + bande « SEMAINE DU : …/…/… AU : …/…/… » et « Prof. Principal : … »
+  (lignes à remplir à la main, on n'a pas ces données). Créneaux rendus verticalement
+  (`cr.Replace(" ", "<br>")` en `MarkupString`), colonnes `table-layout: fixed` très étroites.
+- **Fiche de notes** — N° · Matricule · Nom & Prénoms · Sexe + 7 colonnes vides (`c-vide`).
+- **Trombinoscope**, **paysage** — grille de cartes (`.lc-tromb`) photo (ratio 35×45) + Nom &
+  Prénoms + Matricule ; `break-inside: avoid` sur les cartes.
+
+Règles clés :
+- **Tous les corps itèrent la MÊME source filtrée** (`ElevesImpression` = `Filtered` trié), pour
+  que chaque modèle respecte la barre de filtres et que les stats soient cohérentes.
+- Matricule présent sur appel + notes pour **distinguer les homonymes** ; Matricule/Nom
+  resserrés (`font-size`, `width`) sur ces modèles larges pour laisser la place aux colonnes.
+
+### Orientation portrait / paysage
+
+Les modèles larges (appel, trombinoscope) s'impriment en **paysage**. Deux leviers :
+1. Écran : classe modificatrice sur la feuille et le panneau — `.lc-feuille--paysage { width:
+   297mm; min-height: 210mm; }`, `.lc-preview-panel--paysage { width: 297mm; }`.
+2. Impression : le helper JS bascule `@page` en paysage le temps du print, via une balise
+   `<style>` injectée puis retirée (car `@page` ne se scope pas à une classe body) :
+
+```js
+window.lcImprimerListe = function (paysage) {
+    document.body.classList.add('lc-print-liste');
+    var orient = null;
+    if (paysage) {
+        orient = document.createElement('style');
+        orient.textContent = '@page { size: A4 landscape; margin: 8mm; }';
+        document.head.appendChild(orient);
+    }
+    window.print();
+    if (orient) { orient.remove(); }
+    document.body.classList.remove('lc-print-liste');
+};
+```
+
+Côté page : `await _js.InvokeVoidAsync("lcImprimerListe", ModeleEstPaysage);`.
 
 ## Pièges à éviter
 
