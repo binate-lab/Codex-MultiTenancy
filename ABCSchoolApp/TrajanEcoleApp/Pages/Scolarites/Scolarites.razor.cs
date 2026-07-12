@@ -92,6 +92,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private string _fInscrit = "Oui";   // par défaut : seulement les inscrits
         private string _fActif = "Oui";     // par défaut : seulement les actifs
         private string _fTransport = "Tous";   // Tous / Oui (a une zone) / Non
+        private string _fCodeParent = string.Empty;
 
         // Élèves de l'école, chargés depuis Scolarite.Api (ScolariteDb) dans OnInitializedAsync.
         private List<EleveScolariteRow> _all = new();
@@ -186,7 +187,16 @@ namespace TrajanEcoleApp.Pages.Scolarites
                 && (_fInscrit == "Tous" || (_fInscrit == "Oui") == e.Inscrit)
                 && (_fActif == "Tous" || (_fActif == "Oui") == e.Actif)
                 && (_fTransport == "Tous"
-                    || (_fTransport == "Oui") == !string.IsNullOrWhiteSpace(e.ZoneTransport)));
+                    || (_fTransport == "Oui") == !string.IsNullOrWhiteSpace(e.ZoneTransport))
+                && (string.IsNullOrWhiteSpace(_fCodeParent) || e.CodeParent == _fCodeParent));
+
+        // CodeParent distincts (non vides) des élèves chargés, triés : alimentent la déroulante
+        // du filtre CodeParent — s'enrichit au fil des codes saisis dans la grille.
+        private IEnumerable<string> CodeParentsDisponibles =>
+            _all.Select(e => e.CodeParent)
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Distinct()
+                .OrderBy(c => c, StringComparer.CurrentCultureIgnoreCase);
 
         // « contient » tolérant aux accents et à la casse : on retire les accents des deux
         // côtés (SansAccents) puis on compare sans tenir compte de la casse. Un critère vide
@@ -200,7 +210,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
 
         private void Effacer()
         {
-            _fNumOrdre = _fNom = _fPrenoms = _fMatricule = _fNiveau = _fClasse = string.Empty;
+            _fNumOrdre = _fNom = _fPrenoms = _fMatricule = _fNiveau = _fClasse = _fCodeParent = string.Empty;
             _fStatut = _fTransport = "Tous";
             _fInscrit = _fActif = "Oui";   // on revient au défaut (inscrits + actifs)
         }

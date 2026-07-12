@@ -105,6 +105,19 @@
                     <MudSelectItem Value="@("Non")">Non</MudSelectItem>
                 </MudSelect>
             </div>
+            <div class="acc-fgroup">
+                <label class="acc-flabel">CodeParent :</label>
+                @* Déroulante alimentée par les CodeParent existants (distincts) des élèves
+                   chargés : un nouveau code saisi dans la grille apparaît ici automatiquement. *@
+                <MudSelect @bind-Value="_fCodeParent" T="string" Clearable="true" Dense="true"
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fcodeparent">
+                    <MudSelectItem Value="@("")">Tous</MudSelectItem>
+                    @foreach (var cp in CodeParentsDisponibles)
+                    {
+                        <MudSelectItem Value="@cp">@cp</MudSelectItem>
+                    }
+                </MudSelect>
+            </div>
             <MudButton OnClick="Effacer" Variant="Variant.Outlined" Size="Size.Small"
                        StartIcon="@Icons.Material.Filled.FilterAltOff" Class="ml-auto">Effacer</MudButton>
         </div>
