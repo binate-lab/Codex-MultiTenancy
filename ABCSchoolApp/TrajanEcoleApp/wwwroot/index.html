@@ -660,10 +660,19 @@
         };
 
         // Impression de la Liste de classe : même principe, on isole la feuille d'aperçu A4
-        // (classe body « lc-print-liste ») le temps de l'impression.
-        window.lcImprimerListe = function () {
+        // (classe body « lc-print-liste ») le temps de l'impression. `paysage` bascule la page
+        // en A4 paysage (modèles larges : appel, trombinoscope) via une règle @page injectée.
+        window.lcImprimerListe = function (paysage) {
             document.body.classList.add('lc-print-liste');
+            var orient = null;
+            if (paysage) {
+                orient = document.createElement('style');
+                orient.id = 'lc-print-orient';
+                orient.textContent = '@page { size: A4 landscape; margin: 8mm; }';
+                document.head.appendChild(orient);
+            }
             window.print();
+            if (orient) { orient.remove(); }
             document.body.classList.remove('lc-print-liste');
         };
     </script>

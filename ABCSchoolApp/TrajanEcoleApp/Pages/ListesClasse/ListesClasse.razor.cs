@@ -502,13 +502,58 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private void OuvrirApercu() => _apercuOuvert = true;
         private void FermerApercu() => _apercuOuvert = false;
 
-        // Lance l'impression réelle : le helper JS isole « .lc-feuille » le temps du print.
-        private async Task ImprimerListeAsync() => await _js.InvokeVoidAsync("lcImprimerListe");
+        // Lance l'impression réelle : le helper JS isole « .lc-feuille » le temps du print et
+        // bascule la page en paysage pour les modèles larges (appel, trombinoscope).
+        private async Task ImprimerListeAsync() =>
+            await _js.InvokeVoidAsync("lcImprimerListe", ModeleEstPaysage);
+
+        // ---- Modèles de liste : seul le CORPS (et le titre) change ; en-tête officiel, stats
+        // G/F/Total et mécanisme d'impression sont communs à tous. Le modèle se choisit dans une
+        // déroulante de la barre d'aperçu (front seul, aucune persistance). ----
+        public enum ModeleListe { Classe, Appel, Notes, Trombinoscope, Affectes }
+
+        private ModeleListe _modele = ModeleListe.Classe;
+
+        private void OnModeleChanged(ModeleListe m) => _modele = m;
+
+        // Titre du document selon le modèle (la classe est ajoutée après « : » dans le .razor).
+        private string ModeleTitre => _modele switch
+        {
+            ModeleListe.Appel => "LISTE DE PRÉSENCE",
+            ModeleListe.Notes => "FICHE DE NOTES",
+            ModeleListe.Trombinoscope => "TROMBINOSCOPE",
+            ModeleListe.Affectes => "LISTE DES AFFECTÉS",
+            _ => "LISTE DE CLASSE",
+        };
+
+        // Modèles imprimés en PAYSAGE (grille large) : cahier d'appel hebdomadaire (jours ×
+        // créneaux) et trombinoscope (cartes photo). Les autres restent en portrait.
+        private bool ModeleEstPaysage =>
+            _modele is ModeleListe.Appel or ModeleListe.Trombinoscope;
+
+        // Fiche de notes = Matricule (pour distinguer les homonymes) + 7 colonnes vides que
+        // l'enseignant remplit à la main (notes d'évaluations).
+        private bool ModeleNotes => _modele == ModeleListe.Notes;
+
+        private const int NbColonnesVides = 7;
+
+        // Cahier d'appel hebdomadaire (LISTE DE PRÉSENCE) : jours × créneaux horaires, calqués
+        // sur le modèle Access de Keita. Cases vides à cocher à la main.
+        private static readonly string[] JoursAppel =
+            { "LUNDI", "MARDI", "MERCREDI", "JEUDI", "VENDREDI" };
+        private static readonly string[] CreneauxAppel =
+            { "7 à 8", "8 à 9", "9 à 10", "10 à 11", "11 à 12", "14 à 15", "15 à 16", "16 à 17", "17 à 18" };
+
+        // Source du modèle : « Liste des Affectés » ne garde que les élèves affectés (Statut =
+        // Aff) ; les autres modèles prennent toute la sélection filtrée. TOUS respectent donc la
+        // barre de filtres (via Filtered).
+        private IEnumerable<EleveRow> SourceModele =>
+            _modele == ModeleListe.Affectes ? Filtered.Where(e => e.Statut == "Aff") : Filtered;
 
         // Élèves à imprimer = exactement la sélection filtrée, triée Nom puis Prénoms (ordre
         // d'une liste de classe). La numérotation N° suit cet ordre.
         private List<EleveRow> ElevesImpression =>
-            Filtered
+            SourceModele
                 .OrderBy(e => e.Nom, StringComparer.CurrentCultureIgnoreCase)
                 .ThenBy(e => e.Prenoms, StringComparer.CurrentCultureIgnoreCase)
                 .ToList();

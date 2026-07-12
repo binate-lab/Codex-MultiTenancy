@@ -357,9 +357,23 @@
 @if (_apercuOuvert)
 {
     <div class="lc-preview-overlay" @onclick="FermerApercu">
-        <div class="lc-preview-panel" @onclick:stopPropagation="true">
+        <div class="lc-preview-panel @(ModeleEstPaysage ? "lc-preview-panel--paysage" : "")" @onclick:stopPropagation="true">
             <div class="lc-preview-toolbar">
-                <span class="lc-preview-titre">Aperçu — Liste de classe</span>
+                <div class="d-flex align-center gap-3">
+                    <span class="lc-preview-titre">Aperçu</span>
+                    <div class="lc-preview-modele">
+                        <label class="lc-preview-modele-label">Modèle :</label>
+                        <MudSelect T="ModeleListe" Value="_modele" ValueChanged="OnModeleChanged"
+                                   Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined"
+                                   Class="lc-preview-modele-field">
+                            <MudSelectItem Value="@ModeleListe.Classe">Liste de classe</MudSelectItem>
+                            <MudSelectItem Value="@ModeleListe.Affectes">Liste des affectés</MudSelectItem>
+                            <MudSelectItem Value="@ModeleListe.Appel">Liste d'appel (présence)</MudSelectItem>
+                            <MudSelectItem Value="@ModeleListe.Notes">Fiche de notes</MudSelectItem>
+                            <MudSelectItem Value="@ModeleListe.Trombinoscope">Trombinoscope</MudSelectItem>
+                        </MudSelect>
+                    </div>
+                </div>
                 <div class="d-flex align-center gap-2">
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
                                StartIcon="@Icons.Material.Filled.Print"
@@ -371,7 +385,7 @@
             </div>
 
             @* La feuille A4 : SEUL élément conservé à l'impression. *@
-            <div class="lc-feuille">
+            <div class="lc-feuille @(ModeleEstPaysage ? "lc-feuille--paysage" : "")">
                 <div class="lc-feuille-entete">
                     @* Gauche : autorité de tutelle. *@
                     <div class="lc-feuille-ministere">
@@ -392,7 +406,7 @@
 
                 @* Ligne : titre (classe) à gauche, stats à droite. *@
                 <div class="lc-feuille-barre">
-                    <div class="lc-feuille-titre">LISTE DE CLASSE@(string.IsNullOrWhiteSpace(_fClasse) ? "" : $" : {FormatClasse(_fClasse)}")</div>
+                    <div class="lc-feuille-titre">@ModeleTitre@(string.IsNullOrWhiteSpace(_fClasse) ? "" : $" : {FormatClasse(_fClasse)}")</div>
                     <div class="lc-feuille-totaux">
                         <span>Garçons : <b>@NbGarcons</b></span>
                         <span>Filles : <b>@NbFilles</b></span>
@@ -400,39 +414,143 @@
                     </div>
                 </div>
 
-                <table class="lc-feuille-table">
-                    <thead>
-                        <tr>
-                            <th class="c-num">N°</th>
-                            <th class="c-mat">Matricule</th>
-                            <th class="c-nom">Nom &amp; Prénoms</th>
-                            <th class="c-sexe">Sexe</th>
-                            <th class="c-date">Date naiss.</th>
-                            <th class="c-lieu">Lieu naiss.</th>
-                            <th class="c-nat">Nationalité</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        @{ var rang = 0; }
+                @* ---- Corps selon le modèle. En-tête, stats et impression sont communs. ---- *@
+                @if (_modele == ModeleListe.Appel)
+                {
+                    @* Cahier d'appel hebdomadaire (LISTE DE PRÉSENCE), paysage : jours × créneaux,
+                       cases à cocher à la main. Bande « Semaine du… » + « Prof. Principal ». *@
+                    <div class="lc-appel-band">
+                        <span class="lc-appel-semaine">SEMAINE DU : ....../....../..........&nbsp;&nbsp;&nbsp;AU : ....../....../..........</span>
+                        <span class="lc-appel-prof">Prof. Principal : ...................................</span>
+                    </div>
+                    <table class="lc-feuille-table lc-appel-table">
+                        <thead>
+                            <tr>
+                                <th class="c-num" rowspan="2">N°</th>
+                                <th class="c-mat" rowspan="2">Matricule</th>
+                                <th class="c-nom" rowspan="2">Nom &amp; Prénoms</th>
+                                @foreach (var jour in JoursAppel)
+                                {
+                                    <th class="lc-appel-jour" colspan="@CreneauxAppel.Length">@jour</th>
+                                }
+                            </tr>
+                            <tr>
+                                @foreach (var jour in JoursAppel)
+                                {
+                                    @foreach (var cr in CreneauxAppel)
+                                    {
+                                        <th class="lc-appel-creneau">@((MarkupString)cr.Replace(" ", "<br>"))</th>
+                                    }
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ var rangA = 0; }
+                            @foreach (var e in ElevesImpression)
+                            {
+                                rangA++;
+                                <tr>
+                                    <td class="c-num">@rangA</td>
+                                    <td class="c-mat">@FormatMatricule(e.Matricule)</td>
+                                    <td class="c-nom">@e.Nom @e.Prenoms</td>
+                                    @foreach (var jour in JoursAppel)
+                                    {
+                                        @foreach (var cr in CreneauxAppel)
+                                        {
+                                            <td class="lc-appel-case"></td>
+                                        }
+                                    }
+                                </tr>
+                            }
+                            @if (ElevesImpression.Count == 0)
+                            {
+                                <tr><td colspan="@(3 + JoursAppel.Length * CreneauxAppel.Length)" class="lc-feuille-vide">Aucun élève ne correspond au filtre.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+                else if (_modele == ModeleListe.Trombinoscope)
+                {
+                    @* Trombinoscope (paysage) : grille de cartes photo + Nom & Prénoms + Matricule. *@
+                    <div class="lc-tromb">
                         @foreach (var e in ElevesImpression)
                         {
-                            rang++;
-                            <tr>
-                                <td class="c-num">@rang</td>
-                                <td class="c-mat">@FormatMatricule(e.Matricule)</td>
-                                <td class="c-nom">@e.Nom @e.Prenoms</td>
-                                <td class="c-sexe">@e.Sexe</td>
-                                <td class="c-date">@(e.DateNaissance?.ToString("dd/MM/yyyy"))</td>
-                                <td class="c-lieu">@e.LieuNaissance</td>
-                                <td class="c-nat">@e.Nationalite</td>
-                            </tr>
+                            var src = PhotoSrc(e);
+                            <div class="lc-tromb-carte">
+                                <div class="lc-tromb-photo">
+                                    @if (src is not null)
+                                    {
+                                        <img src="@src" alt="@e.Nom @e.Prenoms" />
+                                    }
+                                </div>
+                                <div class="lc-tromb-nom">@e.Nom @e.Prenoms</div>
+                                <div class="lc-tromb-mat">@FormatMatricule(e.Matricule)</div>
+                            </div>
                         }
                         @if (ElevesImpression.Count == 0)
                         {
-                            <tr><td colspan="7" class="lc-feuille-vide">Aucun élève ne correspond au filtre.</td></tr>
+                            <div class="lc-feuille-vide">Aucun élève ne correspond au filtre.</div>
                         }
-                    </tbody>
-                </table>
+                    </div>
+                }
+                else
+                {
+                    @* Tableaux portrait : état civil (Liste de classe / Affectés) OU Fiche de notes
+                       (Matricule + 7 colonnes vides à remplir à la main). *@
+                    <table class="lc-feuille-table @(ModeleNotes ? "lc-feuille-table--saisie" : "")">
+                        <thead>
+                            <tr>
+                                <th class="c-num">N°</th>
+                                <th class="c-mat">Matricule</th>
+                                <th class="c-nom">Nom &amp; Prénoms</th>
+                                <th class="c-sexe">Sexe</th>
+                                @if (ModeleNotes)
+                                {
+                                    @for (var k = 0; k < NbColonnesVides; k++)
+                                    {
+                                        <th class="c-vide"></th>
+                                    }
+                                }
+                                else
+                                {
+                                    <th class="c-date">Date naiss.</th>
+                                    <th class="c-lieu">Lieu naiss.</th>
+                                    <th class="c-nat">Nationalité</th>
+                                }
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @{ var rang = 0; }
+                            @foreach (var e in ElevesImpression)
+                            {
+                                rang++;
+                                <tr>
+                                    <td class="c-num">@rang</td>
+                                    <td class="c-mat">@FormatMatricule(e.Matricule)</td>
+                                    <td class="c-nom">@e.Nom @e.Prenoms</td>
+                                    <td class="c-sexe">@e.Sexe</td>
+                                    @if (ModeleNotes)
+                                    {
+                                        @for (var k = 0; k < NbColonnesVides; k++)
+                                        {
+                                            <td class="c-vide"></td>
+                                        }
+                                    }
+                                    else
+                                    {
+                                        <td class="c-date">@(e.DateNaissance?.ToString("dd/MM/yyyy"))</td>
+                                        <td class="c-lieu">@e.LieuNaissance</td>
+                                        <td class="c-nat">@e.Nationalite</td>
+                                    }
+                                </tr>
+                            }
+                            @if (ElevesImpression.Count == 0)
+                            {
+                                <tr><td colspan="@(ModeleNotes ? 4 + NbColonnesVides : 7)" class="lc-feuille-vide">Aucun élève ne correspond au filtre.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                }
 
                 @* Date d'édition en bas de la liste. *@
                 <div class="lc-feuille-pied">Édité le : @DateTime.Now.ToString("dd/MM/yyyy")</div>
