@@ -276,6 +276,24 @@
                 min-height: 0;
                 box-shadow: none;
             }
+
+            /* Impression du Reçu de paiement : on masque tout sauf la feuille du reçu (classe
+               body « svt-print-recu », posée le temps du print). */
+            body.svt-print-recu * {
+                visibility: hidden !important;
+            }
+            body.svt-print-recu .recu-feuille,
+            body.svt-print-recu .recu-feuille * {
+                visibility: visible !important;
+            }
+            body.svt-print-recu .recu-feuille {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                min-height: 0;
+                box-shadow: none;
+            }
         }
     </style>
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />
@@ -674,6 +692,13 @@
             window.print();
             if (orient) { orient.remove(); }
             document.body.classList.remove('lc-print-liste');
+        };
+
+        // Impression du Reçu de paiement : isole « .recu-feuille » le temps du print.
+        window.svtImprimerRecu = function () {
+            document.body.classList.add('svt-print-recu');
+            window.print();
+            document.body.classList.remove('svt-print-recu');
         };
     </script>
 </body>

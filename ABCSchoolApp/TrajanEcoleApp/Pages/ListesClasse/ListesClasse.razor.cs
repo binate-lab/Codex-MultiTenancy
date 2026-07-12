@@ -56,6 +56,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private string _fNiveau = string.Empty;     // "" = tous
         private string _fClasse = string.Empty;     // "" = toutes
         private string _fStatut = "Tous";
+        private string _fSexe = "Tous";       // "Tous" / "G" (garçons) / "F" (filles)
         private string _fInscrit = "Tous";
         private string _fActif = "Tous";
 
@@ -252,13 +253,14 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 && (string.IsNullOrWhiteSpace(_fNiveau) || e.Niveau == _fNiveau)
                 && (string.IsNullOrWhiteSpace(_fClasse) || e.Classe == _fClasse)
                 && (_fStatut == "Tous" || e.Statut == _fStatut)
+                && (_fSexe == "Tous" || (_fSexe == "G" ? EstGarcon(e.Sexe) : EstFille(e.Sexe)))
                 && (_fInscrit == "Tous" || (_fInscrit == "Oui") == e.Inscrit)
                 && (_fActif == "Tous" || (_fActif == "Oui") == e.Actif));
 
         private void Effacer()
         {
             _fCycleId = _fNiveau = _fClasse = string.Empty;
-            _fStatut = _fInscrit = _fActif = "Tous";
+            _fStatut = _fSexe = _fInscrit = _fActif = "Tous";
             AppliquerFiltre();
         }
 
@@ -303,6 +305,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         // sur MudSelect) pour garantir le recalage de la fiche.
         private void OnFiltreClasseChanged(string v) { _fClasse = v ?? string.Empty; AppliquerFiltre(); }
         private void OnFiltreStatutChanged(string v) { _fStatut = v ?? "Tous"; AppliquerFiltre(); }
+        private void OnFiltreSexeChanged(string v) { _fSexe = v ?? "Tous"; AppliquerFiltre(); }
         private void OnFiltreInscritChanged(string v) { _fInscrit = v ?? "Tous"; AppliquerFiltre(); }
         private void OnFiltreActifChanged(string v) { _fActif = v ?? "Tous"; AppliquerFiltre(); }
 
@@ -567,6 +570,11 @@ namespace TrajanEcoleApp.Pages.ListesClasse
 
         private int NbGarcons => ElevesImpression.Count(e => EstGarcon(e.Sexe));
         private int NbFilles => ElevesImpression.Count(e => EstFille(e.Sexe));
+
+        // Compteurs du PIED DE GRILLE (sur la sélection affichée = Filtered), indépendants du
+        // modèle d'impression choisi dans l'aperçu.
+        private int GrilleGarcons => Filtered.Count(e => EstGarcon(e.Sexe));
+        private int GrilleFilles => Filtered.Count(e => EstFille(e.Sexe));
 
         // ================== Navigation clavier & copie « cellule du dessus » ==================
         // Réutilise le handler JS global « svtGrilleEleves » (index.html) : Haut/Bas déplacent

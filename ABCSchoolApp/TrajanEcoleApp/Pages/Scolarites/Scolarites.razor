@@ -96,6 +96,15 @@
                     <MudSelectItem Value="@("Non")">Non</MudSelectItem>
                 </MudSelect>
             </div>
+            <div class="acc-fgroup">
+                <label class="acc-flabel">Transport :</label>
+                <MudSelect @bind-Value="_fTransport" T="string" Dense="true"
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                    <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
+                    <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
+                    <MudSelectItem Value="@("Non")">Non</MudSelectItem>
+                </MudSelect>
+            </div>
             <MudButton OnClick="Effacer" Variant="Variant.Outlined" Size="Size.Small"
                        StartIcon="@Icons.Material.Filled.FilterAltOff" Class="ml-auto">Effacer</MudButton>
         </div>
@@ -116,6 +125,7 @@
                 <MudTh Style="width:70px">Statut</MudTh>
                 <MudTh Style="width:74px">Niveau</MudTh>
                 <MudTh Style="width:64px">Classe</MudTh>
+                <MudTh Style="width:96px">Transport</MudTh>
                 <MudTh Style="text-align:right">Net à payer</MudTh>
                 <MudTh Style="text-align:right">Inscription</MudTh>
             </HeaderContent>
@@ -168,6 +178,20 @@
                         @foreach (var cl in ClassesPour(context.Niveau))
                         {
                             <MudSelectItem Value="@cl.Libelle">@cl.Libelle</MudSelectItem>
+                        }
+                    </MudSelect>
+                </MudTd>
+                <MudTd DataLabel="Transport" data-col="Transport" data-eleve-id="@context.Id">
+                    @* Zone de transport : « Aucun » retire le transport ; une zone ajoute la
+                       part transport de chaque mois à la mensualité correspondante. *@
+                    <MudSelect T="string" Value="@context.ZoneTransport"
+                               ValueChanged="@(v => OnZoneTransportChangedAsync(context, v))"
+                               Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                               Disabled="_transportEnCours" Class="acc-cell-select">
+                        <MudSelectItem Value="@("")">Aucun</MudSelectItem>
+                        @foreach (var z in _zonesTransport)
+                        {
+                            <MudSelectItem Value="@z.Zone">@z.Zone</MudSelectItem>
                         }
                     </MudSelect>
                 </MudTd>
@@ -276,10 +300,15 @@
                                            StartIcon="@Icons.Material.Filled.Close">Annuler</MudButton>
                             </MudTooltip>
                         }
-                        <MudTooltip Text="Imprimer le reçu de paiement (PDF)">
+                        <MudTooltip Text="Aperçu du reçu (comme les listes : à l'écran, puis impression)">
+                            <MudButton OnClick="OuvrirRecuApercu" Variant="Variant.Outlined" Color="Color.Primary"
+                                       Size="Size.Small" Disabled="_sel is null" Class="svt-btn-recu ml-2"
+                                       StartIcon="@Icons.Material.Filled.Visibility">Aperçu</MudButton>
+                        </MudTooltip>
+                        <MudTooltip Text="Télécharger le reçu de paiement en PDF">
                             <MudButton OnClick="TelechargerRecuAsync" Variant="Variant.Outlined" Color="Color.Primary"
                                        Size="Size.Small" Disabled="_recuEnCours" Class="svt-btn-recu ml-2"
-                                       StartIcon="@Icons.Material.Filled.Print">Reçu</MudButton>
+                                       StartIcon="@Icons.Material.Filled.PictureAsPdf">Reçu PDF</MudButton>
                         </MudTooltip>
                         @* SMS : le bouton n'envoie que si la case juste à droite est cochée.
                            La case mémorise (ou non) son état pour les prochaines ouvertures. *@
@@ -378,6 +407,213 @@
                 </div>
                 <div class="svt-echeancier-slot"></div>
             </div>
+
+            @* ============ Réductions accordées à l'élève ============
+               Placé sous « Détail des versements ». La réduction s'impute sur les mensualités
+               de scolarité EN PARTANT DE LA FIN, puis déborde sur l'inscription en dernier
+               (mécanique backend). On saisit un type + un montant fixe OU un pourcentage. *@
+            <div class="svt-reduc-zone">
+                <div class="svt-reduc-titre">Réductions</div>
+                <div class="svt-reduc-body">
+                    <div class="svt-reduc-saisie">
+                        <label>Type :</label>
+                        <MudSelect T="string" @bind-Value="_rType" Dense="true"
+                                   Variant="Variant.Outlined" Margin="Margin.Dense" Class="svt-reduc-type">
+                            @foreach (var t in _typesReduction)
+                            {
+                                <MudSelectItem Value="@t.Libelle">@t.Libelle</MudSelectItem>
+                            }
+                        </MudSelect>
+                        <label>Montant :</label>
+                        <MudNumericField T="decimal" @bind-Value="_rMontant" HideSpinButtons="true" Min="0"
+                                         Format="#,0" Culture="@_fr"
+                                         Variant="Variant.Outlined" Margin="Margin.Dense" Class="svt-reduc-montant" />
+                        <label>ou %&nbsp;:</label>
+                        <MudNumericField T="decimal" @bind-Value="_rPourcent" HideSpinButtons="true" Min="0" Max="100"
+                                         Format="0.##" Culture="@_fr"
+                                         Variant="Variant.Outlined" Margin="Margin.Dense" Class="svt-reduc-pct" />
+                        <label>Réf. :</label>
+                        <MudTextField T="string" @bind-Value="_rReference" Placeholder="N° arrêté, nom membre…"
+                                      Variant="Variant.Outlined" Margin="Margin.Dense" Class="svt-reduc-ref" />
+                        <MudButton OnClick="AccorderReductionAsync" Variant="Variant.Filled" Color="Color.Primary"
+                                   Size="Size.Small" Disabled="_rEnCours" Class="svt-reduc-btn"
+                                   StartIcon="@Icons.Material.Filled.Discount">Accorder</MudButton>
+                    </div>
+
+                    <div class="svt-reduc-grid">
+                        @if (_reductions.Count == 0)
+                        {
+                            <div class="svt-reduc-vide">Aucune réduction accordée.</div>
+                        }
+                        else
+                        {
+                            <table class="svt-reduc-table">
+                                <thead>
+                                    <tr><th>Type</th><th>Montant</th><th>%</th><th>Référence</th><th>Date</th><th></th></tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var r in _reductions)
+                                    {
+                                        <tr>
+                                            <td>@r.Motif</td>
+                                            <td class="svt-reduc-num">@Fmt(r.Montant)</td>
+                                            <td class="svt-reduc-num">@(r.Pourcentage is null ? "" : r.Pourcentage.Value.ToString("0.##", _fr) + " %")</td>
+                                            <td>@r.Reference</td>
+                                            <td>@r.Date.ToString("dd/MM/yyyy")</td>
+                                            <td class="svt-reduc-act">
+                                                <MudTooltip Text="Annuler cette réduction">
+                                                    <MudIconButton Icon="@Icons.Material.Filled.Delete" Size="Size.Small"
+                                                                   Color="Color.Error" Disabled="_rEnCours"
+                                                                   OnClick="@(() => SupprimerReductionAsync(r))" />
+                                                </MudTooltip>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        }
+                    </div>
+                </div>
+            </div>
         }
     </div>
 </MudPaper>
+
+@* ==================== Aperçu avant impression du REÇU DE PAIEMENT ====================
+   Même mécanisme que les listes (skill EnteteDeListe) : overlay HTML pur, seule « .recu-feuille »
+   est conservée à l'impression (classe body « svt-print-recu », cf wwwroot/index.html). *@
+@if (_recuApercuOuvert && _sel is not null)
+{
+    <div class="recu-overlay" @onclick="FermerRecuApercu">
+        <div class="recu-panel" @onclick:stopPropagation="true">
+            <div class="recu-toolbar">
+                <span class="recu-toolbar-titre">Aperçu — Reçu de paiement</span>
+                <div class="d-flex align-center gap-2">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                               StartIcon="@Icons.Material.Filled.Print"
+                               OnClick="ImprimerRecuAsync">Imprimer</MudButton>
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                               StartIcon="@Icons.Material.Filled.Close"
+                               OnClick="FermerRecuApercu">Fermer</MudButton>
+                </div>
+            </div>
+
+            <div class="recu-feuille">
+                @* En-tête officiel commun (calque EnteteDeListe). *@
+                <div class="recu-entete">
+                    <div class="recu-ministere">
+                        <div class="recu-min-titre">RÉPUBLIQUE DE CÔTE D'IVOIRE</div>
+                        <div class="recu-dren">MENA-DREN : <b>@_villeEcole</b></div>
+                    </div>
+                    @if (!string.IsNullOrWhiteSpace(_logoEcole))
+                    {
+                        <div class="recu-logo"><img src="@_logoEcole" alt="Logo" /></div>
+                    }
+                    <div class="recu-ecole-droite">
+                        <div class="recu-nom">@(string.IsNullOrWhiteSpace(_nomEcole) ? "ÉCOLE / ÉTABLISSEMENT" : _nomEcole)</div>
+                        <div class="recu-annee">Année scolaire : @_annee</div>
+                    </div>
+                </div>
+
+                <div class="recu-barre">
+                    <div class="recu-titre">REÇU DE PAIEMENT</div>
+                    <div class="recu-date">Édité le : @DateTime.Now.ToString("dd/MM/yyyy")</div>
+                </div>
+
+                @* Identité de l'élève. *@
+                <div class="recu-eleve">
+                    <div class="recu-champ"><span>Élève</span><b>@_sel.Nom @_sel.Prenoms</b></div>
+                    <div class="recu-champ"><span>Matricule</span><b>@_sel.Matricule</b></div>
+                    <div class="recu-champ"><span>N° Inscr.</span><b>@_sel.NumOrdre</b></div>
+                    <div class="recu-champ"><span>Classe</span><b>@_sel.Classe</b></div>
+                </div>
+
+                @* Versements enregistrés. *@
+                <div class="recu-section-titre">Versements</div>
+                <table class="recu-table">
+                    <thead>
+                        <tr>
+                            <th class="r-num">N°</th>
+                            <th>Date</th>
+                            <th>Nature</th>
+                            <th>Mode</th>
+                            <th>Référence</th>
+                            <th class="r-montant">Montant</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @{ var vr = 0; }
+                        @foreach (var v in _versements)
+                        {
+                            vr++;
+                            <tr>
+                                <td class="r-num">@vr</td>
+                                <td>@v.DateVersement.ToString("dd/MM/yyyy")</td>
+                                <td>@v.Nature</td>
+                                <td>@v.MoyenPaiement</td>
+                                <td>@v.ReferencePaiement</td>
+                                <td class="r-montant">@Fmt(v.Montant)</td>
+                            </tr>
+                        }
+                        @if (_versements.Count == 0)
+                        {
+                            <tr><td colspan="6" class="recu-vide">Aucun versement enregistré.</td></tr>
+                        }
+                    </tbody>
+                </table>
+
+                @* Synthèse du compte. *@
+                @if (_resume is not null)
+                {
+                    <div class="recu-synthese">
+                        <div><span>Frais de scolarité</span><b>@Fmt(_resume.FraisScolarite)</b></div>
+                        @if (_resume.TotalReduction > 0)
+                        {
+                            <div><span>Réductions</span><b>- @Fmt(_resume.TotalReduction)</b></div>
+                        }
+                        <div><span>Total versé</span><b>@Fmt(_resume.TotalVerse)</b></div>
+                        <div class="recu-synthese-reste"><span>Reste à payer</span><b>@Fmt(_resume.Reste)</b></div>
+                        @if (_resume.Credit > 0)
+                        {
+                            <div><span>Crédit (avance)</span><b>@Fmt(_resume.Credit)</b></div>
+                        }
+                    </div>
+                }
+
+                @* Échéancier individuel. *@
+                @if (_echeancier.Count > 0)
+                {
+                    <div class="recu-section-titre">Échéancier</div>
+                    <table class="recu-table">
+                        <thead>
+                            <tr>
+                                <th>Échéance</th>
+                                <th class="r-montant">Montant</th>
+                                <th class="r-montant">Payé</th>
+                                <th class="r-montant">Reste</th>
+                                <th>Statut</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var e in _echeancier)
+                            {
+                                <tr>
+                                    <td>@e.Libelle</td>
+                                    <td class="r-montant">@Fmt(e.Montant)</td>
+                                    <td class="r-montant">@Fmt(e.MontantPaye)</td>
+                                    <td class="r-montant">@Fmt(e.Reste)</td>
+                                    <td class="@(e.EnRetard && e.Statut != "Payé" ? "recu-retard" : "")">@e.Statut@(e.EnRetard && e.Statut != "Payé" ? " (retard)" : "")</td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                }
+
+                <div class="recu-signature">
+                    <div>Le Comptable / la Caisse</div>
+                    <div class="recu-signature-ligne">Signature &amp; cachet</div>
+                </div>
+            </div>
+        </div>
+    </div>
+}

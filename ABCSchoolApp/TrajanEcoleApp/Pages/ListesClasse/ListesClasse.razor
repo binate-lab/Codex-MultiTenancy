@@ -70,6 +70,15 @@
                 </MudSelect>
             </div>
             <div class="acc-fgroup">
+                <label class="acc-flabel">Sexe :</label>
+                <MudSelect Value="_fSexe" ValueChanged="OnFiltreSexeChanged" T="string" Dense="true"
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                    <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
+                    <MudSelectItem Value="@("G")">Garçons</MudSelectItem>
+                    <MudSelectItem Value="@("F")">Filles</MudSelectItem>
+                </MudSelect>
+            </div>
+            <div class="acc-fgroup">
                 <label class="acc-flabel">Inscrit :</label>
                 <MudSelect Value="_fInscrit" ValueChanged="OnFiltreInscritChanged" T="string" Dense="true"
                            Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
@@ -229,7 +238,9 @@
         </div>
 
         <div class="acc-gridfoot">
-            <MudText Typo="Typo.caption">@Filtered.Count() élève(s) affiché(s)</MudText>
+            <MudText Typo="Typo.caption">
+                @Filtered.Count() élève(s) affiché(s) — Garçons : @GrilleGarcons · Filles : @GrilleFilles
+            </MudText>
             <MudText Typo="Typo.caption" Class="acc-demo-note">
                 Source : Pédagogie (PedagogieDb). Statut / Classe éditables (Ctrl+' = recopie du dessus).
             </MudText>

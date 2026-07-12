@@ -14,7 +14,17 @@ namespace TrajanEcoleApp.Pages.Scolarites
         [Inject] private IStructureService _structureService { get; set; } = default!;
         [Inject] private IVersementService _versementService { get; set; } = default!;
         [Inject] private INatureVersementService _natureService { get; set; } = default!;
+        [Inject] private ITypeReductionService _typeReductionService { get; set; } = default!;
+        [Inject] private IZoneTransportService _zoneTransportService { get; set; } = default!;
         [Inject] private IJSRuntime _js { get; set; } = default!;
+
+        // Zones de transport visibles de l'école (année en cours) : alimentent le sélecteur
+        // Transport de la fiche élève.
+        private List<ZoneTransportItem> _zonesTransport = new();
+
+        // Types de reduction configurables de l'ecole (module Economat) : alimentent la
+        // deroulante « Type » du panneau Reductions. On ne garde que les types visibles (OK).
+        private List<TypeReductionItem> _typesReduction = new();
 
         // Natures de versement configurables de l'école (module Economat) : alimentent la
         // déroulante « Nature du versement ». On ne garde que les natures visibles (OK),
@@ -35,6 +45,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         // même source que SchoolNavMenu (GetMineAsync filtré sur le claim school).
         private string _nomEcole = string.Empty;
         private string _logoEcole = string.Empty;
+        private string _villeEcole = string.Empty;   // « MENA-DREN : {Ville} » de l'en-tête reçu
 
         // Nom court de l'école (défini à la création) — sert d'EXPÉDITEUR (Sender ID) des SMS.
         private string _nomCourtEts = string.Empty;
@@ -79,6 +90,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private string _fStatut = "Tous";
         private string _fInscrit = "Tous";
         private string _fActif = "Tous";
+        private string _fTransport = "Tous";   // Tous / Oui (a une zone) / Non
 
         // Élèves de l'école, chargés depuis Scolarite.Api (ScolariteDb) dans OnInitializedAsync.
         private List<EleveScolariteRow> _all = new();
@@ -106,6 +118,15 @@ namespace TrajanEcoleApp.Pages.Scolarites
             _natures = natures.Where(n => n.OK).OrderBy(n => n.Ordre).ToList();
             _vNature = NatureParDefaut();
 
+            // Types de reduction configurables (module Economat) : deroulante du panneau Reductions.
+            var types = await _typeReductionService.GetTypesAsync();
+            _typesReduction = types.Where(t => t.OK).OrderBy(t => t.Ordre).ToList();
+            _rType = _typesReduction.FirstOrDefault()?.Libelle ?? string.Empty;
+
+            // Zones de transport visibles (module Economat) : deroulante Transport de la fiche eleve.
+            var zones = await _zoneTransportService.GetZonesAsync(_annee == "—" ? null : _annee);
+            _zonesTransport = zones.Where(z => z.OK).OrderBy(z => z.Zone).ToList();
+
             // Nom de l'école active (en-tête du reçu PDF).
             if (!string.IsNullOrWhiteSpace(codeEts))
             {
@@ -116,6 +137,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
                     _nomEcole = ecole?.Name ?? string.Empty;
                     _logoEcole = ecole?.Logo ?? string.Empty;
                     _nomCourtEts = ecole?.NomCourtEts ?? string.Empty;
+                    _villeEcole = ecole?.Ville ?? string.Empty;
                 }
             }
 
@@ -136,7 +158,8 @@ namespace TrajanEcoleApp.Pages.Scolarites
                     e.Classe,
                     e.Solde,            // colonne « Net à payer » ≈ solde restant
                     e.FraisScolarite,   // colonne « Inscription » ≈ frais (à affiner plus tard)
-                    e.NumOrdre          // N° Inscription
+                    e.NumOrdre,         // N° Inscription
+                    e.ZoneTransport     // zone de transport (colonne éditable)
                 )).ToList();
             }
 
@@ -159,7 +182,9 @@ namespace TrajanEcoleApp.Pages.Scolarites
                 && (string.IsNullOrWhiteSpace(_fClasse) || e.Classe == _fClasse)
                 && (_fStatut == "Tous" || e.Statut == _fStatut)
                 && (_fInscrit == "Tous" || (_fInscrit == "Oui") == e.Inscrit)
-                && (_fActif == "Tous" || (_fActif == "Oui") == e.Actif));
+                && (_fActif == "Tous" || (_fActif == "Oui") == e.Actif)
+                && (_fTransport == "Tous"
+                    || (_fTransport == "Oui") == !string.IsNullOrWhiteSpace(e.ZoneTransport)));
 
         // « contient » tolérant aux accents et à la casse : on retire les accents des deux
         // côtés (SansAccents) puis on compare sans tenir compte de la casse. Un critère vide
@@ -174,7 +199,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private void Effacer()
         {
             _fNumOrdre = _fNom = _fPrenoms = _fMatricule = _fNiveau = _fClasse = string.Empty;
-            _fStatut = _fInscrit = _fActif = "Tous";
+            _fStatut = _fInscrit = _fActif = _fTransport = "Tous";
         }
 
         private void Fermer() => _navigation.NavigateTo("/ecole");
@@ -284,6 +309,17 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private ScolariteResume _resume;
         private List<VersementDetailItem> _versements = new();
         private List<EcheanceEleveItem> _echeancier = new();
+        private List<ReductionDetailItem> _reductions = new();
+
+        // Champs de saisie du panneau Reductions.
+        private string _rType = string.Empty;
+        private decimal _rMontant;    // montant fixe (F) — laisser a 0 si on saisit un %
+        private decimal _rPourcent;   // % de la scolarite — laisser a 0 si on saisit un montant
+        private string _rReference = string.Empty;  // justificatif libre (n° arrêté, nom membre…)
+        private bool _rEnCours;
+
+        // Verrou pendant l'application d'un changement de zone de transport (grille).
+        private bool _transportEnCours;
 
         // Champs de saisie du sous-form bleu ciel.
         private decimal _vMontant;
@@ -320,6 +356,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
             _resume = data?.Resume;
             _versements = data?.Versements ?? new List<VersementDetailItem>();
             _echeancier = data?.Echeancier ?? new List<EcheanceEleveItem>();
+            _reductions = data?.Reductions ?? new List<ReductionDetailItem>();
 
             // Rafraîchit la colonne « Net à payer » de la ligne (reste à payer à jour)
             // et les cases Actif / Inscrit (cochées quand un versement d'inscription passe).
@@ -427,6 +464,145 @@ namespace TrajanEcoleApp.Pages.Scolarites
                 _vEnCours = false;
             }
         }
+
+        // ================== Réductions de l'élève ==================
+
+        // Accorde une réduction : type + montant fixe OU pourcentage (base = mensualités de
+        // scolarité). Le backend impute depuis la fin de l'échéancier et renvoie l'état
+        // rafraîchi (échéancier + synthèse). On saisit l'un OU l'autre, pas les deux.
+        private async Task AccorderReductionAsync()
+        {
+            if (_sel is null) return;
+            if (string.IsNullOrWhiteSpace(_rType))
+            {
+                _snackbar.Add("Choisis d'abord un type de réduction.", Severity.Warning);
+                return;
+            }
+
+            var aMontant = _rMontant > 0;
+            var aPourcent = _rPourcent > 0;
+            if (aMontant == aPourcent)
+            {
+                _snackbar.Add("Renseigne soit un montant, soit un pourcentage (pas les deux).", Severity.Warning);
+                return;
+            }
+
+            _rEnCours = true;
+            try
+            {
+                var result = await _versementService.AddReductionAsync(
+                    _sel.Id, _rType,
+                    aMontant ? _rMontant : null,
+                    aPourcent ? _rPourcent : null,
+                    _rReference);
+
+                if (result.IsSuccessful)
+                {
+                    _snackbar.Add($"Réduction « {_rType} » accordée à {_sel.Nom} {_sel.Prenoms}.", Severity.Success);
+                    AppliquerReponse(result.Data);
+                    _rMontant = 0;
+                    _rPourcent = 0;
+                    _rReference = string.Empty;
+                }
+                else
+                {
+                    _snackbar.Add(result.Error, Severity.Error);
+                }
+            }
+            finally
+            {
+                _rEnCours = false;
+            }
+        }
+
+        // Annule une réduction (confirmation) : le backend restaure les montants de l'échéancier.
+        private async Task SupprimerReductionAsync(ReductionDetailItem r)
+        {
+            if (_sel is null) return;
+
+            var ok = await _js.InvokeAsync<bool>("confirm",
+                $"Annuler la réduction « {r.Motif} » de {Fmt(r.Montant)} ?");
+            if (!ok) return;
+
+            _rEnCours = true;
+            try
+            {
+                var result = await _versementService.DeleteReductionAsync(_sel.Id, r.Id);
+                if (result.IsSuccessful)
+                {
+                    _snackbar.Add($"Réduction « {r.Motif} » annulée.", Severity.Success);
+                    AppliquerReponse(result.Data);
+                }
+                else
+                {
+                    _snackbar.Add(result.Error, Severity.Error);
+                }
+            }
+            finally
+            {
+                _rEnCours = false;
+            }
+        }
+
+        // ================== Transport de l'élève (colonne de la grille) ==================
+
+        // Changement de zone dans la déroulante Transport d'une ligne : rattache l'élève à la
+        // zone (la part transport de chaque mois s'ajoute à sa mensualité) ou le retire (zone
+        // vide). Le backend renvoie l'état rafraîchi ; on met à jour la ligne, et si c'est
+        // l'élève sélectionné, on rafraîchit aussi l'échéancier/synthèse du bas.
+        private async Task OnZoneTransportChangedAsync(EleveScolariteRow row, string zone)
+        {
+            var ancienne = row.ZoneTransport ?? string.Empty;
+            var nouvelle = zone ?? string.Empty;
+            if (nouvelle == ancienne) return;
+
+            row.ZoneTransport = nouvelle;
+
+            _transportEnCours = true;
+            try
+            {
+                var result = await _versementService.SetTransportAsync(row.Id, nouvelle);
+                if (result.IsSuccessful)
+                {
+                    var msg = string.IsNullOrWhiteSpace(nouvelle)
+                        ? $"Transport retiré pour {row.Nom} {row.Prenoms}."
+                        : $"Transport « {nouvelle} » appliqué à {row.Nom} {row.Prenoms}.";
+                    _snackbar.Add(msg, Severity.Success);
+
+                    // Rafraîchit le « Net à payer » de la ligne depuis la synthèse renvoyée.
+                    if (result.Data?.Resume is not null)
+                        row.NetAPayer = result.Data.Resume.Reste;
+
+                    // Si c'est l'élève affiché en bas, on rafraîchit son échéancier + synthèse.
+                    if (_sel == row) AppliquerReponse(result.Data);
+                }
+                else
+                {
+                    row.ZoneTransport = ancienne;   // rollback UI
+                    _snackbar.Add(result.Error, Severity.Error);
+                }
+            }
+            finally
+            {
+                _transportEnCours = false;
+            }
+        }
+
+        // ================== Reçu de paiement : aperçu HTML + impression ==================
+        // Même mécanisme que les listes (skill EnteteDeListe) : feuille A4 HTML affichée dans un
+        // modal, imprimée en isolant « .recu-feuille » (classe body « svt-print-recu »). Toutes
+        // les données du reçu sont déjà côté client (_sel, _resume, _versements, _echeancier).
+        private bool _recuApercuOuvert;
+
+        private void OuvrirRecuApercu()
+        {
+            if (_sel is null) return;
+            _recuApercuOuvert = true;
+        }
+
+        private void FermerRecuApercu() => _recuApercuOuvert = false;
+
+        private async Task ImprimerRecuAsync() => await _js.InvokeVoidAsync("svtImprimerRecu");
 
         // ================== Reçu de paiement (PDF) ==================
 
@@ -616,11 +792,12 @@ namespace TrajanEcoleApp.Pages.Scolarites
             public decimal NetAPayer { get; set; }   // rafraîchi après chaque versement (reste à payer)
             public decimal Inscription { get; set; } // frais de l'année (échéancier généré)
             public int NumOrdre { get; }             // N° Inscription (unique par école)
+            public string ZoneTransport { get; set; } // zone de transport (vide = aucun) — colonne éditable
 
             public EleveScolariteRow(
                 Guid id, string matricule, string telCorrespondant, string nom, string prenoms,
                 bool actif, bool inscrit, string statut, string niveau, string classe,
-                decimal netAPayer, decimal inscription, int numOrdre)
+                decimal netAPayer, decimal inscription, int numOrdre, string zoneTransport)
             {
                 Id = id;
                 Matricule = matricule;
@@ -635,6 +812,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
                 NetAPayer = netAPayer;
                 Inscription = inscription;
                 NumOrdre = numOrdre;
+                ZoneTransport = zoneTransport ?? string.Empty;
             }
         }
     }
