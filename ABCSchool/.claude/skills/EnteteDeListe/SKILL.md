@@ -264,6 +264,25 @@ window.lcImprimerListe = function (paysage) {
 
 Côté page : `await _js.InvokeVoidAsync("lcImprimerListe", ModeleEstPaysage);`.
 
+## Réutilisation : documents mono-élève (ex. reçu de paiement)
+
+Le pattern ne sert pas qu'aux listes. Exemple livré : le **reçu de paiement** sur `/scolarites`
+(page `Scolarites.razor`). Même en-tête officiel + même mécanisme d'impression, mais un corps
+mono-élève : identité de l'élève, tableau des **versements**, bloc **synthèse** (Frais /
+Réductions / Total versé / **Reste** / Crédit), **échéancier**, zone signature. Toutes les
+données sont déjà côté client (`_sel`, `_resume`, `_versements`, `_echeancier`) — aucun appel
+serveur, contrairement à l'ancien reçu PDF QuestPDF (endpoint `/recu`, conservé en parallèle).
+
+Points de méthode confirmés par cet exemple :
+- **Cloner le couple d'impression sous un nom dédié** : classe body `svt-print-recu` + helper
+  `svtImprimerRecu` (jumeaux de `lc-print-liste` / `lcImprimerListe`), et une règle `@media
+  print` propre qui isole `.recu-feuille`. Ne PAS réutiliser `lc-print-liste` d'une autre page.
+- **Répliquer les classes de la feuille** dans le `.razor.css` de la page (`.recu-feuille`,
+  `.recu-entete`, `.recu-min-titre`, `.recu-dren`, `.recu-ecole-droite`, `.recu-nom`…), car le
+  CSS scopé Blazor est par-page. Copier les mêmes valeurs (A4, `print-color-adjust: exact`…).
+- **Capturer `Ville`** de l'école active (`SchoolResponse.Ville`) sur la page aussi, pour
+  « MENA-DREN : {Ville} ».
+
 ## Pièges à éviter
 
 - **Ne pas** faire `window.print()` sur la page de travail : ça imprime la grille rouge, les
