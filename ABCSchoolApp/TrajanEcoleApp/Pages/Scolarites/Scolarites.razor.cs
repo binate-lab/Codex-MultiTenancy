@@ -47,6 +47,8 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private string _nomEcole = string.Empty;
         private string _logoEcole = string.Empty;
         private string _villeEcole = string.Empty;   // « MENA-DREN : {Ville} » de l'en-tête reçu
+        private string _telEcole = string.Empty;     // téléphone école (en-tête état des versements)
+        private string _codeEts = string.Empty;      // école active (pour les requêtes école-niveau)
 
         // Nom court de l'école (défini à la création) — sert d'EXPÉDITEUR (Sender ID) des SMS.
         private string _nomCourtEts = string.Empty;
@@ -102,6 +104,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
             // École active = claim « school » (= CodeEts) du JWT école-scoped.
             var user = await _applicationStateProvider.GetAuthenticationStateProviderUserAsync();
             var codeEts = user.FindFirst("school")?.Value ?? string.Empty;
+            _codeEts = codeEts;
 
             // Année scolaire en cours (bandeau).
             var annee = await _anneeScolaireService.GetAnneeEnCoursAsync();
@@ -140,6 +143,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
                     _logoEcole = ecole?.Logo ?? string.Empty;
                     _nomCourtEts = ecole?.NomCourtEts ?? string.Empty;
                     _villeEcole = ecole?.Ville ?? string.Empty;
+                    _telEcole = ecole?.Telephone ?? string.Empty;
                 }
             }
 
@@ -617,6 +621,32 @@ namespace TrajanEcoleApp.Pages.Scolarites
                 _transportEnCours = false;
             }
         }
+
+        // ================== État des versements du JOUR : aperçu + impression ==================
+        // Calque du report Access « VersementsEntre2Dates » (journée en cours) : groupé par
+        // niveau, une ligne par versement + Total/Nbre reçu par niveau. Données chargées depuis
+        // Scolarite.Api (école entière). Impression : classe body « svt-print-journee ».
+        private bool _journeeOuvert;
+        private bool _journeeChargement;
+        private DateTime _journeeDate = DateTime.Today;
+        private IReadOnlyList<VersementsJourNiveauItem> _journeeGroupes = new List<VersementsJourNiveauItem>();
+
+        private async Task OuvrirJourneeApercu()
+        {
+            _journeeDate = DateTime.Today;
+            _journeeOuvert = true;
+            _journeeChargement = true;
+            _journeeGroupes = await _scolariteEleveService.GetVersementsDuJourAsync(_codeEts, _journeeDate);
+            _journeeChargement = false;
+        }
+
+        private void FermerJourneeApercu() => _journeeOuvert = false;
+
+        private async Task ImprimerJourneeAsync() => await _js.InvokeVoidAsync("svtImprimerJournee");
+
+        // Totaux généraux (toutes classes) du jour.
+        private decimal JourneeTotalMontant => _journeeGroupes.Sum(g => g.TotalMontant);
+        private int JourneeNbRecu => _journeeGroupes.Sum(g => g.NbRecu);
 
         // ================== Reçu de paiement : aperçu HTML + impression ==================
         // Même mécanisme que les listes (skill EnteteDeListe) : feuille A4 HTML affichée dans un

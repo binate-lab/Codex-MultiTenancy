@@ -304,6 +304,24 @@
                 min-height: 0;
                 box-shadow: none;
             }
+
+            /* Impression de l'état des versements du jour : on masque tout sauf « .journee-feuille »
+               (classe body « svt-print-journee », posée le temps du print). */
+            body.svt-print-journee * {
+                visibility: hidden !important;
+            }
+            body.svt-print-journee .journee-feuille,
+            body.svt-print-journee .journee-feuille * {
+                visibility: visible !important;
+            }
+            body.svt-print-journee .journee-feuille {
+                position: absolute;
+                left: 0;
+                top: 0;
+                width: 100%;
+                min-height: 0;
+                box-shadow: none;
+            }
         }
     </style>
     <link rel="apple-touch-icon" sizes="512x512" href="icon-512.png" />

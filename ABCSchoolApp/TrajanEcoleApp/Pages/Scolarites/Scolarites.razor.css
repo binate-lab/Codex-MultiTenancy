@@ -870,3 +870,120 @@
     padding-top: 3px;
     color: #555;
 }
+
+/* ==================== État des versements du jour (aperçu + impression) ====================
+   Réutilise le chrome .recu-overlay/.recu-panel/.recu-toolbar ; feuille A4 portrait dédiée,
+   isolée à l'impression par la classe body « svt-print-journee » (@media print, index.html). */
+.journee-feuille {
+    background: #ffffff;
+    color: #111;
+    width: 210mm;
+    max-width: 100%;
+    min-height: 297mm;
+    padding: 8mm 10mm 14mm;
+    box-sizing: border-box;
+    box-shadow: 0 6px 24px rgba(0, 0, 0, 0.35);
+    font-size: 10px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+
+/* En-tête façon Access (école à gauche, année/imprimé le à droite). */
+.journee-entete {
+    display: flex;
+    align-items: flex-start;
+    justify-content: space-between;
+    gap: 14px;
+    margin-bottom: 8px;
+}
+
+.journee-nom {
+    font-weight: 700;
+    font-size: 14px;
+    text-transform: uppercase;
+}
+
+.journee-meta {
+    text-align: right;
+    font-size: 11px;
+}
+
+.journee-titre {
+    text-align: center;
+    font-weight: 700;
+    font-size: 13px;
+    margin: 4px 0 10px;
+}
+
+.journee-niveau {
+    font-style: italic;
+    font-size: 11px;
+    margin: 8px 0 2px;
+    border-bottom: 1px solid #999;
+}
+
+.journee-table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 10px;
+    margin-bottom: 2px;
+}
+
+.journee-table th,
+.journee-table td {
+    border: 1px solid #666;
+    padding: 2px 4px;
+    text-align: left;
+    white-space: nowrap;
+}
+
+.journee-table th {
+    background: #e4e4e4;
+    font-weight: 700;
+}
+
+.journee-table tbody tr:nth-child(even) td {
+    background: #f5f5f5;
+}
+
+.journee-table .j-num { width: 34px; text-align: right; }
+.journee-table .j-classe { width: 48px; }
+.journee-table .j-montant { text-align: right; }
+.journee-table .j-reste { font-weight: 700; }
+.journee-table .j-nat { width: 60px; }
+.journee-table .j-mode { width: 38px; text-align: center; }
+.journee-table .j-rame { width: 34px; text-align: center; }
+.journee-table .j-auteur { width: 60px; }
+
+/* Ligne « Total {niveau} » du pied de tableau. */
+.journee-table tfoot .journee-total td {
+    background: #d9d9d9;
+    font-weight: 700;
+    border-top: 2px solid #333;
+}
+
+/* Case Rame vide (à cocher à la main pour l'instant ; viendra de la saisie). */
+.journee-case {
+    display: inline-block;
+    width: 11px;
+    height: 11px;
+    border: 1px solid #333;
+    background: #fff;
+}
+
+.journee-grandtotal {
+    display: flex;
+    gap: 40px;
+    justify-content: flex-end;
+    margin-top: 12px;
+    font-size: 12px;
+    border-top: 2px solid #333;
+    padding-top: 6px;
+}
+
+.journee-vide {
+    text-align: center;
+    font-style: italic;
+    padding: 20px;
+    color: #555;
+}

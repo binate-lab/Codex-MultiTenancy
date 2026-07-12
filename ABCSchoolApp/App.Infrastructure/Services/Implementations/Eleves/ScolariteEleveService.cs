@@ -63,5 +63,22 @@ namespace App.Infrastructure.Services.Implementations.Eleves
                 return false;
             }
         }
+
+        public async Task<IReadOnlyList<VersementsJourNiveauItem>> GetVersementsDuJourAsync(string codeEts, DateTime? date = null)
+        {
+            try
+            {
+                var url = $"versements/journalier?codeEts={Uri.EscapeDataString(codeEts)}";
+                if (date is not null)
+                    url += $"&date={Uri.EscapeDataString(date.Value.ToString("yyyy-MM-dd"))}";
+
+                var data = await _httpClient.GetFromJsonAsync<List<VersementsJourNiveauItem>>(url);
+                return data ?? new List<VersementsJourNiveauItem>();
+            }
+            catch
+            {
+                return new List<VersementsJourNiveauItem>();
+            }
+        }
     }
 }

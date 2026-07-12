@@ -15,7 +15,19 @@ namespace App.Infrastructure.Services.Eleves
         // Met a jour le CodeParent (fratrie) de l'eleve (colonne editable de la grille).
         // Retourne true si l'enregistrement a reussi.
         Task<bool> MajCodeParentAsync(Guid eleveId, string codeParent);
+
+        // Etat des versements d'une journee (defaut : aujourd'hui) pour l'ecole, groupe par
+        // niveau. Alimente l'apercu/impression « Versements du jour ». Liste vide si indispo.
+        Task<IReadOnlyList<VersementsJourNiveauItem>> GetVersementsDuJourAsync(string codeEts, DateTime? date = null);
     }
+
+    // Calques des DTOs de Scolarite.Api (VersementsDuJourEndpoint).
+    public record VersementJourLigneItem(
+        int Numero, string NomPrenoms, string Classe, decimal Montant, string Nature,
+        string Mode, decimal TotalFrais, decimal TotalVerse, decimal Reste, string Auteur);
+
+    public record VersementsJourNiveauItem(
+        string Niveau, List<VersementJourLigneItem> Lignes, decimal TotalMontant, int NbRecu);
 
     // Projection plate calquee sur EleveListeItem (Scolarite.Api/Eleves/Liste).
     // Id = EleveId cote Scolarite, requis pour les endpoints versements.

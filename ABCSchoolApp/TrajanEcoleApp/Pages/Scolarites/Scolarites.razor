@@ -12,6 +12,9 @@
             </div>
             <div class="d-flex align-center gap-2">
                 <MudButton Variant="Variant.Text" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.PointOfSale"
+                           OnClick="OuvrirJourneeApercu">Versements du jour</MudButton>
+                <MudButton Variant="Variant.Text" Size="Size.Small"
                            StartIcon="@Icons.Material.Filled.Close"
                            OnClick="Fermer">Fermer</MudButton>
             </div>
@@ -634,6 +637,115 @@
                     <div>Le Comptable / la Caisse</div>
                     <div class="recu-signature-ligne">Signature &amp; cachet</div>
                 </div>
+            </div>
+        </div>
+    </div>
+}
+
+@* ==================== Aperçu / impression — ÉTAT DES VERSEMENTS DU JOUR ====================
+   Calque du report Access « VersementsEntre2Dates » (journée en cours), groupé par niveau.
+   Overlay HTML pur ; seule « .journee-feuille » est conservée à l'impression (classe body
+   « svt-print-journee », cf wwwroot/index.html). *@
+@if (_journeeOuvert)
+{
+    <div class="recu-overlay" @onclick="FermerJourneeApercu">
+        <div class="recu-panel" @onclick:stopPropagation="true">
+            <div class="recu-toolbar">
+                <span class="recu-toolbar-titre">Aperçu — Versements du @_journeeDate.ToString("dd/MM/yyyy")</span>
+                <div class="d-flex align-center gap-2">
+                    <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                               StartIcon="@Icons.Material.Filled.Print" Disabled="_journeeChargement"
+                               OnClick="ImprimerJourneeAsync">Imprimer</MudButton>
+                    <MudButton Variant="Variant.Outlined" Size="Size.Small"
+                               StartIcon="@Icons.Material.Filled.Close"
+                               OnClick="FermerJourneeApercu">Fermer</MudButton>
+                </div>
+            </div>
+
+            <div class="journee-feuille">
+                @* En-tête façon Access : école + tél + ville (gauche), année + imprimé le (droite). *@
+                <div class="journee-entete">
+                    <div class="journee-ecole">
+                        <div class="journee-nom">@(string.IsNullOrWhiteSpace(_nomEcole) ? "ÉCOLE / ÉTABLISSEMENT" : _nomEcole)</div>
+                        @if (!string.IsNullOrWhiteSpace(_telEcole))
+                        {
+                            <div>Tél : @_telEcole</div>
+                        }
+                        <div>@_villeEcole</div>
+                    </div>
+                    <div class="journee-meta">
+                        <div>Année scolaire : @_annee</div>
+                        <div>Imprimé le : @DateTime.Now.ToString("dd/MM/yyyy HH:mm")</div>
+                    </div>
+                </div>
+
+                <div class="journee-titre">
+                    État des versements du <i>@_journeeDate.ToString("dd/MM/yyyy")</i>
+                </div>
+
+                @if (_journeeChargement)
+                {
+                    <div class="journee-vide">Chargement…</div>
+                }
+                else if (_journeeGroupes.Count == 0)
+                {
+                    <div class="journee-vide">Aucun versement enregistré pour cette journée.</div>
+                }
+                else
+                {
+                    @foreach (var g in _journeeGroupes)
+                    {
+                        <div class="journee-niveau">Niveau : <b>@g.Niveau</b></div>
+                        <table class="journee-table">
+                            <thead>
+                                <tr>
+                                    <th class="j-num">N°</th>
+                                    <th>Nom et prénoms</th>
+                                    <th class="j-classe">Classe</th>
+                                    <th class="j-montant">Montant</th>
+                                    <th class="j-nat">Nat.</th>
+                                    <th class="j-mode">Mode</th>
+                                    <th class="j-montant">Total frais</th>
+                                    <th class="j-montant">Total Versé</th>
+                                    <th class="j-montant">Reste</th>
+                                    <th class="j-rame">Rame</th>
+                                    <th class="j-auteur">Auteur</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var l in g.Lignes)
+                                {
+                                    <tr>
+                                        <td class="j-num">@l.Numero</td>
+                                        <td>@l.NomPrenoms</td>
+                                        <td class="j-classe">@FormatClasse(l.Classe)</td>
+                                        <td class="j-montant">@Fmt(l.Montant)</td>
+                                        <td class="j-nat">@l.Nature</td>
+                                        <td class="j-mode">@l.Mode</td>
+                                        <td class="j-montant">@Fmt(l.TotalFrais)</td>
+                                        <td class="j-montant">@Fmt(l.TotalVerse)</td>
+                                        <td class="j-montant j-reste">@Fmt(l.Reste)</td>
+                                        <td class="j-rame"><span class="journee-case"></span></td>
+                                        <td class="j-auteur">@l.Auteur</td>
+                                    </tr>
+                                }
+                            </tbody>
+                            <tfoot>
+                                <tr class="journee-total">
+                                    <td colspan="3">Total @g.Niveau</td>
+                                    <td class="j-montant">@Fmt(g.TotalMontant)</td>
+                                    <td colspan="4"></td>
+                                    <td colspan="3">Nbre reçu : <b>@g.NbRecu</b></td>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    }
+
+                    <div class="journee-grandtotal">
+                        <span>TOTAL GÉNÉRAL : <b>@Fmt(JourneeTotalMontant)</b></span>
+                        <span>Nbre reçu : <b>@JourneeNbRecu</b></span>
+                    </div>
+                }
             </div>
         </div>
     </div>
