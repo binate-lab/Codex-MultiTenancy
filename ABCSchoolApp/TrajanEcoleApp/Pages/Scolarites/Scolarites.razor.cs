@@ -89,8 +89,8 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private string _fNiveau = string.Empty;   // "" = tous
         private string _fClasse = string.Empty;
         private string _fStatut = "Tous";
-        private string _fInscrit = "Tous";
-        private string _fActif = "Tous";
+        private string _fInscrit = "Oui";   // par défaut : seulement les inscrits
+        private string _fActif = "Oui";     // par défaut : seulement les actifs
         private string _fTransport = "Tous";   // Tous / Oui (a une zone) / Non
 
         // Élèves de l'école, chargés depuis Scolarite.Api (ScolariteDb) dans OnInitializedAsync.
@@ -200,7 +200,8 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private void Effacer()
         {
             _fNumOrdre = _fNom = _fPrenoms = _fMatricule = _fNiveau = _fClasse = string.Empty;
-            _fStatut = _fInscrit = _fActif = _fTransport = "Tous";
+            _fStatut = _fTransport = "Tous";
+            _fInscrit = _fActif = "Oui";   // on revient au défaut (inscrits + actifs)
         }
 
         private void Fermer() => _navigation.NavigateTo("/ecole");
@@ -608,6 +609,9 @@ namespace TrajanEcoleApp.Pages.Scolarites
         // Matricule national formaté « 22 654 456 M » — helper partagé (Shared.Library), commun
         // aux listes et au reçu.
         private static string FormatMatricule(string mat) => MatriculeFormatter.Format(mat);
+
+        // Libellé de classe collège reformaté (« 6e1 » -> « 6è 1 ») — helper partagé.
+        private static string FormatClasse(string classe) => ClasseFormatter.Format(classe);
 
         // ================== Reçu de paiement (PDF) ==================
 

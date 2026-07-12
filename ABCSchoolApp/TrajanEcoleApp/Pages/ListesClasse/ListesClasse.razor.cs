@@ -58,8 +58,8 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private string _fClasse = string.Empty;     // "" = toutes
         private string _fStatut = "Tous";
         private string _fSexe = "Tous";       // "Tous" / "G" (garçons) / "F" (filles)
-        private string _fInscrit = "Tous";
-        private string _fActif = "Tous";
+        private string _fInscrit = "Oui";     // par défaut : seulement les inscrits
+        private string _fActif = "Oui";       // par défaut : seulement les actifs
 
         // Page courante (0-based) et taille de page de la grille : pilotées par la MudTable.
         // On les suit pour recaler la sélection sur le 1er élève de la page affichée.
@@ -158,17 +158,9 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         // aux listes et au reçu de paiement.
         private static string FormatMatricule(string mat) => MatriculeFormatter.Format(mat);
 
-        // Mise en forme du libellé de classe pour l'impression : les classes de COLLÈGE (cycle 1)
-        // « 6e1 / 5e1 / 4e3 / 3e2 » deviennent « 6è 1 / 5è 1 / 4è 3 / 3è 2 » (e→è + espace avant
-        // la subdivision). Le 2nd cycle (2nde, 1ere, TleA1, TleD3…) n'est PAS concerné : le motif
-        // exige un chiffre de niveau 3–6 suivi de « e » puis d'une subdivision chiffrée.
-        private static string FormatClasse(string classe)
-        {
-            if (string.IsNullOrWhiteSpace(classe)) return classe ?? string.Empty;
-            return System.Text.RegularExpressions.Regex
-                .Replace(classe.Trim(), @"^([3-6])e(?=\d|$)", "$1è ")
-                .Trim();
-        }
+        // Libellé de classe collège reformaté (« 6e1 » -> « 6è 1 ») — helper partagé
+        // (Shared.Library), commun aux listes et au reçu.
+        private static string FormatClasse(string classe) => ClasseFormatter.Format(classe);
 
         // ---- Cascade des filtres (Cycle -> Niveau -> Classe) ----
 
@@ -239,7 +231,8 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private void Effacer()
         {
             _fCycleId = _fNiveau = _fClasse = string.Empty;
-            _fStatut = _fSexe = _fInscrit = _fActif = "Tous";
+            _fStatut = _fSexe = "Tous";
+            _fInscrit = _fActif = "Oui";   // on revient au défaut (inscrits + actifs)
             AppliquerFiltre();
         }
 
