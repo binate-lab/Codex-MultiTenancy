@@ -363,6 +363,13 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private string _vRef = string.Empty;
         private bool _vEnCours;
 
+        // Articles/fournitures rattaches au versement + mois couvert (1-12, null = non renseigne).
+        private bool _vRame;
+        private bool _vTenueSport;
+        private bool _vCarnetCorresp;
+        private bool _vMacaron;
+        private string _vModeRame = string.Empty;
+
         // Id du versement en cours de modification (null = saisie d'un nouveau versement).
         // Quand il est renseigne, le bouton Valider fait une modification (PUT) au lieu
         // d'une creation (POST).
@@ -415,6 +422,11 @@ namespace TrajanEcoleApp.Pages.Scolarites
             _vNature = NatureParDefaut();
             _vMode = "Espèce";
             _vRef = string.Empty;
+            _vRame = false;
+            _vTenueSport = false;
+            _vCarnetCorresp = false;
+            _vMacaron = false;
+            _vModeRame = string.Empty;
             _vEnEdition = null;
         }
 
@@ -428,6 +440,11 @@ namespace TrajanEcoleApp.Pages.Scolarites
             _vNature = v.Nature;
             _vMode = v.MoyenPaiement;
             _vRef = v.ReferencePaiement == "-" ? string.Empty : v.ReferencePaiement;
+            _vRame = v.Rame;
+            _vTenueSport = v.TenueSport;
+            _vCarnetCorresp = v.CarnetCorresp;
+            _vMacaron = v.Macaron;
+            _vModeRame = v.ModeRame ?? string.Empty;
         }
 
         private async Task ValiderVersementAsync()
@@ -443,11 +460,17 @@ namespace TrajanEcoleApp.Pages.Scolarites
             try
             {
                 // Mode modification (PUT) si un versement est en édition, sinon création (POST).
+                // Mois couvert = mois de la date de saisie (pas de saisie manuelle) ; null si
+                // aucune date. La garde 1-12 côté domaine est toujours satisfaite (1..12).
+                var mois = _vDate?.Month;
+
                 var result = _vEnEdition is Guid id
                     ? await _versementService.UpdateAsync(
-                        _sel.Id, id, _vMontant, _vDate, _vNature, _vMode, _vRef)
+                        _sel.Id, id, _vMontant, _vDate, _vNature, _vMode, _vRef,
+                        _vRame, _vTenueSport, _vCarnetCorresp, _vMacaron, _vModeRame, mois)
                     : await _versementService.CreateAsync(
-                        _sel.Id, _vMontant, _vDate, _vNature, _vMode, _vRef);
+                        _sel.Id, _vMontant, _vDate, _vNature, _vMode, _vRef,
+                        _vRame, _vTenueSport, _vCarnetCorresp, _vMacaron, _vModeRame, mois);
 
                 if (result.IsSuccessful)
                 {

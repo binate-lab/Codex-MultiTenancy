@@ -125,6 +125,30 @@ namespace App.Infrastructure.Extensions
                 })
                 .AddHttpMessageHandler<AuthenticationHeaderHandler>();
 
+            // Client typie dedie au module Economat de Scolarite.Api : types de reduction.
+            builder.Services
+                .AddHttpClient<ITypeReductionService, TypeReductionService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
+            // Client typie dedie au module Economat de Scolarite.Api : Frais Generaux.
+            builder.Services
+                .AddHttpClient<IFraisGeneralService, FraisGeneralService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
+            // Client typie dedie au module Economat de Scolarite.Api : bareme Transport (zones).
+            builder.Services
+                .AddHttpClient<IZoneTransportService, ZoneTransportService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
             builder.Services.AddHttpClientInterceptor();
 
             return builder;

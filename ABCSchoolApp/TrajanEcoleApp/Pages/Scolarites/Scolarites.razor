@@ -231,13 +231,6 @@
         </MudTable>
         </div>
 
-        <div class="acc-gridfoot">
-            <MudText Typo="Typo.caption">@Filtered.Count() élève(s) affiché(s)</MudText>
-            <MudText Typo="Typo.caption" Class="acc-demo-note">
-                Source : Scolarite (ScolariteDb).
-            </MudText>
-        </div>
-
         @* ============ Versements de l'élève sélectionné (calque Access) ============ *@
         @if (_sel is not null)
         {
@@ -266,6 +259,35 @@
                        Valider en bas a droite. --- *@
                 <div class="svt-saisie">
                     <div class="svt-cols">
+                        @* Colonne de gauche : articles/fournitures, disposés comme dans le
+                           formulaire Access « Scolarités » — cadre « Rame » (Fournie + Mode)
+                           puis les cases Tenue de sport / Carnet corresp. / Macaron empilées. *@
+                        <div class="svt-col-gauche">
+                            <fieldset class="svt-rame-group">
+                                <legend>Rame</legend>
+                                <div class="svt-rame-ligne">
+                                    <label>Fournie :</label>
+                                    <MudCheckBox T="bool" @bind-Value="_vRame" Dense="true" Size="Size.Small"
+                                                 Color="Color.Primary" Class="svt-rame-chk" />
+                                </div>
+                                <div class="svt-rame-ligne">
+                                    <label>Mode :</label>
+                                    <MudSelect T="string" @bind-Value="_vModeRame" Clearable="true" Variant="Variant.Outlined"
+                                               Margin="Margin.Dense" Class="svt-nav-moderame">
+                                        <MudSelectItem Value="@("Nature")">Nature</MudSelectItem>
+                                        <MudSelectItem Value="@("4000")">4000</MudSelectItem>
+                                    </MudSelect>
+                                </div>
+                            </fieldset>
+                            <div class="svt-articles-box">
+                                <MudCheckBox T="bool" @bind-Value="_vTenueSport" Dense="true" Size="Size.Small"
+                                             Color="Color.Primary">Tenue de sport</MudCheckBox>
+                                <MudCheckBox T="bool" @bind-Value="_vCarnetCorresp" Dense="true" Size="Size.Small"
+                                             Color="Color.Primary">Carnet corresp.</MudCheckBox>
+                                <MudCheckBox T="bool" @bind-Value="_vMacaron" Dense="true" Size="Size.Small"
+                                             Color="Color.Primary">Macaron</MudCheckBox>
+                            </div>
+                        </div>
                         <div class="svt-col-droite">
                             @* Date et MONTANT sur la meme ligne, pousses a droite. *@
                             <div class="svt-ligne svt-ligne-montant">

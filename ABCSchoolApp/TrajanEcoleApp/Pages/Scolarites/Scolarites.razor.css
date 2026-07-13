@@ -223,9 +223,10 @@
     font-size: 0.85rem;
 }
 
-/* Rangee du bas : Detail des versements aligne sous la zone bleue, meme largeur */
+/* Rangee du bas : Detail des versements aligne sous la zone bleue, meme largeur.
+   Marge negative : remonte le chatbot + Detail des versements vers la zone bleue. */
 .svt-zone-bas {
-    margin-top: 8px;
+    margin-top: -6px;
 }
 
 .svt-resume-spacer {
@@ -325,8 +326,8 @@
 
 /* Grille echeancier de l'eleve, a droite de la zone bleue (calque Access) */
 .svt-echeancier-slot {
-    flex: 0 0 32%;
-    min-width: 300px;
+    flex: 0 0 27%;
+    min-width: 250px;
 }
 
 .svt-ech-titre {
@@ -343,6 +344,7 @@
     background: #ffffff;
     max-height: 220px;
     overflow-y: auto;
+    overflow-x: hidden; /* pas de debordement horizontal */
 }
 
 .svt-ech-vide {
@@ -356,7 +358,8 @@
 .svt-ech-table {
     width: 100%;
     border-collapse: collapse;
-    font-size: 0.68rem;
+    font-size: 0.66rem;
+    table-layout: fixed; /* largeurs de colonnes contraintes -> pas de debordement */
 }
 
 .svt-ech-table th {
@@ -366,15 +369,30 @@
     color: #ffffff;
     font-weight: 700;
     text-align: left;
-    padding: 2px 4px;
+    padding: 2px 3px;
     white-space: nowrap;
 }
 
 .svt-ech-table td {
-    padding: 2px 4px;
+    padding: 2px 3px;
     border-bottom: 1px solid #dce4e9;
     white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
 }
+
+/* Largeurs fixes (total 100 %). Echeance = colonne texte tronquee ; Montant et Reste
+   resserrees comme demande ; Paye et Statut gardent leur place. */
+.svt-ech-table th:nth-child(1),
+.svt-ech-table td:nth-child(1) { width: 33%; }   /* Echeance */
+.svt-ech-table th:nth-child(2),
+.svt-ech-table td:nth-child(2) { width: 15%; }   /* Montant */
+.svt-ech-table th:nth-child(3),
+.svt-ech-table td:nth-child(3) { width: 15%; }   /* Paye */
+.svt-ech-table th:nth-child(4),
+.svt-ech-table td:nth-child(4) { width: 22%; }   /* Statut */
+.svt-ech-table th:nth-child(5),
+.svt-ech-table td:nth-child(5) { width: 15%; }   /* Reste */
 
 .svt-ech-num {
     text-align: right;
@@ -517,6 +535,7 @@
 .svt-valider-box {
     align-self: center;
     margin-top: 8px;
+    margin-left: 64px; /* decalage vers la droite (a partir de Valider) */
     display: flex;
     align-items: center;
 }
@@ -539,10 +558,81 @@
 }
 
 .svt-col-gauche {
-    flex: 0 0 300px;
+    flex: 0 0 190px;
     display: flex;
     flex-direction: column;
-    gap: 8px;
+    gap: 6px;
+}
+
+/* Cadre « Rame » (Fournie + Mode) — calque du groupe encadré du formulaire Access. */
+.svt-rame-group {
+    border: 1px solid #c76a1c; /* orange Access */
+    border-radius: 3px;
+    padding: 0 8px 4px;
+    margin: 0;
+}
+
+.svt-rame-group > legend {
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #5a748a;
+    padding: 0 4px;
+    width: auto;
+    margin: 0;
+}
+
+/* Ligne libelle + controle a l'interieur du cadre Rame et pour « Mois ». */
+.svt-rame-ligne {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.svt-rame-ligne > label {
+    min-width: 54px;
+    text-align: left;
+    font-size: 0.75rem;
+    color: #5a748a;
+}
+
+/* Largeur des controles de la colonne gauche (Mode rame). */
+.svt-col-gauche ::deep .mud-input-control {
+    width: 96px !important;
+    flex: 0 0 auto;
+}
+
+.svt-col-gauche ::deep .mud-input-slot,
+.svt-col-gauche ::deep .mud-select-input {
+    min-height: 24px !important;
+    padding-top: 2px !important;
+    padding-bottom: 2px !important;
+}
+
+/* Cases empilees verticalement : Tenue de sport / Carnet corresp. / Macaron. */
+.svt-articles-box {
+    display: flex;
+    flex-direction: column;
+    border: 1px solid #7fa8c8;
+    border-radius: 3px;
+    padding: 1px 8px;
+}
+
+.svt-articles-box ::deep .mud-checkbox,
+.svt-rame-ligne ::deep .mud-checkbox {
+    margin: 0;
+}
+
+/* Rembourrage reduit de la case : rapproche les lignes (conteneur plus bas). */
+.svt-articles-box ::deep .mud-checkbox .mud-icon-button {
+    padding: 2px;
+}
+
+/* Libelles sur UNE seule ligne (pas de retour a la ligne). */
+.svt-articles-box ::deep .mud-checkbox .mud-typography,
+.svt-rame-ligne ::deep .mud-checkbox .mud-typography {
+    font-size: 0.75rem;
+    color: #34495e;
+    white-space: nowrap;
 }
 
 .svt-col-droite {

@@ -1,0 +1,86 @@
+@page "/frais-generaux"
+@layout SchoolLayout
+
+<MudPaper Elevation="6" Class="ma-2">
+    <MudToolBar Dense="true" Class="px-3" Style="background-color:#1b4f72; color:white;">
+        <MudIcon Icon="@Icons.Material.Outlined.ReceiptLong" Class="mr-2" />
+        <MudText Typo="Typo.h6">Économat — Frais Généraux</MudText>
+        <MudSpacer />
+        <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Inherit"
+                   OnClick="Fermer">Fermer</MudButton>
+    </MudToolBar>
+
+    <div class="pa-4" style="max-width:820px;">
+        <MudText Typo="Typo.body2" Class="mb-3 mud-text-secondary">
+            Ces postes (assurance, fournitures, tenue, examen…) sont <b>identiques pour tous les élèves</b>
+            de l'école. Chaque poste <b>Visible</b> au montant &gt; 0 est ajouté à l'échéancier de l'élève
+            (après les mensualités) et compté dans le total à payer. Ils ne sont pas concernés par les réductions.
+        </MudText>
+
+        @* Ligne d'ajout : libellé + montant *@
+        <div class="d-flex align-center gap-2 mb-3" style="max-width:620px;">
+            <MudTextField @bind-Value="_nouveauLibelle" Immediate="true" Label="Nouveau poste"
+                          Variant="Variant.Outlined" Margin="Margin.Dense"
+                          Disabled="_enCours" OnKeyUp="@(e => { if (e.Key == "Enter") _ = AjouterAsync(); })" />
+            <MudNumericField T="decimal" @bind-Value="_nouveauMontant" Label="Montant" HideSpinButtons="true" Min="0"
+                             Format="#,0" Culture="@_fr" Variant="Variant.Outlined" Margin="Margin.Dense"
+                             Disabled="_enCours" Style="width:140px;" />
+            <MudTooltip Text="Ajouter">
+                <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" IconSize="Size.Medium"
+                        Color="Color.Primary" Disabled="_enCours" OnClick="AjouterAsync" />
+            </MudTooltip>
+        </div>
+
+        <div class="nat-grid">
+        <MudTable Items="_lignes" Dense="true" Hover="true" Bordered="true" Striped="true" Class="natures-table">
+            <HeaderContent>
+                <MudTh Style="width:90px; text-align:center;">Ordre</MudTh>
+                <MudTh>Libellé</MudTh>
+                <MudTh Style="width:150px; text-align:right;">Montant</MudTh>
+                <MudTh Style="width:90px; text-align:center;">Visible</MudTh>
+                <MudTh Style="width:70px; text-align:center;">Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Ordre" Style="text-align:center;">
+                    <MudNumericField T="int" @bind-Value="context.Ordre" HideSpinButtons="false" Min="0"
+                                     Variant="Variant.Text" Underline="false" Margin="Margin.Dense" Style="width:70px;" />
+                </MudTd>
+                <MudTd DataLabel="Libellé">
+                    <MudTextField T="string" @bind-Value="context.Libelle"
+                                  Variant="Variant.Text" Underline="false" Margin="Margin.Dense" />
+                </MudTd>
+                <MudTd DataLabel="Montant" Style="text-align:right;">
+                    <MudNumericField T="decimal" @bind-Value="context.Montant" HideSpinButtons="true" Min="0"
+                                     Format="#,0" Culture="@_fr"
+                                     Variant="Variant.Text" Underline="false" Margin="Margin.Dense" Style="width:130px;" />
+                </MudTd>
+                <MudTd DataLabel="Visible" Style="text-align:center;">
+                    <MudCheckBox T="bool" @bind-Value="context.OK" Dense="true" Color="Color.Primary" />
+                </MudTd>
+                <MudTd DataLabel="Actions" Style="text-align:center;">
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Color="Color.Secondary"
+                             TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
+                        <MudMenuItem Disabled="@(_enCours || !context.EstModifiee)"
+                                     OnClick="@(() => EnregistrerAsync(context))">Enregistrer</MudMenuItem>
+                        <MudMenuItem Disabled="_enCours"
+                                     OnClick="@(() => SupprimerAsync(context))">Supprimer</MudMenuItem>
+                    </MudMenu>
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText Class="pa-2">Aucun poste configuré.</MudText>
+            </NoRecordsContent>
+        </MudTable>
+        </div>
+
+        @* Rattrapage : ajoute les lignes FG manquantes aux eleves qui ont deja un echeancier. *@
+        <div class="d-flex align-center gap-3 mt-4">
+            <MudButton OnClick="AppliquerAuxExistantsAsync" Variant="Variant.Filled" Color="Color.Secondary"
+                       Size="Size.Small" Disabled="_enCours"
+                       StartIcon="@Icons.Material.Filled.GroupAdd">Appliquer aux élèves existants</MudButton>
+            <MudText Typo="Typo.caption" Class="mud-text-secondary">
+                Ajoute les postes manquants aux élèves déjà inscrits (les paiements sont conservés).
+            </MudText>
+        </div>
+    </div>
+</MudPaper>

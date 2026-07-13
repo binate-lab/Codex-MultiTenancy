@@ -1,0 +1,73 @@
+/* Grille "Transport par zone" — même habillage bleu que la page Échéancier (barème
+   Modalités de versement). Le CSS isolé étant par composant, on recopie ici les règles
+   .ech-* (posées sur des div HTML bruts pour que le scope s'applique). */
+
+.ech-grid {
+    overflow-x: auto;
+    padding-bottom: 3px;
+}
+
+.ech-grid ::deep .mud-table-root {
+    font-size: 0.875rem;
+}
+
+.ech-grid ::deep th {
+    background: #4d1501 !important; /* rouge plus soutenu que les lignes */
+    color: #ffffff !important;
+    font-weight: 700 !important;
+    white-space: nowrap;
+    padding: 4px 10px !important;
+}
+
+.ech-grid ::deep td {
+    background: #701F01; /* rouge rouille de la barre d'état VS */
+    color: #ffffff !important;
+    border-color: #9a4a30 !important;
+    padding: 0 8px !important;
+    height: 26px !important;
+    white-space: nowrap;
+}
+
+.ech-grid ::deep tr:hover td {
+    background: #8a2a10;
+}
+
+.ech-grid ::deep td .mud-input-slot,
+.ech-grid ::deep td .mud-input,
+.ech-grid ::deep td .mud-input > input {
+    font-size: inherit !important;
+    color: #ffffff !important;
+    text-align: right;
+}
+
+.ech-grid ::deep td .mud-input.mud-input-underline::before,
+.ech-grid ::deep td .mud-input.mud-input-underline::after {
+    border-bottom: none !important;
+}
+
+.ech-grid ::deep td .mud-input-control {
+    margin-top: 0 !important;
+}
+
+.ech-grid ::deep td .mud-input-slot {
+    min-height: 20px;
+    padding-top: 0 !important;
+    padding-bottom: 0 !important;
+}
+
+.ech-grid ::deep td .mud-button-root {
+    padding: 2px !important;
+    color: #ffffff;
+}
+
+/* Barre d'ajout sous la grille : boîte compacte (nom de zone + bouton) */
+.ech-addbar {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    width: fit-content;
+    border: 1px solid #000000;
+    border-radius: 4px;
+    padding: 6px 12px;
+    margin: 16px auto 0;
+}
