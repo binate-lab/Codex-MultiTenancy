@@ -134,13 +134,18 @@
     width: 70px;
 }
 
+/* Colonne Classe un peu plus large (libellés « TleD3 », « 2nde C2 »…). */
+.acc-grid ::deep .acc-cell-classe {
+    width: 88px;
+}
+
 .acc-grid ::deep .acc-cell-input {
     width: 70px;
 }
 
-/* Telephone du correspondant : editable en ligne, occupe la largeur de la colonne */
+/* Telephone du tuteur : editable en ligne, occupe la largeur de la colonne (10 chiffres) */
 .acc-grid ::deep .acc-cell-tel {
-    width: 98px;
+    width: 90px;
 }
 
 /* Pas de trait de soulignement sous les sÃ©lecteurs Statut / Niveau */
@@ -669,6 +674,17 @@
     flex: 0 0 auto;
 }
 
+/* Cadre Rame → contrôle « Mode » (déroulante Nature/4000) : un peu plus large + caractères
+   plus petits. Ciblé via le wrapper .svt-rame-mode (div de MA page → portée scopée fiable). */
+.svt-rame-mode ::deep .mud-input-control {
+    width: 130px !important;
+}
+
+.svt-rame-mode ::deep .mud-select-input,
+.svt-rame-mode ::deep input {
+    font-size: 14px !important;
+}
+
 /* Listes deroulantes (Nature, Mode) : hauteur reduite */
 .svt-ligne ::deep .mud-input-slot,
 .svt-ligne ::deep .mud-select-input {
@@ -921,12 +937,53 @@
 .recu-vide { text-align: center; font-style: italic; padding: 10px; }
 
 /* Synthèse : bloc aligné à droite. */
+/* Bas du reçu : articles (gauche, cases empilées) + synthèse (droite) — calque Access. */
+.recu-bas {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    gap: 20px;
+    margin-top: 8px;
+}
+
+.recu-articles {
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+    font-size: 12px;
+}
+
+.recu-article {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+.recu-case {
+    display: inline-block;
+    width: 12px;
+    height: 12px;
+    border: 1px solid #333;
+    background: #fff;
+    position: relative;
+    flex: 0 0 auto;
+}
+
+.recu-article.coche .recu-case::after {
+    content: "\2715"; /* ✕ */
+    position: absolute;
+    top: -3px;
+    left: 1px;
+    font-size: 12px;
+    line-height: 12px;
+    color: #000;
+}
+
 .recu-synthese {
     display: flex;
     flex-direction: column;
     gap: 2px;
     width: 55%;
-    margin: 8px 0 0 auto;
     font-size: 12px;
 }
 
@@ -1059,6 +1116,18 @@
     height: 11px;
     border: 1px solid #333;
     background: #fff;
+    position: relative;
+}
+
+/* Rame fournie : case cochée (croix noire, façon report Access). */
+.journee-case.coche::after {
+    content: "\2715"; /* ✕ */
+    position: absolute;
+    top: -4px;
+    left: 1px;
+    font-size: 11px;
+    line-height: 11px;
+    color: #000;
 }
 
 .journee-grandtotal {

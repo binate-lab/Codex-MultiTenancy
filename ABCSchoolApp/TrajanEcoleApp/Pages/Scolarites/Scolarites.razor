@@ -51,7 +51,7 @@
             <div class="acc-fgroup">
                 <label class="acc-flabel">Niveau :</label>
                 <MudSelect Value="_fNiveau" ValueChanged="OnFiltreNiveauChanged" T="string" Clearable="true" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow acc-fniveau">
                     <MudSelectItem Value="@("")">Tous</MudSelectItem>
                     @foreach (var n in _niveaux)
                     {
@@ -133,7 +133,7 @@
                   RowsPerPage="5" OnRowClick="OnRowClick" RowClassFunc="ClasseLigne">
             <HeaderContent>
                 <MudTh Style="width:96px">Matricule</MudTh>
-                <MudTh Style="width:104px">Tél. Correspondant</MudTh>
+                <MudTh Style="width:90px">Tél. Tuteur</MudTh>
                 <MudTh Style="width:96px">CodeParent</MudTh>
                 <MudTh>Nom</MudTh>
                 <MudTh>Prénoms</MudTh>
@@ -141,14 +141,14 @@
                 <MudTh Style="width:52px; text-align:center">Inscrit</MudTh>
                 <MudTh Style="width:70px">Statut</MudTh>
                 <MudTh Style="width:74px">Niveau</MudTh>
-                <MudTh Style="width:64px">Classe</MudTh>
+                <MudTh Style="width:88px">Classe</MudTh>
                 <MudTh Style="width:96px">Transport</MudTh>
                 <MudTh Style="text-align:right">Net à payer</MudTh>
                 <MudTh Style="text-align:right">Inscription</MudTh>
             </HeaderContent>
             <RowTemplate>
                 <MudTd DataLabel="Matricule">@context.Matricule</MudTd>
-                <MudTd DataLabel="Tél. Correspondant" data-col="Tel" data-eleve-id="@context.Id">
+                <MudTd DataLabel="Tél. Tuteur" data-col="Tel" data-eleve-id="@context.Id">
                     <MudTextField T="string" Value="@context.TelCorrespondant"
                                   ValueChanged="@(v => OnTelChanged(context, v))"
                                   Immediate="false" Margin="Margin.Dense"
@@ -198,7 +198,7 @@
                     <MudSelect T="string" Value="@context.Classe"
                                ValueChanged="@(v => OnClasseChanged(context, v))"
                                Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
-                               Class="acc-cell-select">
+                               Class="acc-cell-select acc-cell-classe">
                         @foreach (var cl in ClassesPour(context.Niveau))
                         {
                             <MudSelectItem Value="@cl.Libelle">@cl.Libelle</MudSelectItem>
@@ -270,7 +270,7 @@
                                     <MudCheckBox T="bool" @bind-Value="_vRame" Dense="true" Size="Size.Small"
                                                  Color="Color.Primary" Class="svt-rame-chk" />
                                 </div>
-                                <div class="svt-rame-ligne">
+                                <div class="svt-rame-ligne svt-rame-mode">
                                     <label>Mode :</label>
                                     <MudSelect T="string" @bind-Value="_vModeRame" Clearable="true" Variant="Variant.Outlined"
                                                Margin="Margin.Dense" Class="svt-nav-moderame">
@@ -608,23 +608,41 @@
                     </tbody>
                 </table>
 
-                @* Synthèse du compte. *@
-                @if (_resume is not null)
-                {
-                    <div class="recu-synthese">
-                        <div><span>Frais de scolarité</span><b>@Fmt(_resume.FraisScolarite)</b></div>
-                        @if (_resume.TotalReduction > 0)
-                        {
-                            <div><span>Réductions</span><b>- @Fmt(_resume.TotalReduction)</b></div>
-                        }
-                        <div><span>Total versé</span><b>@Fmt(_resume.TotalVerse)</b></div>
-                        <div class="recu-synthese-reste"><span>Reste à payer</span><b>@Fmt(_resume.Reste)</b></div>
-                        @if (_resume.Credit > 0)
-                        {
-                            <div><span>Crédit (avance)</span><b>@Fmt(_resume.Credit)</b></div>
-                        }
+                @* Articles/fournitures (à gauche, cases empilées) + synthèse du compte (à
+                   droite) — calque du reçu Access. Un article est coché si un versement de
+                   l'élève le porte ; Rame affiche son mode. *@
+                <div class="recu-bas">
+                    <div class="recu-articles">
+                        <div class="recu-article @(_versements.Any(v => v.Rame) ? "coche" : "")">
+                            <span class="recu-case"></span>Rame@(RameMode() is { Length: > 0 } m ? $" : {m}" : "")
+                        </div>
+                        <div class="recu-article @(_versements.Any(v => v.TenueSport) ? "coche" : "")">
+                            <span class="recu-case"></span>Tenue de sport
+                        </div>
+                        <div class="recu-article @(_versements.Any(v => v.CarnetCorresp) ? "coche" : "")">
+                            <span class="recu-case"></span>Carnet de correspondance
+                        </div>
+                        <div class="recu-article @(_versements.Any(v => v.Macaron) ? "coche" : "")">
+                            <span class="recu-case"></span>Macaron
+                        </div>
                     </div>
-                }
+                    @if (_resume is not null)
+                    {
+                        <div class="recu-synthese">
+                            <div><span>Frais de scolarité</span><b>@Fmt(_resume.FraisScolarite)</b></div>
+                            @if (_resume.TotalReduction > 0)
+                            {
+                                <div><span>Réductions</span><b>- @Fmt(_resume.TotalReduction)</b></div>
+                            }
+                            <div><span>Total versé</span><b>@Fmt(_resume.TotalVerse)</b></div>
+                            <div class="recu-synthese-reste"><span>Reste à payer</span><b>@Fmt(_resume.Reste)</b></div>
+                            @if (_resume.Credit > 0)
+                            {
+                                <div><span>Crédit (avance)</span><b>@Fmt(_resume.Credit)</b></div>
+                            }
+                        </div>
+                    }
+                </div>
 
                 @* Échéancier individuel. *@
                 @if (_echeancier.Count > 0)
@@ -747,7 +765,7 @@
                                         <td class="j-montant">@Fmt(l.TotalFrais)</td>
                                         <td class="j-montant">@Fmt(l.TotalVerse)</td>
                                         <td class="j-montant j-reste">@Fmt(l.Reste)</td>
-                                        <td class="j-rame"><span class="journee-case"></span></td>
+                                        <td class="j-rame"><span class="journee-case @(l.Rame ? "coche" : "")"></span></td>
                                         <td class="j-auteur">@l.Auteur</td>
                                     </tr>
                                 }

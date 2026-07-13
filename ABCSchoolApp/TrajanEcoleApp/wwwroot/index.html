@@ -52,21 +52,22 @@
             min-width: 125px !important;
             max-width: 125px !important;
         }
-        /* N° Inscription. */
-        .acc-window .acc-fnumordre {
+        /* Filtres déroulants courts (Statut, Inscrit, Actif, Transport) : largeur 110px.
+           Définis APRÈS .acc-ffield pour l'emporter (même spécificité). */
+        .acc-window .acc-fnarrow {
             width: 110px !important;
             min-width: 110px !important;
             max-width: 110px !important;
         }
-        /* Filtres déroulants courts (Niveau, Classe, Statut, Inscrit, Actif, Transport) +
-           CodeParent : largeur commune 110px. Définis APRÈS .acc-ffield pour l'emporter
-           (même spécificité). */
-        .acc-window .acc-fnarrow,
+        /* N° Inscription, Niveau, Classe, CodeParent : un peu plus larges (135px). Définis
+           APRÈS .acc-fnarrow pour l'emporter sur Niveau/Classe (qui ont aussi .acc-fnarrow). */
+        .acc-window .acc-fnumordre,
+        .acc-window .acc-fniveau,
         .acc-window .acc-fclasse,
         .acc-window .acc-fcodeparent {
-            width: 110px !important;
-            min-width: 110px !important;
-            max-width: 110px !important;
+            width: 135px !important;
+            min-width: 135px !important;
+            max-width: 135px !important;
         }
 
         /* Pager de la grille élèves : le sélecteur « rows per page » (5) était aussi happé

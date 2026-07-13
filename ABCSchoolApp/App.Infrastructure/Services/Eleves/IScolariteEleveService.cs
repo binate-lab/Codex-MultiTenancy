@@ -24,7 +24,8 @@ namespace App.Infrastructure.Services.Eleves
     // Calques des DTOs de Scolarite.Api (VersementsDuJourEndpoint).
     public record VersementJourLigneItem(
         int Numero, string NomPrenoms, string Classe, decimal Montant, string Nature,
-        string Mode, decimal TotalFrais, decimal TotalVerse, decimal Reste, string Auteur);
+        string Mode, decimal TotalFrais, decimal TotalVerse, decimal Reste, string Auteur,
+        bool Rame);
 
     public record VersementsJourNiveauItem(
         string Niveau, List<VersementJourLigneItem> Lignes, decimal TotalMontant, int NbRecu);

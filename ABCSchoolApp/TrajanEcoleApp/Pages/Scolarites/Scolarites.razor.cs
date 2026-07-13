@@ -865,6 +865,12 @@ namespace TrajanEcoleApp.Pages.Scolarites
 
         private static string Fmt(decimal montant) => montant.ToString("#,0", _fr) + " F";
 
+        // Mode de la rame pour le reçu (affiché à côté de « Rame ») : premier versement de
+        // l'élève portant la rame avec un mode renseigné. Vide sinon.
+        private string RameMode()
+            => _versements.FirstOrDefault(v => v.Rame && !string.IsNullOrWhiteSpace(v.ModeRame))?.ModeRame
+               ?? string.Empty;
+
         // Ligne de la grille rouge (calque des colonnes du formulaire Access « Scolarités »).
         // Statut et Niveau sont modifiables directement dans la grille → propriétés set.
         public sealed class EleveScolariteRow
