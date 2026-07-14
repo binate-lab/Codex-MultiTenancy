@@ -743,6 +743,35 @@ namespace TrajanEcoleApp.Pages.Scolarites
             }
         }
 
+        // ================== Reçu par WhatsApp ==================
+
+        private bool _waEnCours;
+
+        // Envoie le reçu PDF au parent (Tuteur.Telephone1) via WhatsApp — même en-tête
+        // que le reçu PDF. Le PDF est généré côté serveur puis transmis à Twilio.
+        private async Task EnvoyerRecuWhatsAppAsync()
+        {
+            if (_sel is null) return;
+
+            _waEnCours = true;
+            try
+            {
+                var logoBase64 = string.IsNullOrWhiteSpace(_logoEcole)
+                    ? null
+                    : await _js.InvokeAsync<string>("trajanImageEnBase64", _logoEcole);
+
+                var annee = _annee == "—" ? string.Empty : _annee;
+                var (ok, message) = await _versementService.EnvoyerRecuWhatsAppAsync(
+                    _sel.Id, _nomEcole, logoBase64, _villeEcole, annee);
+
+                _snackbar.Add(message, ok ? Severity.Success : Severity.Error);
+            }
+            finally
+            {
+                _waEnCours = false;
+            }
+        }
+
         // ================== Reçu par SMS ==================
 
         // Clé localStorage de la préférence « case SMS cochée à l'ouverture ».

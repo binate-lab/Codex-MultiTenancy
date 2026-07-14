@@ -216,5 +216,33 @@ namespace App.Infrastructure.Services.Implementations.Eleves
                 return null;
             }
         }
+
+        // Envoie le recu PDF au parent (Tuteur.Telephone1) via WhatsApp. Meme en-tete que
+        // le recu PDF ; l'API genere le PDF, le publie temporairement et declenche Twilio.
+        public async Task<(bool Ok, string Message)> EnvoyerRecuWhatsAppAsync(
+            Guid eleveId, string ecole, string logoBase64, string ville, string anneeScolaire)
+        {
+            try
+            {
+                var reponse = await _httpClient.PostAsJsonAsync(
+                    $"eleves/{eleveId}/versements/recu/whatsapp",
+                    new { ecole, logoBase64, ville, anneeScolaire });
+
+                if (reponse.IsSuccessStatusCode)
+                    return (true, "Reçu envoyé par WhatsApp.");
+
+                var erreur = await reponse.Content.ReadFromJsonAsync<WhatsAppErreurDto>();
+                return (false, erreur?.message ?? "Échec de l'envoi WhatsApp.");
+            }
+            catch (Exception ex)
+            {
+                return (false, $"Erreur : {ex.Message}");
+            }
+        }
+
+        private sealed class WhatsAppErreurDto
+        {
+            public string? message { get; set; }
+        }
     }
 }

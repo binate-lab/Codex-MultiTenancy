@@ -356,6 +356,11 @@
                                        Size="Size.Small" Disabled="_recuEnCours" Class="svt-btn-recu ml-2"
                                        StartIcon="@Icons.Material.Filled.PictureAsPdf">Reçu PDF</MudButton>
                         </MudTooltip>
+                        <MudTooltip Text="Envoyer le reçu PDF au parent par WhatsApp">
+                            <MudButton OnClick="EnvoyerRecuWhatsAppAsync" Variant="Variant.Outlined" Color="Color.Success"
+                                       Size="Size.Small" Disabled="_sel is null || _waEnCours" Class="svt-btn-recu ml-2"
+                                       StartIcon="@Icons.Material.Filled.Chat">WhatsApp</MudButton>
+                        </MudTooltip>
                         @* SMS : le bouton n'envoie que si la case juste à droite est cochée.
                            La case mémorise (ou non) son état pour les prochaines ouvertures. *@
                         <MudTooltip Text="Envoyer le reçu par SMS (coche la case pour activer)">
