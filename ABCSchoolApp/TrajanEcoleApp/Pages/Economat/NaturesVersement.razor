@@ -40,26 +40,46 @@
             <RowTemplate>
                 <MudTd DataLabel="Ordre" Style="text-align:center;">
                     <MudNumericField T="int" @bind-Value="context.Ordre" HideSpinButtons="false" Min="0"
+                                     Disabled="@context.Auto"
                                      Variant="Variant.Text" Underline="false" Margin="Margin.Dense" Style="width:70px;" />
                 </MudTd>
                 <MudTd DataLabel="Libellé">
-                    <MudTextField T="string" @bind-Value="context.Libelle"
-                                  Variant="Variant.Text" Underline="false" Margin="Margin.Dense" />
+                    @if (context.Auto)
+                    {
+                        <div class="d-flex align-center">
+                            <span>@context.Libelle</span>
+                            <span style="margin-left:8px; font-size:0.68rem; font-weight:600; color:#1565c0; border:1px solid #90caf9; border-radius:10px; padding:1px 8px; background:#e3f2fd;">Frais Général</span>
+                        </div>
+                    }
+                    else
+                    {
+                        <MudTextField T="string" @bind-Value="context.Libelle"
+                                      Variant="Variant.Text" Underline="false" Margin="Margin.Dense" />
+                    }
                 </MudTd>
                 <MudTd DataLabel="Visible" Style="text-align:center;">
-                    <MudCheckBox T="bool" @bind-Value="context.OK" Dense="true" Color="Color.Primary" />
+                    <MudCheckBox T="bool" @bind-Value="context.OK" Dense="true" Color="Color.Primary" Disabled="@context.Auto" />
                 </MudTd>
                 <MudTd DataLabel="Inscription" Style="text-align:center;">
-                    <MudCheckBox T="bool" @bind-Value="context.EstInscription" Dense="true" Color="Color.Secondary" />
+                    <MudCheckBox T="bool" @bind-Value="context.EstInscription" Dense="true" Color="Color.Secondary" Disabled="@context.Auto" />
                 </MudTd>
                 <MudTd DataLabel="Actions" Style="text-align:center;">
-                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Color="Color.Secondary"
-                             TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
-                        <MudMenuItem Disabled="@(_enCours || !context.EstModifiee)"
-                                     OnClick="@(() => EnregistrerAsync(context))">Enregistrer</MudMenuItem>
-                        <MudMenuItem Disabled="_enCours"
-                                     OnClick="@(() => SupprimerAsync(context))">Supprimer</MudMenuItem>
-                    </MudMenu>
+                    @if (context.Auto)
+                    {
+                        <MudTooltip Text="Nature gérée par les Frais Généraux (à modifier depuis la page « Frais Généraux »).">
+                            <MudIcon Icon="@Icons.Material.Filled.Lock" Size="Size.Small" Color="Color.Default" />
+                        </MudTooltip>
+                    }
+                    else
+                    {
+                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Color="Color.Secondary"
+                                 TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
+                            <MudMenuItem Disabled="@(_enCours || !context.EstModifiee)"
+                                         OnClick="@(() => EnregistrerAsync(context))">Enregistrer</MudMenuItem>
+                            <MudMenuItem Disabled="_enCours"
+                                         OnClick="@(() => SupprimerAsync(context))">Supprimer</MudMenuItem>
+                        </MudMenu>
+                    }
                 </MudTd>
             </RowTemplate>
             <NoRecordsContent>

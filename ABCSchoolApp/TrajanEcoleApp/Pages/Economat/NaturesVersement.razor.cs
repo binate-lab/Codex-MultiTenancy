@@ -101,10 +101,13 @@ namespace TrajanEcoleApp.Pages.Economat
             public NatureRow(NatureVersementItem n)
             {
                 Id = n.Id; Ordre = n.Ordre; Libelle = n.Libelle; OK = n.OK; EstInscription = n.EstInscription;
+                Auto = n.Auto;
                 FigerSnapshot();
             }
 
             public int Id { get; }
+            // Nature issue d'un poste de Frais Généraux : non éditable ici (gérée côté FG).
+            public bool Auto { get; }
             public int Ordre { get; set; }
             public string Libelle { get; set; }
             public bool OK { get; set; }

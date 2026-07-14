@@ -9,6 +9,7 @@ namespace App.Infrastructure.Services.Economat
         public string Libelle { get; set; } = string.Empty;
         public bool OK { get; set; } = true;          // visible dans la deroulante de saisie
         public bool EstInscription { get; set; }      // nature qui rend l'eleve inscrit
+        public bool Auto { get; set; }                // issue d'un poste de Frais Généraux (non éditable ici)
     }
 
     // Resultat d'ecriture : Error porte le message metier du backend (409 doublon...).
