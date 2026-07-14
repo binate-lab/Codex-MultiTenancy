@@ -259,30 +259,65 @@ namespace TrajanEcoleApp.Pages.Scolarites
         // Édition en ligne du statut (Aff/Naff) d'un élève.
         // TODO (à venir) : publier un événement « changement de statut » relié à
         // l'échéancier (recalcul des modalités de versement selon Aff/Naff).
-        private void OnStatutChanged(EleveScolariteRow row, string nouveau)
+        private async Task OnStatutChanged(EleveScolariteRow row, string nouveau)
         {
+            var ancien = row.Statut;
+            if (nouveau == ancien) return;
+
             row.Statut = nouveau;
+
+            var ok = await _scolariteEleveService.MajStatutAsync(row.Id, nouveau ?? string.Empty);
+            if (!ok)
+            {
+                row.Statut = ancien;
+                _snackbar.Add("Impossible d'enregistrer le statut.", Severity.Error);
+            }
         }
 
         // Édition en ligne du niveau d'un élève. La classe est invalidée si elle
         // n'appartient plus au nouveau niveau (cascade du référentiel structures).
         // TODO (à venir) : publier un événement « changement de niveau » relié à
         // l'échéancier (les frais / l'échéancier dépendent du niveau).
-        private void OnNiveauChanged(EleveScolariteRow row, string nouveau)
+        private async Task OnNiveauChanged(EleveScolariteRow row, string nouveau)
         {
+            var ancienNiveau = row.Niveau;
+            var ancienneClasse = row.Classe;
+            if (nouveau == ancienNiveau) return;
+
             row.Niveau = nouveau;
+            // Le changement de niveau invalide une classe qui n'appartient pas au niveau.
             if (!ClassesPour(nouveau).Any(c => c.Libelle == row.Classe))
             {
                 row.Classe = string.Empty;
+            }
+
+            var ok = await _scolariteEleveService.MajClasseNiveauAsync(
+                row.Id, nouveau ?? string.Empty, row.Classe ?? string.Empty);
+            if (!ok)
+            {
+                row.Niveau = ancienNiveau;
+                row.Classe = ancienneClasse;
+                _snackbar.Add("Impossible d'enregistrer le niveau.", Severity.Error);
             }
         }
 
         // Édition en ligne de la classe d'un élève.
         // TODO (à venir) : publier un événement « changement de classe » relié à
         // l'échéancier / aux listes de classe.
-        private void OnClasseChanged(EleveScolariteRow row, string nouveau)
+        private async Task OnClasseChanged(EleveScolariteRow row, string nouveau)
         {
+            var ancien = row.Classe;
+            if (nouveau == ancien) return;
+
             row.Classe = nouveau;
+
+            var ok = await _scolariteEleveService.MajClasseNiveauAsync(
+                row.Id, row.Niveau ?? string.Empty, nouveau ?? string.Empty);
+            if (!ok)
+            {
+                row.Classe = ancien;
+                _snackbar.Add("Impossible d'enregistrer la classe.", Severity.Error);
+            }
         }
 
         // ================== Navigation clavier & copie « cellule du dessus » ==================

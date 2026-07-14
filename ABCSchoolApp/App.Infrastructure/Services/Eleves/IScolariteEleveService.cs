@@ -16,6 +16,14 @@ namespace App.Infrastructure.Services.Eleves
         // Retourne true si l'enregistrement a reussi.
         Task<bool> MajCodeParentAsync(Guid eleveId, string codeParent);
 
+        // Positionne Niveau + Classe de l'eleve (cellules editables de la grille).
+        // Retourne true si l'enregistrement a reussi.
+        Task<bool> MajClasseNiveauAsync(Guid eleveId, string niveau, string classe);
+
+        // Met a jour le Statut (Aff / Naff) de l'eleve (cellule editable de la grille).
+        // Retourne true si l'enregistrement a reussi.
+        Task<bool> MajStatutAsync(Guid eleveId, string statut);
+
         // Etat des versements d'une PERIODE [dateDebut, dateFin] pour l'ecole, groupe par niveau
         // (defaut : aujourd'hui pour les deux ; fin = debut si absente). Alimente l'apercu/
         // impression « Versements entre deux dates ». Liste vide si indispo.

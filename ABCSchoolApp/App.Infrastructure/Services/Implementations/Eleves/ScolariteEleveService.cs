@@ -64,6 +64,36 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
+        public async Task<bool> MajClasseNiveauAsync(Guid eleveId, string niveau, string classe)
+        {
+            try
+            {
+                var reponse = await _httpClient.PutAsJsonAsync(
+                    $"eleves/{eleveId}/classe-niveau",
+                    new { niveau, classe });
+                return reponse.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> MajStatutAsync(Guid eleveId, string statut)
+        {
+            try
+            {
+                var reponse = await _httpClient.PutAsJsonAsync(
+                    $"eleves/{eleveId}/statut",
+                    new { statut });
+                return reponse.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public async Task<IReadOnlyList<VersementsJourNiveauItem>> GetVersementsPeriodeAsync(
             string codeEts, DateTime? dateDebut = null, DateTime? dateFin = null)
         {
