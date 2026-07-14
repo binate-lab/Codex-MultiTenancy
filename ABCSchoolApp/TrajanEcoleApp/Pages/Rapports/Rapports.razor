@@ -1,0 +1,138 @@
+@page "/rapports"
+@layout SchoolLayout
+@using System.Globalization
+@using global::App.Infrastructure.Services.Rapports
+@inject IRapportService _rapportService
+@inject IJSRuntime _js
+
+<MudPaper Elevation="6" Class="ma-2">
+    <div class="acc-window">
+
+        <!-- Bandeau : titre + année -->
+        <div class="acc-titlebar">
+            <div class="d-flex align-center gap-3">
+                <span class="acc-title">Rapports des versements</span>
+                <span class="acc-year">@_annee</span>
+            </div>
+        </div>
+
+        <div class="pa-4">
+            <MudText Typo="Typo.body2" Class="mb-3 mud-text-secondary">
+                Choisis une période, puis génère le rapport mensuel des versements
+                (par élève ou par classe) au format PDF, avec l'en-tête officiel de l'école.
+            </MudText>
+
+            <div class="d-flex align-end gap-4 flex-wrap mb-4">
+                <MudDatePicker Label="Du" @bind-Date="_debut" DateFormat="dd/MM/yyyy"
+                               Culture="@_fr" Variant="Variant.Outlined" Margin="Margin.Dense"
+                               Style="max-width: 190px;" />
+                <MudDatePicker Label="Au" @bind-Date="_fin" DateFormat="dd/MM/yyyy"
+                               Culture="@_fr" Variant="Variant.Outlined" Margin="Margin.Dense"
+                               Style="max-width: 190px;" />
+            </div>
+
+            <div class="d-flex gap-3 flex-wrap">
+                <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                           StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                           Disabled="_enCours" OnClick="GenererMensuelAsync">
+                    Rapport par élève
+                </MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Secondary"
+                           StartIcon="@Icons.Material.Filled.TableChart"
+                           Disabled="_enCours" OnClick="GenererParClasseAsync">
+                    Rapport par classe
+                </MudButton>
+            </div>
+
+            @if (_enCours)
+            {
+                <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-4" />
+            }
+        </div>
+    </div>
+</MudPaper>
+
+@code {
+    private static readonly CultureInfo _fr = CultureInfo.GetCultureInfo("fr-FR");
+
+    private string _annee = "—";
+    private string _nomEcole = string.Empty;
+    private string _logoEcole = string.Empty;
+    private string _villeEcole = string.Empty;
+
+    private DateTime? _debut = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
+    private DateTime? _fin = DateTime.Today;
+
+    private bool _enCours;
+
+    protected override async Task OnInitializedAsync()
+    {
+        // Année scolaire en cours (bandeau + en-tête PDF).
+        var annee = await _anneeScolaireService.GetAnneeEnCoursAsync();
+        if (annee.IsSuccessful && annee.Data is not null)
+            _annee = annee.Data.Libelle;
+
+        // École active (claim "school") : nom / logo / ville pour l'en-tête officiel.
+        var user = await _applicationStateProvider.GetAuthenticationStateProviderUserAsync();
+        var codeEts = user.FindFirst("school")?.Value;
+        if (!string.IsNullOrWhiteSpace(codeEts))
+        {
+            var ecoles = await _schoolService.GetMineAsync();
+            if (ecoles.IsSuccessful && ecoles.Data is not null)
+            {
+                var ecole = ecoles.Data.FirstOrDefault(s => s.CodeEts == codeEts);
+                _nomEcole = ecole?.Name ?? string.Empty;
+                _logoEcole = ecole?.Logo ?? string.Empty;
+                _villeEcole = ecole?.Ville ?? string.Empty;
+            }
+        }
+    }
+
+    private Task GenererMensuelAsync()
+        => GenererAsync((d, f, e, l, v, a) => _rapportService.GetRapportMensuelPdfAsync(d, f, e, l, v, a), "rapport-mensuel");
+
+    private Task GenererParClasseAsync()
+        => GenererAsync((d, f, e, l, v, a) => _rapportService.GetRapportParClassePdfAsync(d, f, e, l, v, a), "rapport-par-classe");
+
+    private async Task GenererAsync(
+        Func<DateOnly, DateOnly, string, string, string, string, Task<byte[]>> generer, string prefixeFichier)
+    {
+        if (_debut is null || _fin is null)
+        {
+            _snackbar.Add("Renseigne la période (Du / Au).", Severity.Warning);
+            return;
+        }
+        if (_debut > _fin)
+        {
+            _snackbar.Add("La date de début doit précéder la date de fin.", Severity.Warning);
+            return;
+        }
+
+        _enCours = true;
+        try
+        {
+            var logoBase64 = string.IsNullOrWhiteSpace(_logoEcole)
+                ? null
+                : await _js.InvokeAsync<string>("trajanImageEnBase64", _logoEcole);
+
+            var annee = _annee == "—" ? string.Empty : _annee;
+            var debut = DateOnly.FromDateTime(_debut.Value);
+            var fin = DateOnly.FromDateTime(_fin.Value);
+
+            var pdf = await generer(debut, fin, _nomEcole, logoBase64, _villeEcole, annee);
+            if (pdf is null || pdf.Length == 0)
+            {
+                _snackbar.Add("Rapport indisponible pour cette période.", Severity.Error);
+                return;
+            }
+
+            var nomFichier = $"{prefixeFichier}-{debut:yyyyMMdd}-{fin:yyyyMMdd}.pdf";
+            await _js.InvokeVoidAsync("trajanTelechargerFichier",
+                nomFichier, Convert.ToBase64String(pdf), "application/pdf");
+        }
+        finally
+        {
+            _enCours = false;
+        }
+    }
+}

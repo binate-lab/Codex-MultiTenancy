@@ -9,6 +9,8 @@ using App.Infrastructure.Services.Implementations.Certificats;
 using App.Infrastructure.Services.Implementations.Chat;
 using App.Infrastructure.Services.Eleves;
 using App.Infrastructure.Services.Implementations.Eleves;
+using App.Infrastructure.Services.Rapports;
+using App.Infrastructure.Services.Implementations.Rapports;
 using App.Infrastructure.Services.Structures;
 using App.Infrastructure.Services.Implementations.Structures;
 using App.Infrastructure.Services.Economat;
@@ -104,6 +106,14 @@ namespace App.Infrastructure.Extensions
             // Client typie dedie au module Versements de Scolarite.Api (saisie + detail).
             builder.Services
                 .AddHttpClient<IVersementService, VersementService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
+            // Client typie dedie aux rapports mensuels de versements de Scolarite.Api.
+            builder.Services
+                .AddHttpClient<IRapportService, RapportService>(client =>
                 {
                     client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
                 })
