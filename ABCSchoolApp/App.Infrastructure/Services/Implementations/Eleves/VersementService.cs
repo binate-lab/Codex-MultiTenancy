@@ -198,14 +198,14 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
-        public async Task<byte[]> GetRecuPdfAsync(Guid eleveId, string ecole, string logoBase64)
+        public async Task<byte[]> GetRecuPdfAsync(Guid eleveId, string ecole, string logoBase64, string ville, string anneeScolaire)
         {
             try
             {
                 // POST : l'en-tete (nom d'ecole + logo base64) peut peser plusieurs Ko.
                 var reponse = await _httpClient.PostAsJsonAsync(
                     $"eleves/{eleveId}/versements/recu",
-                    new { ecole, logoBase64 });
+                    new { ecole, logoBase64, ville, anneeScolaire });
 
                 if (!reponse.IsSuccessStatusCode) return null;
 

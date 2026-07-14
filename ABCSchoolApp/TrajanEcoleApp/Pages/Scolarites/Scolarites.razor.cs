@@ -725,7 +725,8 @@ namespace TrajanEcoleApp.Pages.Scolarites
                     ? null
                     : await _js.InvokeAsync<string>("trajanImageEnBase64", _logoEcole);
 
-                var pdf = await _versementService.GetRecuPdfAsync(_sel.Id, _nomEcole, logoBase64);
+                var annee = _annee == "—" ? string.Empty : _annee;
+                var pdf = await _versementService.GetRecuPdfAsync(_sel.Id, _nomEcole, logoBase64, _villeEcole, annee);
                 if (pdf is null || pdf.Length == 0)
                 {
                     _snackbar.Add("Reçu indisponible pour cet élève.", Severity.Error);
