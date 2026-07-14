@@ -16,9 +16,11 @@ namespace App.Infrastructure.Services.Eleves
         // Retourne true si l'enregistrement a reussi.
         Task<bool> MajCodeParentAsync(Guid eleveId, string codeParent);
 
-        // Etat des versements d'une journee (defaut : aujourd'hui) pour l'ecole, groupe par
-        // niveau. Alimente l'apercu/impression « Versements du jour ». Liste vide si indispo.
-        Task<IReadOnlyList<VersementsJourNiveauItem>> GetVersementsDuJourAsync(string codeEts, DateTime? date = null);
+        // Etat des versements d'une PERIODE [dateDebut, dateFin] pour l'ecole, groupe par niveau
+        // (defaut : aujourd'hui pour les deux ; fin = debut si absente). Alimente l'apercu/
+        // impression « Versements entre deux dates ». Liste vide si indispo.
+        Task<IReadOnlyList<VersementsJourNiveauItem>> GetVersementsPeriodeAsync(
+            string codeEts, DateTime? dateDebut = null, DateTime? dateFin = null);
     }
 
     // Calques des DTOs de Scolarite.Api (VersementsDuJourEndpoint).

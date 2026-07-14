@@ -64,13 +64,16 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
-        public async Task<IReadOnlyList<VersementsJourNiveauItem>> GetVersementsDuJourAsync(string codeEts, DateTime? date = null)
+        public async Task<IReadOnlyList<VersementsJourNiveauItem>> GetVersementsPeriodeAsync(
+            string codeEts, DateTime? dateDebut = null, DateTime? dateFin = null)
         {
             try
             {
                 var url = $"versements/journalier?codeEts={Uri.EscapeDataString(codeEts)}";
-                if (date is not null)
-                    url += $"&date={Uri.EscapeDataString(date.Value.ToString("yyyy-MM-dd"))}";
+                if (dateDebut is not null)
+                    url += $"&dateDebut={Uri.EscapeDataString(dateDebut.Value.ToString("yyyy-MM-dd"))}";
+                if (dateFin is not null)
+                    url += $"&dateFin={Uri.EscapeDataString(dateFin.Value.ToString("yyyy-MM-dd"))}";
 
                 var data = await _httpClient.GetFromJsonAsync<List<VersementsJourNiveauItem>>(url);
                 return data ?? new List<VersementsJourNiveauItem>();

@@ -70,6 +70,17 @@
             max-width: 135px !important;
         }
 
+        /* Sélecteurs de dates de l'aperçu « Versements entre deux dates » (barre d'outils) :
+           compacts, texte normal (sinon happés par le 22px « Access » global). */
+        .acc-window .journee-datepick {
+            width: 130px !important;
+            min-width: 130px !important;
+        }
+        .acc-window .journee-datepick input,
+        .acc-window .journee-datepick .mud-input-slot {
+            font-size: 14px !important;
+        }
+
         /* Pager de la grille élèves : le sélecteur « rows per page » (5) était aussi happé
            par les 22px du look Access. On le ramène à la taille du texte « 1-5 of 34 » (14px). */
         .acc-window .mud-table-pagination input,

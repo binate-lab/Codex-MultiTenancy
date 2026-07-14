@@ -691,7 +691,18 @@
     <div class="recu-overlay" @onclick="FermerJourneeApercu">
         <div class="recu-panel" @onclick:stopPropagation="true">
             <div class="recu-toolbar">
-                <span class="recu-toolbar-titre">Aperçu — Versements du @_journeeDate.ToString("dd/MM/yyyy")</span>
+                @* Plage de dates : par defaut debut = fin = aujourd'hui (report du jour) ; on
+                   recharge des qu'une borne change. *@
+                <div class="d-flex align-center gap-2">
+                    <span class="recu-toolbar-titre">Versements entre</span>
+                    <MudDatePicker @bind-Date="_journeeDebut" @bind-Date:after="RechargerJourneeAsync"
+                                   Editable="true" DateFormat="dd/MM/yyyy" Variant="Variant.Outlined"
+                                   Margin="Margin.Dense" Class="journee-datepick" />
+                    <span class="recu-toolbar-titre">et</span>
+                    <MudDatePicker @bind-Date="_journeeFin" @bind-Date:after="RechargerJourneeAsync"
+                                   Editable="true" DateFormat="dd/MM/yyyy" Variant="Variant.Outlined"
+                                   Margin="Margin.Dense" Class="journee-datepick" />
+                </div>
                 <div class="d-flex align-center gap-2">
                     <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
                                StartIcon="@Icons.Material.Filled.Print" Disabled="_journeeChargement"
@@ -720,7 +731,7 @@
                 </div>
 
                 <div class="journee-titre">
-                    État des versements du <i>@_journeeDate.ToString("dd/MM/yyyy")</i>
+                    Versements entre le <i>@(_journeeDebut?.ToString("dd/MM/yyyy"))</i> et le <i>@(_journeeFin?.ToString("dd/MM/yyyy"))</i>
                 </div>
 
                 @if (_journeeChargement)

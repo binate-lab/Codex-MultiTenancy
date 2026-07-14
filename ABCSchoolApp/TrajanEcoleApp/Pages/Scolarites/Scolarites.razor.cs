@@ -651,15 +651,27 @@ namespace TrajanEcoleApp.Pages.Scolarites
         // Scolarite.Api (école entière). Impression : classe body « svt-print-journee ».
         private bool _journeeOuvert;
         private bool _journeeChargement;
-        private DateTime _journeeDate = DateTime.Today;
+        // Bornes de la periode affichee. Par defaut debut = fin = aujourd'hui (report du jour) ;
+        // l'utilisateur peut elargir a « du {debut} au {fin} ».
+        private DateTime? _journeeDebut = DateTime.Today;
+        private DateTime? _journeeFin = DateTime.Today;
         private IReadOnlyList<VersementsJourNiveauItem> _journeeGroupes = new List<VersementsJourNiveauItem>();
 
         private async Task OuvrirJourneeApercu()
         {
-            _journeeDate = DateTime.Today;
+            _journeeDebut = DateTime.Today;
+            _journeeFin = DateTime.Today;
             _journeeOuvert = true;
+            await RechargerJourneeAsync();
+        }
+
+        // Recharge l'etat pour la periode courante (appele a l'ouverture et a chaque changement
+        // d'une des deux dates).
+        private async Task RechargerJourneeAsync()
+        {
             _journeeChargement = true;
-            _journeeGroupes = await _scolariteEleveService.GetVersementsDuJourAsync(_codeEts, _journeeDate);
+            _journeeGroupes = await _scolariteEleveService.GetVersementsPeriodeAsync(
+                _codeEts, _journeeDebut, _journeeFin);
             _journeeChargement = false;
         }
 
