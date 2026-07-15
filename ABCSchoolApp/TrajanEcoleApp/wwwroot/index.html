@@ -103,6 +103,13 @@
             padding-top: 0 !important;
             padding-bottom: 0 !important;
         }
+        /* Resserrement horizontal (défaut MudBlazor = 16px gauche / 24px droite) —
+           appliqué aux cellules ET aux en-têtes pour garder les colonnes alignées. */
+        .acc-window .acc-grid-eleves td,
+        .acc-window .acc-grid-eleves th {
+            padding-left: 10px !important;
+            padding-right: 10px !important;
+        }
         .acc-window .acc-grid-eleves td input,
         .acc-window .acc-grid-eleves td .mud-input-slot,
         .acc-window .acc-grid-eleves td .mud-select-input {
