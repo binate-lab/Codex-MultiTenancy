@@ -226,7 +226,10 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 && (_fStatut == "Tous" || e.Statut == _fStatut)
                 && (_fSexe == "Tous" || (_fSexe == "G" ? EstGarcon(e.Sexe) : EstFille(e.Sexe)))
                 && (_fInscrit == "Tous" || (_fInscrit == "Oui") == e.Inscrit)
-                && (_fActif == "Tous" || (_fActif == "Oui") == e.Actif));
+                && (_fActif == "Tous" || (_fActif == "Oui") == e.Actif))
+            // Toujours par ordre alphabétique : Nom croissant, puis Prénoms croissant.
+            .OrderBy(e => e.Nom, StringComparer.CurrentCultureIgnoreCase)
+            .ThenBy(e => e.Prenoms, StringComparer.CurrentCultureIgnoreCase);
 
         private void Effacer()
         {

@@ -91,8 +91,8 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private string _fNiveau = string.Empty;   // "" = tous
         private string _fClasse = string.Empty;
         private string _fStatut = "Tous";
-        private string _fInscrit = "Oui";   // par défaut : seulement les inscrits
-        private string _fActif = "Oui";     // par défaut : seulement les actifs
+        private string _fInscrit = "Non";   // par défaut : les NON inscrits
+        private string _fActif = "Non";     // par défaut : les NON actifs
         private string _fTransport = "Tous";   // Tous / Oui (a une zone) / Non
         private string _fCodeParent = string.Empty;
 
@@ -192,7 +192,10 @@ namespace TrajanEcoleApp.Pages.Scolarites
                 && (_fActif == "Tous" || (_fActif == "Oui") == e.Actif)
                 && (_fTransport == "Tous"
                     || (_fTransport == "Oui") == !string.IsNullOrWhiteSpace(e.ZoneTransport))
-                && (string.IsNullOrWhiteSpace(_fCodeParent) || e.CodeParent == _fCodeParent));
+                && (string.IsNullOrWhiteSpace(_fCodeParent) || e.CodeParent == _fCodeParent))
+            // Toujours par ordre alphabétique : Nom croissant, puis Prénoms croissant.
+            .OrderBy(e => e.Nom, StringComparer.CurrentCultureIgnoreCase)
+            .ThenBy(e => e.Prenoms, StringComparer.CurrentCultureIgnoreCase);
 
         // CodeParent distincts (non vides) des élèves chargés, triés : alimentent la déroulante
         // du filtre CodeParent — s'enrichit au fil des codes saisis dans la grille.
@@ -216,7 +219,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         {
             _fNumOrdre = _fNom = _fPrenoms = _fMatricule = _fNiveau = _fClasse = _fCodeParent = string.Empty;
             _fStatut = _fTransport = "Tous";
-            _fInscrit = _fActif = "Oui";   // on revient au défaut (inscrits + actifs)
+            _fInscrit = _fActif = "Non";   // on revient au défaut (non inscrits + non actifs)
         }
 
         private void Fermer() => _navigation.NavigateTo("/ecole");

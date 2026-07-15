@@ -164,6 +164,21 @@
     width: 70px;
 }
 
+/* Colonne Classe : le déroulant remplit toute la colonne et sa flèche est compacte, sinon
+   la marge droite + l'icône rognent le libellé de classe (« Tle A », « NON DÉFINIE »…). */
+.acc-grid ::deep td[data-col="Classe"] .acc-cell-select {
+    width: 100% !important;
+}
+.acc-grid ::deep td[data-col="Classe"] .mud-select-input {
+    padding-right: 2px !important;
+}
+.acc-grid ::deep td[data-col="Classe"] .mud-input-adornment-end {
+    margin-left: 0 !important;
+}
+.acc-grid ::deep td[data-col="Classe"] .mud-input-adornment-end .mud-icon-root {
+    font-size: 1.1rem !important;
+}
+
 /* Pas de trait de soulignement sous les sélecteurs Statut / Classe. */
 .acc-grid ::deep td .mud-input.mud-input-underline::before,
 .acc-grid ::deep td .mud-input.mud-input-underline::after {
