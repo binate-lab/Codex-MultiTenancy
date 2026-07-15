@@ -82,6 +82,20 @@ règle n'était juste jamais appliquée).
 `wwwroot/index.html` (bloc `<style>`), qui n'a pas de scope et cible directement
 `.mon-champ input`. Pour une GRILLE, le CSS scopé `::deep` via le `<div>` wrapper suffit.
 
+**Cas `MudSelect` (déroulante en cellule) — un piège de plus** : la liste d'options n'est
+PAS rendue dans la cellule. MudBlazor la **téléporte** à la racine du `<body>` (sous
+`MudPopoverProvider`, DOM : `div.mud-popover.mud-popover-open > .mud-list > li.mud-list-item`).
+Donc styliser les options ne se fait QUE en CSS **global** — ni `.razor.css` scopé ni
+`::deep` ne l'atteignent (le popover n'est pas enfant de ta grille). Bon côté : n'étant pas
+dans le `.mud-table-container`, la liste n'est PAS coupée par l'`overflow` de la grille. Et
+le focus clavier vise un `div[tabindex]` (l'`<input>` du select est `type=hidden`) — d'où la
+garde `.mud-popover-open .mud-list` de la Recette 5.
+
+**Box-model d'un champ en cellule** : autour de l'`input` s'empilent **3 paddings** —
+`td.mud-table-cell`, puis `.mud-input-control` (surtout le `margin-top` réservé au label
+flottant), puis `.mud-select .mud-input-slot`. Une cellule « trop haute/large » = la somme de
+ces 3 couches → il faut les dégonfler **toutes** (voir Recette 1), pas seulement le `td`.
+
 ## Où mettre la règle CSS — table de décision
 
 | Tu veux styliser… | Où | Comment |
@@ -155,6 +169,27 @@ les autres grilles qui partagent la même classe générique :
     padding-top: 0 !important; padding-bottom: 0 !important;
 }
 ```
+
+**Padding HORIZONTAL des cellules — souvent oublié** (parametrage 2026-07-15). Les overrides
+ci-dessus ne touchent que le **vertical**. En horizontal, le défaut MudBlazor `Dense` reste :
+
+```css
+/* Défaut MudBlazor 8.6.0 Dense, pour mémoire */
+.mud-table-dense * .mud-table-row .mud-table-cell { padding: 6px 24px 6px 16px; }
+```
+
+→ soit **16px à gauche / 24px à droite** (asymétrique, 24px « gras » à droite). Pour resserrer
+(gain mesuré ~28px/cellule), en **global**, sur les cellules **ET les en-têtes** — sinon le
+texte des colonnes se désaligne entre `th` et `td` :
+
+```css
+.acc-window .acc-grid-eleves td,
+.acc-window .acc-grid-eleves th { padding-left: 10px !important; padding-right: 10px !important; }
+```
+
+Vérifié en live (`getComputedStyle` → `1px 10px 1px 10px`) sur `/scolarites` et
+`/listes-classe` — commit `2d98b30`. Hors `.acc-window`, `/structures` obtient le même effet
+en **scopé** : `.str-grid ::deep td { padding: 0 10px !important; }`.
 
 ## Recette 2 — Rapetisser / compacter un champ (filtre ou saisie)
 
@@ -324,6 +359,20 @@ Quand une taille est « bizarre » sans raison, **compare le `font-size` compute
 alors que « 1-5 of 34 » juste à côté était à 14px → ça a pointé la règle `.acc-window`
 qui gonflait tous les *champs* (pas le texte). Regarde aussi si ta règle apparaît dans
 l'onglet **Styles** (absente = pas chargée/scope raté ; barrée = battue en spécificité).
+
+**Mesurer une valeur en live sans DevTools** (utile en capture navigateur pilotée, ou pour
+prouver qu'un réglage est bien appliqué) :
+
+```js
+getComputedStyle(document.querySelector('.acc-grid-eleves th')).padding  // ex : "1px 10px 1px 10px"
+```
+
+Astuce : quand `td` et `th` partagent la même règle (`… td, th { … }`), mesurer le **`th`**
+suffit — il est présent même sur une grille vide (« Aucun élève »), contrairement au `td` de
+données. Rappel de cascade quand deux règles `!important` de même spécificité s'affrontent
+(ex. globale `index.html` vs scopée `.razor.css`) : **la dernière chargée gagne** ; dans
+`index.html`, le `<style>` inline est placé APRÈS le `<link>` du bundle scopé
+`TrajanEcoleApp.styles.css` → la globale l'emporte.
 
 ## Fichiers de référence (à lire pour voir le pattern en vrai)
 
