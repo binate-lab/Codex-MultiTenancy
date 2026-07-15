@@ -11,42 +11,84 @@
         <!-- Bandeau : titre + année -->
         <div class="acc-titlebar">
             <div class="d-flex align-center gap-3">
-                <span class="acc-title">Rapports des versements</span>
+                <span class="acc-title">Rapports — Économat</span>
                 <span class="acc-year">@_annee</span>
             </div>
         </div>
 
         <div class="pa-4">
-            <MudText Typo="Typo.body2" Class="mb-3 mud-text-secondary">
-                Choisis une période, puis génère le rapport mensuel des versements
-                (par élève ou par classe) au format PDF, avec l'en-tête officiel de l'école.
+            <MudText Typo="Typo.body2" Class="mb-4 mud-text-secondary">
+                Choisis un rapport, règle la période, puis génère le PDF (avec l'en-tête
+                officiel de l'école).
             </MudText>
 
-            <div class="d-flex align-end gap-4 flex-wrap mb-4">
-                <MudDatePicker Label="Du" @bind-Date="_debut" DateFormat="dd/MM/yyyy"
-                               Culture="@_fr" Variant="Variant.Outlined" Margin="Margin.Dense"
-                               Style="max-width: 190px;" />
-                <MudDatePicker Label="Au" @bind-Date="_fin" DateFormat="dd/MM/yyyy"
-                               Culture="@_fr" Variant="Variant.Outlined" Margin="Margin.Dense"
-                               Style="max-width: 190px;" />
+            <!-- ============ Famille : Versements ============ -->
+            <MudText Typo="Typo.subtitle1" Class="rpt-famille">Versements</MudText>
+            <div class="rpt-cartes">
+                <div class="rpt-carte @(_selected == RapportId.ParEleve ? "rpt-carte-active" : "")"
+                     @onclick="@(() => Selectionner(RapportId.ParEleve))">
+                    <MudIcon Icon="@Icons.Material.Filled.PictureAsPdf" Color="Color.Primary" Size="Size.Large" />
+                    <div class="rpt-carte-titre">Par élève</div>
+                    <div class="rpt-carte-desc">Un élève par ligne, groupé par niveau (montant, dû, payé, reste).</div>
+                </div>
+
+                <div class="rpt-carte @(_selected == RapportId.ParClasse ? "rpt-carte-active" : "")"
+                     @onclick="@(() => Selectionner(RapportId.ParClasse))">
+                    <MudIcon Icon="@Icons.Material.Filled.TableChart" Color="Color.Secondary" Size="Size.Large" />
+                    <div class="rpt-carte-titre">Par classe</div>
+                    <div class="rpt-carte-desc">Synthèse par classe + totaux et taux de recouvrement (camembert).</div>
+                </div>
             </div>
 
-            <div class="d-flex gap-3 flex-wrap">
-                <MudButton Variant="Variant.Filled" Color="Color.Primary"
-                           StartIcon="@Icons.Material.Filled.PictureAsPdf"
-                           Disabled="_enCours" OnClick="GenererMensuelAsync">
-                    Rapport par élève
-                </MudButton>
-                <MudButton Variant="Variant.Filled" Color="Color.Secondary"
-                           StartIcon="@Icons.Material.Filled.TableChart"
-                           Disabled="_enCours" OnClick="GenererParClasseAsync">
-                    Rapport par classe
-                </MudButton>
+            <!-- ============ Familles à venir (extensible) ============ -->
+            <MudText Typo="Typo.subtitle1" Class="rpt-famille">Autres familles (à venir)</MudText>
+            <div class="rpt-cartes">
+                <div class="rpt-carte rpt-carte-disabled">
+                    <MudIcon Icon="@Icons.Material.Filled.TrendingDown" Size="Size.Large" />
+                    <div class="rpt-carte-titre">Recouvrement</div>
+                    <div class="rpt-carte-desc">Élèves en retard, taux par classe…</div>
+                </div>
+                <div class="rpt-carte rpt-carte-disabled">
+                    <MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Large" />
+                    <div class="rpt-carte-titre">Effectifs</div>
+                    <div class="rpt-carte-desc">Par niveau, par sexe…</div>
+                </div>
+                <div class="rpt-carte rpt-carte-disabled">
+                    <MudIcon Icon="@Icons.Material.Filled.PointOfSale" Size="Size.Large" />
+                    <div class="rpt-carte-titre">Caisse</div>
+                    <div class="rpt-carte-desc">Arrêté de caisse, journal…</div>
+                </div>
             </div>
 
-            @if (_enCours)
+            <!-- ============ Panneau de configuration du rapport choisi ============ -->
+            @if (_selected is not null)
             {
-                <MudProgressLinear Indeterminate="true" Color="Color.Primary" Class="mt-4" />
+                <MudPaper Elevation="2" Class="rpt-config mt-4 pa-4">
+                    <MudText Typo="Typo.subtitle1" Class="mb-3">
+                        <b>@TitreRapport(_selected.Value)</b> — période
+                    </MudText>
+
+                    <div class="d-flex align-end gap-4 flex-wrap mb-4">
+                        <MudDatePicker Label="Du" @bind-Date="_debut" DateFormat="dd/MM/yyyy"
+                                       Editable="true" ImmediateText="true"
+                                       Culture="@_fr" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                       Style="max-width: 190px;" />
+                        <MudDatePicker Label="Au" @bind-Date="_fin" DateFormat="dd/MM/yyyy"
+                                       Editable="true" ImmediateText="true"
+                                       Culture="@_fr" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                       Style="max-width: 190px;" />
+                        <MudButton Variant="Variant.Filled" Color="Color.Primary"
+                                   StartIcon="@Icons.Material.Filled.PictureAsPdf"
+                                   Disabled="_enCours" OnClick="GenererAsync">
+                            Générer le PDF
+                        </MudButton>
+                    </div>
+
+                    @if (_enCours)
+                    {
+                        <MudProgressLinear Indeterminate="true" Color="Color.Primary" />
+                    }
+                </MudPaper>
             }
         </div>
     </div>
@@ -54,6 +96,10 @@
 
 @code {
     private static readonly CultureInfo _fr = CultureInfo.GetCultureInfo("fr-FR");
+
+    private enum RapportId { ParEleve, ParClasse }
+
+    private RapportId? _selected;
 
     private string _annee = "—";
     private string _nomEcole = string.Empty;
@@ -65,14 +111,21 @@
 
     private bool _enCours;
 
+    private void Selectionner(RapportId id) => _selected = id;
+
+    private static string TitreRapport(RapportId id) => id switch
+    {
+        RapportId.ParEleve => "Versements par élève",
+        RapportId.ParClasse => "Versements par classe",
+        _ => string.Empty
+    };
+
     protected override async Task OnInitializedAsync()
     {
-        // Année scolaire en cours (bandeau + en-tête PDF).
         var annee = await _anneeScolaireService.GetAnneeEnCoursAsync();
         if (annee.IsSuccessful && annee.Data is not null)
             _annee = annee.Data.Libelle;
 
-        // École active (claim "school") : nom / logo / ville pour l'en-tête officiel.
         var user = await _applicationStateProvider.GetAuthenticationStateProviderUserAsync();
         var codeEts = user.FindFirst("school")?.Value;
         if (!string.IsNullOrWhiteSpace(codeEts))
@@ -88,15 +141,10 @@
         }
     }
 
-    private Task GenererMensuelAsync()
-        => GenererAsync((d, f, e, l, v, a) => _rapportService.GetRapportMensuelPdfAsync(d, f, e, l, v, a), "rapport-mensuel");
-
-    private Task GenererParClasseAsync()
-        => GenererAsync((d, f, e, l, v, a) => _rapportService.GetRapportParClassePdfAsync(d, f, e, l, v, a), "rapport-par-classe");
-
-    private async Task GenererAsync(
-        Func<DateOnly, DateOnly, string, string, string, string, Task<byte[]>> generer, string prefixeFichier)
+    private async Task GenererAsync()
     {
+        if (_selected is null) return;
+
         if (_debut is null || _fin is null)
         {
             _snackbar.Add("Renseigne la période (Du / Au).", Severity.Warning);
@@ -119,14 +167,24 @@
             var debut = DateOnly.FromDateTime(_debut.Value);
             var fin = DateOnly.FromDateTime(_fin.Value);
 
-            var pdf = await generer(debut, fin, _nomEcole, logoBase64, _villeEcole, annee);
+            var (pdf, prefixe) = _selected.Value switch
+            {
+                RapportId.ParEleve => (
+                    await _rapportService.GetRapportMensuelPdfAsync(debut, fin, _nomEcole, logoBase64, _villeEcole, annee),
+                    "rapport-par-eleve"),
+                RapportId.ParClasse => (
+                    await _rapportService.GetRapportParClassePdfAsync(debut, fin, _nomEcole, logoBase64, _villeEcole, annee),
+                    "rapport-par-classe"),
+                _ => (null, "rapport")
+            };
+
             if (pdf is null || pdf.Length == 0)
             {
                 _snackbar.Add("Rapport indisponible pour cette période.", Severity.Error);
                 return;
             }
 
-            var nomFichier = $"{prefixeFichier}-{debut:yyyyMMdd}-{fin:yyyyMMdd}.pdf";
+            var nomFichier = $"{prefixe}-{debut:yyyyMMdd}-{fin:yyyyMMdd}.pdf";
             await _js.InvokeVoidAsync("trajanTelechargerFichier",
                 nomFichier, Convert.ToBase64String(pdf), "application/pdf");
         }

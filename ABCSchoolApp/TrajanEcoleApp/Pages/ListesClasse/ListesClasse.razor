@@ -120,7 +120,7 @@
                 <MudTh Style="width:150px">Prénoms</MudTh>
                 <MudTh Style="width:56px">Cycle</MudTh>
                 <MudTh Style="width:72px">Niveau</MudTh>
-                <MudTh Style="width:78px">Classe</MudTh>
+                <MudTh Style="width:88px">Classe</MudTh>
                 <MudTh Style="width:60px">Série</MudTh>
                 <MudTh Style="width:74px">Statut</MudTh>
                 <MudTh Style="width:50px; text-align:center">Sexe</MudTh>
@@ -181,7 +181,7 @@
                     <MudSelect T="string" Value="@context.Classe"
                                ValueChanged="@(v => OnClasseChanged(context, v))"
                                Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
-                               Class="acc-cell-select">
+                               Class="acc-cell-select acc-cell-classe">
                         @foreach (var cl in ClassesPour(context.Niveau))
                         {
                             <MudSelectItem Value="@cl.Libelle">@cl.Libelle</MudSelectItem>
