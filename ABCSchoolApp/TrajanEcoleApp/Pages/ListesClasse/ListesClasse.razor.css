@@ -41,7 +41,7 @@
     display: flex;
     flex-wrap: wrap;
     align-items: flex-end;
-    gap: 8px 14px;
+    gap: 2px 14px;   /* row-gap resserré : la 2e ligne (Matricule/N° Inscr) colle au-dessus */
     background: #cfd9df;
     border: 1px solid #9fb0bb;
     border-radius: 4px;
@@ -52,7 +52,16 @@
 .acc-fgroup {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0;            /* contrôle collé sous son label (rapproché) */
+}
+
+/* 2e ligne de filtres (Matricule + N° Inscr) : conteneur pleine largeur => passe sous la
+   1re ligne, aligné à gauche, sans consommer de row-gap supplémentaire. */
+.lc-row2 {
+    flex-basis: 100%;
+    display: flex;
+    gap: 0 14px;
+    align-items: flex-end;
 }
 
 .acc-flabel {
@@ -380,7 +389,7 @@
 
 .lc-field {
     display: flex;
-    gap: 8px;
+    gap: 4px;                 /* valeur rapprochée du label (était 8px) */
     align-items: baseline;
     border-bottom: 1px dotted #b9c6ce;
     padding: 1px 0;
@@ -392,7 +401,7 @@
 }
 
 .lc-field span {
-    flex: 0 0 84px;
+    flex: 0 0 62px;           /* largeur du label réduite (était 84px) → valeur plus près */
     color: #5a748a;
 }
 

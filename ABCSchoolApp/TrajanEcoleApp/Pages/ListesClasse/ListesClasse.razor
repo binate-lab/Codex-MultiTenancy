@@ -28,18 +28,6 @@
              par défaut (comme Échéancier), sans tronquer — scopé pour ne pas toucher /scolarites. -->
         <div class="acc-filterbar lc-filtres">
             <div class="acc-fgroup">
-                <label class="acc-flabel">Matricule :</label>
-                <MudTextField Value="_fMatricule" ValueChanged="OnFiltreMatriculeChanged" T="string"
-                              Immediate="true" Clearable="true"
-                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield" />
-            </div>
-            <div class="acc-fgroup">
-                <label class="acc-flabel">N° Inscr. :</label>
-                <MudTextField Value="_fNumOrdre" ValueChanged="OnFiltreNumOrdreChanged" T="string"
-                              Immediate="true" Clearable="true" Placeholder="N°…"
-                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow" />
-            </div>
-            <div class="acc-fgroup">
                 <label class="acc-flabel">Cycle :</label>
                 <MudSelect Value="_fCycleId" ValueChanged="OnFiltreCycleChanged" T="string" Clearable="true" Dense="true"
                            Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
@@ -54,7 +42,7 @@
                 <label class="acc-flabel">Niveau :</label>
                 @* Cascade : ne montre que les niveaux du cycle filtré (tous si aucun cycle). *@
                 <MudSelect Value="_fNiveau" ValueChanged="OnFiltreNiveauChanged" T="string" Clearable="true" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow lc-fniveau">
                     <MudSelectItem Value="@("")">Tous</MudSelectItem>
                     @foreach (var n in NiveauxFiltre)
                     {
@@ -112,6 +100,23 @@
             </div>
             <MudButton OnClick="Effacer" Variant="Variant.Outlined" Size="Size.Small"
                        StartIcon="@Icons.Material.Filled.FilterAltOff" Class="ml-auto">Effacer</MudButton>
+
+            @* Matricule + N° Inscr sur une 2e ligne pleine largeur (à gauche, en jaune).
+               Conteneur unique => une seule row-gap (au lieu du double gap d'un séparateur). *@
+            <div class="lc-row2">
+                <div class="acc-fgroup">
+                    <label class="acc-flabel">Matricule :</label>
+                    <MudTextField Value="_fMatricule" ValueChanged="OnFiltreMatriculeChanged" T="string"
+                                  Immediate="true" Clearable="true"
+                                  Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-yellow" />
+                </div>
+                <div class="acc-fgroup">
+                    <label class="acc-flabel">N° Inscr. :</label>
+                    <MudTextField Value="_fNumOrdre" ValueChanged="OnFiltreNumOrdreChanged" T="string"
+                                  Immediate="true" Clearable="true" Placeholder="N°…"
+                                  Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow acc-yellow" />
+                </div>
+            </div>
         </div>
 
         <!-- ============ Grille (gauche) + Fiche Élève (droite), côte à côte ============ -->
