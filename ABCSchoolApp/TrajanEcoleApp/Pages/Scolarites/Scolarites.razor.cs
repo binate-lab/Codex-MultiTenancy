@@ -92,8 +92,8 @@ namespace TrajanEcoleApp.Pages.Scolarites
         private string _fNiveau = string.Empty;   // "" = tous
         private string _fClasse = string.Empty;
         private string _fStatut = "Tous";
-        private string _fInscrit = "Non";   // par défaut : les NON inscrits
-        private string _fActif = "Non";     // par défaut : les NON actifs
+        private string _fInscrit = "Tous";   // par défaut : tous (inscrits ou non)
+        private string _fActif = "Tous";     // par défaut : tous (actifs ou non)
         private string _fTransport = "Tous";   // Tous / Oui (a une zone) / Non
         private string _fCodeParent = string.Empty;
 
@@ -220,7 +220,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
         {
             _fNumOrdre = _fNom = _fPrenoms = _fMatricule = _fNiveau = _fClasse = _fCodeParent = string.Empty;
             _fStatut = _fTransport = "Tous";
-            _fInscrit = _fActif = "Non";   // on revient au défaut (non inscrits + non actifs)
+            _fInscrit = _fActif = "Tous";   // on revient au défaut (tous)
         }
 
         private void Fermer() => _navigation.NavigateTo("/ecole");
