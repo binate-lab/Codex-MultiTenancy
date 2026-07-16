@@ -6,6 +6,7 @@ using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MudBlazor;
 using TrajanEcole.Shared.Library.Helpers;
+using TrajanEcoleApp.Components;
 
 namespace TrajanEcoleApp.Pages.Scolarites
 {
@@ -287,15 +288,20 @@ namespace TrajanEcoleApp.Pages.Scolarites
             var ancienneClasse = row.Classe;
             if (nouveau == ancienNiveau) return;
 
-            // Confirmation explicite : « Non » par défaut — seul un clic sur « Oui » déclenche
-            // le changement (Non, Échap ou clic hors dialogue = annulation). Le changement de
-            // niveau touche les frais/l'échéancier, on ne le fait pas par erreur de saisie.
-            var confirme = await _dialogService.ShowMessageBox(
-                "Changement de niveau",
-                $"Vous décidez de changer {row.Nom} {row.Prenoms} de niveau ?",
-                yesText: "Oui", noText: "Non");
+            // Confirmation explicite via un dialogue dont le bouton « Non » est FOCALISÉ par
+            // défaut : seul un clic (ou Entrée/Espace) sur « Oui » déclenche le changement ;
+            // Non, Échap ou clic hors dialogue = annulation. Le changement de niveau touche les
+            // frais/l'échéancier, on ne le fait pas par erreur de saisie.
+            var parameters = new DialogParameters
+            {
+                { nameof(ConfirmerChangementNiveau.Nom), row.Nom },
+                { nameof(ConfirmerChangementNiveau.Prenoms), row.Prenoms },
+            };
+            var options = new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, BackdropClick = false };
+            var dialog = await _dialogService.ShowAsync<ConfirmerChangementNiveau>(null, parameters, options);
+            var result = await dialog.Result;
 
-            if (confirme != true)
+            if (result is null || result.Canceled)
             {
                 // Annulation : la cellule (liée à row.Niveau) revient à l'ancien niveau au
                 // re-render. On ne touche à rien.
