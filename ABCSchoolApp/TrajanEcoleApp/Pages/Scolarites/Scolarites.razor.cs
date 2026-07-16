@@ -287,20 +287,41 @@ namespace TrajanEcoleApp.Pages.Scolarites
             var ancienneClasse = row.Classe;
             if (nouveau == ancienNiveau) return;
 
-            row.Niveau = nouveau;
-            // Le changement de niveau invalide une classe qui n'appartient pas au niveau.
-            if (!ClassesPour(nouveau).Any(c => c.Libelle == row.Classe))
+            // Confirmation explicite : « Non » par défaut — seul un clic sur « Oui » déclenche
+            // le changement (Non, Échap ou clic hors dialogue = annulation). Le changement de
+            // niveau touche les frais/l'échéancier, on ne le fait pas par erreur de saisie.
+            var confirme = await _dialogService.ShowMessageBox(
+                "Changement de niveau",
+                $"Vous décidez de changer {row.Nom} {row.Prenoms} de niveau ?",
+                yesText: "Oui", noText: "Non");
+
+            if (confirme != true)
             {
-                row.Classe = string.Empty;
+                // Annulation : la cellule (liée à row.Niveau) revient à l'ancien niveau au
+                // re-render. On ne touche à rien.
+                StateHasChanged();
+                return;
             }
 
+            // Le changement de niveau VIDE toujours la classe (la classe appartient au niveau).
+            // La classe vide est propagée à Pedagogie via EleveScolariteModifieeEvent : c'est à
+            // l'humain de repositionner la classe dans la Liste de classe (Pédagogie).
+            row.Niveau = nouveau;
+            row.Classe = string.Empty;
+
             var ok = await _scolariteEleveService.MajClasseNiveauAsync(
-                row.Id, nouveau ?? string.Empty, row.Classe ?? string.Empty);
+                row.Id, nouveau ?? string.Empty, string.Empty);
             if (!ok)
             {
                 row.Niveau = ancienNiveau;
                 row.Classe = ancienneClasse;
                 _snackbar.Add("Impossible d'enregistrer le niveau.", Severity.Error);
+            }
+            else
+            {
+                _snackbar.Add(
+                    $"Niveau de {row.Nom} {row.Prenoms} changé en {nouveau}. Classe à repositionner dans la Liste de classe.",
+                    Severity.Success);
             }
         }
 
