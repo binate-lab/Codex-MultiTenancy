@@ -33,6 +33,16 @@
             min-height: 30px !important;
         }
 
+        /* Liste de classe (.lc-filtres) : filtres alignés sur l'aspect de la page Échéancier
+           — typo MudBlazor par défaut (16px) pour NE PAS tronquer les libellés, à largeur
+           110px identique. Spécificité 0,4,0 (> .acc-ffield 0,3,0) + définie après : l'emporte.
+           Scopé à .lc-filtres → n'affecte PAS les filtres de /scolarites (qui partagent .acc-ffield). */
+        .acc-window .lc-filtres .acc-ffield input,
+        .acc-window .lc-filtres .acc-ffield .mud-input-slot,
+        .acc-window .lc-filtres .acc-ffield .mud-select-input {
+            font-size: 16px !important;
+        }
+
         /* Filtre Nom affiché en MAJUSCULES (la valeur reste inchangée, la recherche est
            déjà insensible à la casse). */
         .acc-window .acc-fmaj input {

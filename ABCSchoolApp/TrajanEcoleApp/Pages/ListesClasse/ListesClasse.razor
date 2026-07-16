@@ -24,7 +24,9 @@
         </div>
 
         <!-- ============ Barre de filtres (cascade Cycle -> Niveau -> Classe) ============ -->
-        <div class="acc-filterbar">
+        <!-- lc-filtres : marqueur de page pour ramener la typo des filtres à la taille MudBlazor
+             par défaut (comme Échéancier), sans tronquer — scopé pour ne pas toucher /scolarites. -->
+        <div class="acc-filterbar lc-filtres">
             <div class="acc-fgroup">
                 <label class="acc-flabel">Matricule :</label>
                 <MudTextField Value="_fMatricule" ValueChanged="OnFiltreMatriculeChanged" T="string"
