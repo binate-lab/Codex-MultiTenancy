@@ -26,6 +26,18 @@
         <!-- ============ Barre de filtres (cascade Cycle -> Niveau -> Classe) ============ -->
         <div class="acc-filterbar">
             <div class="acc-fgroup">
+                <label class="acc-flabel">Matricule :</label>
+                <MudTextField Value="_fMatricule" ValueChanged="OnFiltreMatriculeChanged" T="string"
+                              Immediate="true" Clearable="true"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield" />
+            </div>
+            <div class="acc-fgroup">
+                <label class="acc-flabel">N° Inscr. :</label>
+                <MudTextField Value="_fNumOrdre" ValueChanged="OnFiltreNumOrdreChanged" T="string"
+                              Immediate="true" Clearable="true" Placeholder="N°…"
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow" />
+            </div>
+            <div class="acc-fgroup">
                 <label class="acc-flabel">Cycle :</label>
                 <MudSelect Value="_fCycleId" ValueChanged="OnFiltreCycleChanged" T="string" Clearable="true" Dense="true"
                            Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
