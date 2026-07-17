@@ -141,6 +141,32 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
+        public async Task<bool> MajLv2Async(Guid eleveId, string lv2)
+        {
+            try
+            {
+                var resp = await _httpClient.PutAsJsonAsync($"eleves/{eleveId}/lv2", new { lv2 });
+                return resp.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> MajArtsAsync(Guid eleveId, string arts)
+        {
+            try
+            {
+                var resp = await _httpClient.PutAsJsonAsync($"eleves/{eleveId}/arts", new { arts });
+                return resp.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public async Task<RegenererMatriculesResult> RegenererMatriculesAsync(bool complet)
         {
             try

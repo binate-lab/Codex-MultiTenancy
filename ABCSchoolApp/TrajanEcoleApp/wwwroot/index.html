@@ -138,6 +138,13 @@
             padding-left: 10px !important;
             padding-right: 10px !important;
         }
+        /* Colonnes LV2 / Arts : padding horizontal réduit à 1px pour élargir la zone utile de
+           la déroulante. Cible data-col => n'affecte que ces cellules (les en-têtes gardent 10px). */
+        .acc-window .acc-grid-eleves td[data-col="LV_2"],
+        .acc-window .acc-grid-eleves td[data-col="Arts"] {
+            padding-left: 1px !important;
+            padding-right: 1px !important;
+        }
         .acc-window .acc-grid-eleves td input,
         .acc-window .acc-grid-eleves td .mud-input-slot,
         .acc-window .acc-grid-eleves td .mud-select-input {

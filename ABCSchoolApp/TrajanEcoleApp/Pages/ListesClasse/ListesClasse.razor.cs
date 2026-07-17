@@ -127,7 +127,8 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 StatutLibelle(e.Statut), e.Sexe, e.DateNaissance, e.LieuNaissance,
                 e.Nationalite, e.Telephone, e.IsInscrit, e.IsActif, e.ImageFile,
                 e.Tuteur?.Nom ?? string.Empty, e.Tuteur?.Prenom ?? string.Empty,
-                e.Tuteur?.Telephone1 ?? string.Empty, e.Tuteur?.Telephone2 ?? string.Empty)).ToList();
+                e.Tuteur?.Telephone1 ?? string.Empty, e.Tuteur?.Telephone2 ?? string.Empty,
+                e.LV_2 ?? string.Empty, e.Arts ?? string.Empty)).ToList();
         }
 
         // Corrige en masse les clés de contrôle des matricules de l'école (garde les chiffres).
@@ -389,6 +390,34 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             }
         }
 
+        // LV2 / Arts : déroulantes éditables (toutes écoles, aucun impact échéancier), persistées
+        // directement sur dbo.Eleves. Rollback de la cellule si l'appel échoue.
+        private async Task OnLv2Changed(EleveRow row, string nouveau)
+        {
+            var ancien = row.LV_2;
+            if (nouveau == ancien) return;
+
+            row.LV_2 = nouveau;
+            if (!await _eleveService.MajLv2Async(row.Id, nouveau ?? string.Empty))
+            {
+                row.LV_2 = ancien;
+                _snackbar.Add("Impossible d'enregistrer la LV2.", Severity.Error);
+            }
+        }
+
+        private async Task OnArtsChanged(EleveRow row, string nouveau)
+        {
+            var ancien = row.Arts;
+            if (nouveau == ancien) return;
+
+            row.Arts = nouveau;
+            if (!await _eleveService.MajArtsAsync(row.Id, nouveau ?? string.Empty))
+            {
+                row.Arts = ancien;
+                _snackbar.Add("Impossible d'enregistrer les Arts.", Severity.Error);
+            }
+        }
+
         // ---- Cycle / Niveau (éditables seulement en école publique) ----
 
         // Cycle du référentiel par son n° ; niveaux (codes) d'un cycle ; cycle d'un niveau.
@@ -616,6 +645,13 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                     if (ClassesPour(cible.Niveau).Any(c => c.Libelle == source.Classe))
                         await OnClasseChanged(cible, source.Classe);
                     break;
+                // LV2 / Arts : éditables pour toutes les écoles, donc toujours copiables.
+                case "LV_2":
+                    await OnLv2Changed(cible, source.LV_2);
+                    break;
+                case "Arts":
+                    await OnArtsChanged(cible, source.Arts);
+                    break;
             }
 
             StateHasChanged();
@@ -649,13 +685,16 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             public string TuteurPrenom { get; set; }
             public string TuteurTel1 { get; set; }   // tél.
             public string TuteurTel2 { get; set; }   // WhatsApp
+            public string LV_2 { get; set; }         // langue vivante 2 (Allemand / Espagnol), éditable
+            public string Arts { get; set; }         // Arts Plastiques / Musique, éditable
 
             public EleveRow(
                 Guid id, int numOrdre, string matricule, string nom, string prenoms,
                 int cycle, string niveau, string serie, string classe,
                 string statut, string sexe, DateTime? dateNaissance, string lieuNaissance,
                 string nationalite, string telephone, bool inscrit, bool actif, string imageFile,
-                string tuteurNom, string tuteurPrenom, string tuteurTel1, string tuteurTel2)
+                string tuteurNom, string tuteurPrenom, string tuteurTel1, string tuteurTel2,
+                string lv2, string arts)
             {
                 Id = id;
                 NumOrdre = numOrdre;
@@ -679,6 +718,8 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 TuteurPrenom = tuteurPrenom;
                 TuteurTel1 = tuteurTel1;
                 TuteurTel2 = tuteurTel2;
+                LV_2 = lv2;
+                Arts = arts;
             }
         }
     }

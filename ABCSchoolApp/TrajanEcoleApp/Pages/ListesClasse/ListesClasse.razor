@@ -141,6 +141,8 @@
                 <MudTh Style="width:72px">Niveau</MudTh>
                 <MudTh Style="width:88px">Classe</MudTh>
                 <MudTh Style="width:60px">Série</MudTh>
+                <MudTh Style="width:120px">LV2</MudTh>
+                <MudTh Style="width:140px">Arts</MudTh>
                 <MudTh Style="width:74px">Statut</MudTh>
                 <MudTh Style="width:50px; text-align:center">Sexe</MudTh>
                 <MudTh Style="width:92px">Date naiss.</MudTh>
@@ -208,6 +210,26 @@
                     </MudSelect>
                 </MudTd>
                 <MudTd DataLabel="Série">@context.Serie</MudTd>
+                <MudTd DataLabel="LV2" data-col="LV_2" data-eleve-id="@context.Id">
+                    @* LV2 éditable pour toutes les écoles (aucun impact échéancier) : Allemand / Espagnol. *@
+                    <MudSelect T="string" Value="@context.LV_2"
+                               ValueChanged="@(v => OnLv2Changed(context, v))"
+                               Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                               Clearable="true" Class="acc-cell-select">
+                        <MudSelectItem Value="@("Allemand")">Allemand</MudSelectItem>
+                        <MudSelectItem Value="@("Espagnol")">Espagnol</MudSelectItem>
+                    </MudSelect>
+                </MudTd>
+                <MudTd DataLabel="Arts" data-col="Arts" data-eleve-id="@context.Id">
+                    @* Arts éditable pour toutes les écoles : Arts Plastiques / Musique. *@
+                    <MudSelect T="string" Value="@context.Arts"
+                               ValueChanged="@(v => OnArtsChanged(context, v))"
+                               Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                               Clearable="true" Class="acc-cell-select">
+                        <MudSelectItem Value="@("Arts Plastiques")">Arts Plastiques</MudSelectItem>
+                        <MudSelectItem Value="@("Musique")">Musique</MudSelectItem>
+                    </MudSelect>
+                </MudTd>
                 <MudTd DataLabel="Statut" data-col="Statut" data-eleve-id="@context.Id">
                     @if (_ecolePublique)
                     {
@@ -261,7 +283,7 @@
                 @Filtered.Count() élève(s) affiché(s) — Garçons : @GrilleGarcons · Filles : @GrilleFilles
             </MudText>
             <MudText Typo="Typo.caption" Class="acc-demo-note">
-                Source : Pédagogie (PedagogieDb). Statut / Classe éditables (Ctrl+' = recopie du dessus).
+                Source : Pédagogie (PedagogieDb). Statut / Classe / LV2 / Arts éditables (Ctrl+' = recopie du dessus).
             </MudText>
         </div>
         </div><!-- /lc-grid-col -->

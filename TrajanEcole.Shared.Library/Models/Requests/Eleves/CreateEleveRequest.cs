@@ -38,8 +38,9 @@ namespace TrajanEcole.Shared.Library.Models.Requests.Eleves
         public StatutEleve Statut { get; set; } = StatutEleve.Naff;
         public string Interne { get; set; } = "Non";
         public string Regime { get; set; } = "NB";
-        public string LangueVivante1 { get; set; } = "Anglais";
-        public string LangueVivante2 { get; set; } = "Anglais";
+        public string LV_1 { get; set; } = "Anglais";
+        public string LV_2 { get; set; } = "Anglais";
+        public string Arts { get; set; } = string.Empty;
         public string Serie { get; set; } = "A";
         public string DispenseEps { get; set; } = "Non";
         public DateTime? DateInscription { get; set; } = DateTime.Today;

@@ -29,6 +29,10 @@ namespace App.Infrastructure.Services.Eleves
         // Tuteur (correspondant) : Nom / Prenom / Tel1 (tel) / Tel2 (WhatsApp).
         Task<bool> MajTuteurAsync(Guid eleveId, string nom, string prenom, string telephone1, string telephone2);
 
+        // Langue vivante 2 et Arts : editees en ligne dans la grille (deroulantes).
+        Task<bool> MajLv2Async(Guid eleveId, string lv2);
+        Task<bool> MajArtsAsync(Guid eleveId, string arts);
+
         // Regenere les matricules de l'ecole courante (portee deduite du token cote serveur).
         // complet=false : recalcule les cles de controle (garde les chiffres) ; complet=true :
         // anonymise (chiffres neufs). Ecrit le journal [eleves].[LogsMatricules] cote Pedagogie.
@@ -65,6 +69,8 @@ namespace App.Infrastructure.Services.Eleves
         bool IsActif,
         string Telephone,
         string ImageFile,   // photo de l'élève (data URL / chemin / base64) — souvent vide tant que l'upload n'existe pas
+        string LV_2,        // langue vivante 2 (Allemand / Espagnol) — éditable dans la grille
+        string Arts,        // Arts Plastiques / Musique — éditable dans la grille
         TuteurItem? Tuteur);   // correspondant / tuteur (nom + téléphones)
 
     // Sous-objet tuteur (calque partiel de ParentDto renvoyé par Pedagogie) : ce dont la
