@@ -29,9 +29,18 @@ namespace App.Infrastructure.Services.Eleves
         // Tuteur (correspondant) : Nom / Prenom / Tel1 (tel) / Tel2 (WhatsApp).
         Task<bool> MajTuteurAsync(Guid eleveId, string nom, string prenom, string telephone1, string telephone2);
 
-        // Langue vivante 2 et Arts : editees en ligne dans la grille (deroulantes).
+        // Langue vivante 2, Arts et Red (R/NR) : editees en ligne dans la grille (deroulantes).
         Task<bool> MajLv2Async(Guid eleveId, string lv2);
         Task<bool> MajArtsAsync(Guid eleveId, string arts);
+        Task<bool> MajRedAsync(Guid eleveId, string red);
+
+        // Corrections « Activer colonne » (edition individuelle de colonnes normalement read-only).
+        // Cycle SEUL = sans cascade Niveau/Classe, sans restriction public.
+        Task<bool> MajCycleSeulAsync(Guid eleveId, int cycle);
+        Task<bool> MajDateNaissanceAsync(Guid eleveId, DateTime? dateNaissance);
+        Task<bool> MajLieuNaissanceAsync(Guid eleveId, string lieuNaissance);
+        Task<bool> MajNationaliteAsync(Guid eleveId, string nationalite);
+        Task<bool> MajTelephoneAsync(Guid eleveId, string telephone);
 
         // Operation en masse sur une liste d'eleves (panneau « Go » du bas de la grille).
         // operation ∈ { prenom-minuscule, prenom-majuscule, inscrire, desinscrire, lv2, arts,
@@ -79,6 +88,7 @@ namespace App.Infrastructure.Services.Eleves
         string ImageFile,   // photo de l'élève (data URL / chemin / base64) — souvent vide tant que l'upload n'existe pas
         string LV_2,        // langue vivante 2 (Allemand / Espagnol) — éditable dans la grille
         string Arts,        // Arts Plastiques / Musique — éditable dans la grille
+        string Red,         // R / NR (redoublant) — éditable dans la grille
         TuteurItem? Tuteur);   // correspondant / tuteur (nom + téléphones)
 
     // Sous-objet tuteur (calque partiel de ParentDto renvoyé par Pedagogie) : ce dont la

@@ -141,6 +141,7 @@
                 <MudTh Style="width:72px">Niveau</MudTh>
                 <MudTh Style="width:88px">Classe</MudTh>
                 <MudTh Style="width:60px">Série</MudTh>
+                <MudTh Style="width:64px">Red</MudTh>
                 <MudTh Style="width:120px">LV2</MudTh>
                 <MudTh Style="width:140px">Arts</MudTh>
                 <MudTh Style="width:74px">Statut</MudTh>
@@ -159,8 +160,21 @@
                 <MudTd DataLabel="Nom" Class="acc-cell-nom">@context.Nom</MudTd>
                 <MudTd DataLabel="Prénoms" Class="acc-cell-prenom">@context.Prenoms</MudTd>
                 <MudTd DataLabel="Cycle" data-col="Cycle" data-eleve-id="@context.Id">
-                    @* Éditable seulement en école publique (sinon lecture seule : échéancier). *@
-                    @if (_ecolePublique)
+                    @* « Activer colonne=Cycle » : correction (toutes écoles, SANS cascade). Sinon,
+                       édition publique avec cascade, ou lecture seule en privé. *@
+                    @if (_colonneActive == "cycle")
+                    {
+                        <MudSelect T="int" Value="@context.Cycle"
+                                   ValueChanged="@(v => OnCycleCorrige(context, v))"
+                                   Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                                   Class="acc-cell-select">
+                            @foreach (var c in _cycles)
+                            {
+                                <MudSelectItem Value="@c.Numero">@c.Numero</MudSelectItem>
+                            }
+                        </MudSelect>
+                    }
+                    else if (_ecolePublique)
                     {
                         <MudSelect T="int" Value="@context.Cycle"
                                    ValueChanged="@(v => OnCycleChanged(context, v))"
@@ -210,6 +224,16 @@
                     </MudSelect>
                 </MudTd>
                 <MudTd DataLabel="Série">@context.Serie</MudTd>
+                <MudTd DataLabel="Red" data-col="Red" data-eleve-id="@context.Id">
+                    @* R / NR (redoublant) éditable pour toutes les écoles. *@
+                    <MudSelect T="string" Value="@context.Red"
+                               ValueChanged="@(v => OnRedChanged(context, v))"
+                               Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                               Clearable="true" Class="acc-cell-select">
+                        <MudSelectItem Value="@("R")">R</MudSelectItem>
+                        <MudSelectItem Value="@("NR")">NR</MudSelectItem>
+                    </MudSelect>
+                </MudTd>
                 <MudTd DataLabel="LV2" data-col="LV_2" data-eleve-id="@context.Id">
                     @* LV2 éditable pour toutes les écoles (aucun impact échéancier) : Allemand / Espagnol. *@
                     <MudSelect T="string" Value="@context.LV_2"
@@ -247,10 +271,59 @@
                     }
                 </MudTd>
                 <MudTd DataLabel="Sexe" Style="text-align:center">@context.Sexe</MudTd>
-                <MudTd DataLabel="Date naiss.">@(context.DateNaissance?.ToString("dd/MM/yyyy"))</MudTd>
-                <MudTd DataLabel="Lieu naiss.">@context.LieuNaissance</MudTd>
-                <MudTd DataLabel="Nationalité">@context.Nationalite</MudTd>
-                <MudTd DataLabel="Tél.">@context.Telephone</MudTd>
+                <MudTd DataLabel="Date naiss.">
+                    @if (_colonneActive == "datenaiss")
+                    {
+                        <MudDatePicker Date="@context.DateNaissance"
+                                       DateChanged="@(d => OnDateNaissChanged(context, d))"
+                                       DateFormat="dd/MM/yyyy" Editable="true"
+                                       Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                                       Class="acc-cell-select" />
+                    }
+                    else
+                    {
+                        @(context.DateNaissance?.ToString("dd/MM/yyyy"))
+                    }
+                </MudTd>
+                <MudTd DataLabel="Lieu naiss.">
+                    @if (_colonneActive == "lieunaiss")
+                    {
+                        <MudTextField T="string" Value="@context.LieuNaissance"
+                                      ValueChanged="@((string v) => OnLieuNaissChanged(context, v))"
+                                      Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                                      Class="acc-cell-select" />
+                    }
+                    else
+                    {
+                        @context.LieuNaissance
+                    }
+                </MudTd>
+                <MudTd DataLabel="Nationalité">
+                    @if (_colonneActive == "nationalite")
+                    {
+                        <MudTextField T="string" Value="@context.Nationalite"
+                                      ValueChanged="@((string v) => OnNationaliteChanged(context, v))"
+                                      Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                                      Class="acc-cell-select" />
+                    }
+                    else
+                    {
+                        @context.Nationalite
+                    }
+                </MudTd>
+                <MudTd DataLabel="Tél.">
+                    @if (_colonneActive == "telephone")
+                    {
+                        <MudTextField T="string" Value="@context.Telephone"
+                                      ValueChanged="@((string v) => OnTelephoneChanged(context, v))"
+                                      Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                                      Class="acc-cell-select" />
+                    }
+                    else
+                    {
+                        @context.Telephone
+                    }
+                </MudTd>
                 <MudTd DataLabel="Inscrit" Style="text-align:center">
                     <MudIcon Size="Size.Small"
                              Icon="@(context.Inscrit ? Icons.Material.Filled.CheckBox : Icons.Material.Filled.CheckBoxOutlineBlank)" />
@@ -283,7 +356,7 @@
                 @Filtered.Count() élève(s) affiché(s) — Garçons : @GrilleGarcons · Filles : @GrilleFilles
             </MudText>
             <MudText Typo="Typo.caption" Class="acc-demo-note">
-                Source : Pédagogie (PedagogieDb). Statut / Classe / LV2 / Arts éditables (Ctrl+' = recopie du dessus).
+                Source : Pédagogie (PedagogieDb). Statut / Classe / Red / LV2 / Arts éditables (Ctrl+' = recopie du dessus).
             </MudText>
         </div>
 
@@ -303,6 +376,7 @@
                 <MudSelectItem Value="@("lv2")">Copier LV_2</MudSelectItem>
                 <MudSelectItem Value="@("arts")">Copier Arts</MudSelectItem>
                 <MudSelectItem Value="@("serie")">Copier Série</MudSelectItem>
+                <MudSelectItem Value="@("red")">Copier Red</MudSelectItem>
             </MudSelect>
 
             @if (BulkNeedsValeur)
@@ -333,6 +407,24 @@
             @if (_bulkEnCours)
             {
                 <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="lc-bulk-progress" />
+            }
+        </div>
+
+        @* ===== Activer colonne : rend une colonne normalement read-only éditable pour correction ===== *@
+        <div class="lc-activer">
+            <span class="lc-bulk-label">Activer colonne :</span>
+            <MudSelect T="string" Value="_colonneActive" ValueChanged="OnColonneActiveChanged" Clearable="true"
+                       Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Class="lc-bulk-op"
+                       Style="width:185px" Placeholder="(aucune)">
+                <MudSelectItem Value="@("cycle")">Cycle</MudSelectItem>
+                <MudSelectItem Value="@("datenaiss")">Date naiss</MudSelectItem>
+                <MudSelectItem Value="@("lieunaiss")">Lieu naiss</MudSelectItem>
+                <MudSelectItem Value="@("nationalite")">Nationalité</MudSelectItem>
+                <MudSelectItem Value="@("telephone")">Téléphone</MudSelectItem>
+            </MudSelect>
+            @if (!string.IsNullOrEmpty(_colonneActive))
+            {
+                <span class="lc-activer-hint">← colonne éditable : corrige directement dans la grille.</span>
             }
         </div>
         </div><!-- /lc-grid-col -->

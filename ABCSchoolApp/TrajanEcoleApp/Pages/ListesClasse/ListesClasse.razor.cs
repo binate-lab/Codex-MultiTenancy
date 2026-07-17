@@ -130,7 +130,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 e.Nationalite, e.Telephone, e.IsInscrit, e.IsActif, e.ImageFile,
                 e.Tuteur?.Nom ?? string.Empty, e.Tuteur?.Prenom ?? string.Empty,
                 e.Tuteur?.Telephone1 ?? string.Empty, e.Tuteur?.Telephone2 ?? string.Empty,
-                e.LV_2 ?? string.Empty, e.Arts ?? string.Empty)).ToList();
+                e.LV_2 ?? string.Empty, e.Arts ?? string.Empty, e.Red ?? string.Empty)).ToList();
         }
 
         // Corrige en masse les clés de contrôle des matricules de l'école (garde les chiffres).
@@ -420,12 +420,91 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             }
         }
 
+        private async Task OnRedChanged(EleveRow row, string nouveau)
+        {
+            var ancien = row.Red;
+            if (nouveau == ancien) return;
+
+            row.Red = nouveau;
+            if (!await _eleveService.MajRedAsync(row.Id, nouveau ?? string.Empty))
+            {
+                row.Red = ancien;
+                _snackbar.Add("Impossible d'enregistrer Red.", Severity.Error);
+            }
+        }
+
+        // ---- Corrections « Activer colonne » : édition inline persistée par cellule (rollback si échec) ----
+        // Cycle SEUL : ne touche NI le niveau NI la classe (correction d'incohérence, pas de cascade).
+        private async Task OnCycleCorrige(EleveRow row, int nouveau)
+        {
+            if (nouveau == row.Cycle) return;
+            var ancien = row.Cycle;
+            row.Cycle = nouveau;
+            if (!await _eleveService.MajCycleSeulAsync(row.Id, nouveau))
+            {
+                row.Cycle = ancien;
+                _snackbar.Add("Impossible d'enregistrer le cycle.", Severity.Error);
+            }
+        }
+
+        private async Task OnDateNaissChanged(EleveRow row, DateTime? nouvelle)
+        {
+            if (nouvelle == row.DateNaissance) return;
+            var ancienne = row.DateNaissance;
+            row.DateNaissance = nouvelle;
+            if (!await _eleveService.MajDateNaissanceAsync(row.Id, nouvelle))
+            {
+                row.DateNaissance = ancienne;
+                _snackbar.Add("Impossible d'enregistrer la date de naissance.", Severity.Error);
+            }
+        }
+
+        private async Task OnLieuNaissChanged(EleveRow row, string nouveau)
+        {
+            if (nouveau == row.LieuNaissance) return;
+            var ancien = row.LieuNaissance;
+            row.LieuNaissance = nouveau;
+            if (!await _eleveService.MajLieuNaissanceAsync(row.Id, nouveau ?? string.Empty))
+            {
+                row.LieuNaissance = ancien;
+                _snackbar.Add("Impossible d'enregistrer le lieu de naissance.", Severity.Error);
+            }
+        }
+
+        private async Task OnNationaliteChanged(EleveRow row, string nouveau)
+        {
+            if (nouveau == row.Nationalite) return;
+            var ancien = row.Nationalite;
+            row.Nationalite = nouveau;
+            if (!await _eleveService.MajNationaliteAsync(row.Id, nouveau ?? string.Empty))
+            {
+                row.Nationalite = ancien;
+                _snackbar.Add("Impossible d'enregistrer la nationalité.", Severity.Error);
+            }
+        }
+
+        private async Task OnTelephoneChanged(EleveRow row, string nouveau)
+        {
+            if (nouveau == row.Telephone) return;
+            var ancien = row.Telephone;
+            row.Telephone = nouveau;
+            if (!await _eleveService.MajTelephoneAsync(row.Id, nouveau ?? string.Empty))
+            {
+                row.Telephone = ancien;
+                _snackbar.Add("Impossible d'enregistrer le téléphone.", Severity.Error);
+            }
+        }
+
         // ================== Opérations en masse (panneau « Go » du bas de grille) ==================
         // Agit sur les élèves ACTUELLEMENT filtrés (Filtered). Persisté côté Pédagogie en une
         // transaction (PUT /eleves/operations), puis rechargement de la grille.
         private string _bulkOp = string.Empty;      // opération choisie (clé)
         private string _bulkValeur = string.Empty;  // valeur pour Copier LV_2 / Arts / Série
         private bool _bulkEnCours;                   // désactive « Go » pendant l'appel
+
+        // Colonne « activée » pour édition inline de correction ("" = aucune → colonnes read-only).
+        private string _colonneActive = string.Empty;
+        private void OnColonneActiveChanged(string col) => _colonneActive = col ?? string.Empty;
 
         // Option « vider la colonne » : sentinel affiché (≠ chaîne vide, sinon la garde « valeur
         // obligatoire » la refuserait) ; converti en "" au moment de l'envoi.
@@ -434,15 +513,17 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private static readonly string[] OptionsLv2 = { "Allemand", "Espagnol", ValeurVide };
         private static readonly string[] OptionsArts = { "Arts Plastiques", "Musique", ValeurVide };
         private static readonly string[] OptionsSerie = { "A", "A1", "A2", "C", "D", "x" };
+        private static readonly string[] OptionsRed = { "R", "NR" };
 
         // Les opérations « Copier … » exigent une valeur (2e déroulante).
-        private bool BulkNeedsValeur => _bulkOp is "lv2" or "arts" or "serie";
+        private bool BulkNeedsValeur => _bulkOp is "lv2" or "arts" or "serie" or "red";
 
         private IEnumerable<string> BulkValeurOptions => _bulkOp switch
         {
             "lv2" => OptionsLv2,
             "arts" => OptionsArts,
             "serie" => OptionsSerie,
+            "red" => OptionsRed,
             _ => Enumerable.Empty<string>(),
         };
 
@@ -463,6 +544,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             "lv2" => $"Copier LV_2 = « {_bulkValeur} »",
             "arts" => $"Copier Arts = « {_bulkValeur} »",
             "serie" => $"Copier Série = « {_bulkValeur} »",
+            "red" => $"Copier Red = « {_bulkValeur} »",
             _ => op,
         };
 
@@ -764,6 +846,9 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 case "Arts":
                     await OnArtsChanged(cible, source.Arts);
                     break;
+                case "Red":
+                    await OnRedChanged(cible, source.Red);
+                    break;
             }
 
             StateHasChanged();
@@ -786,10 +871,10 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             public string Classe { get; set; }
             public string Statut { get; set; }
             public string Sexe { get; }
-            public DateTime? DateNaissance { get; }
-            public string LieuNaissance { get; }
-            public string Nationalite { get; }
-            public string Telephone { get; }
+            public DateTime? DateNaissance { get; set; }
+            public string LieuNaissance { get; set; }
+            public string Nationalite { get; set; }
+            public string Telephone { get; set; }
             public bool Inscrit { get; }
             public bool Actif { get; }
             public string ImageFile { get; set; }   // photo de l'élève (base64 data URL), éditable via upload
@@ -799,6 +884,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             public string TuteurTel2 { get; set; }   // WhatsApp
             public string LV_2 { get; set; }         // langue vivante 2 (Allemand / Espagnol), éditable
             public string Arts { get; set; }         // Arts Plastiques / Musique, éditable
+            public string Red { get; set; }          // R / NR (redoublant), éditable
 
             public EleveRow(
                 Guid id, int numOrdre, string matricule, string nom, string prenoms,
@@ -806,7 +892,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 string statut, string sexe, DateTime? dateNaissance, string lieuNaissance,
                 string nationalite, string telephone, bool inscrit, bool actif, string imageFile,
                 string tuteurNom, string tuteurPrenom, string tuteurTel1, string tuteurTel2,
-                string lv2, string arts)
+                string lv2, string arts, string red)
             {
                 Id = id;
                 NumOrdre = numOrdre;
@@ -832,6 +918,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 TuteurTel2 = tuteurTel2;
                 LV_2 = lv2;
                 Arts = arts;
+                Red = red;
             }
         }
     }

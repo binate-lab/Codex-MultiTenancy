@@ -167,6 +167,49 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
+        public async Task<bool> MajRedAsync(Guid eleveId, string red)
+        {
+            try
+            {
+                var resp = await _httpClient.PutAsJsonAsync($"eleves/{eleveId}/red", new { red });
+                return resp.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> MajCycleSeulAsync(Guid eleveId, int cycle)
+        {
+            try { var r = await _httpClient.PutAsJsonAsync($"eleves/{eleveId}/cycle", new { cycle }); return r.IsSuccessStatusCode; }
+            catch { return false; }
+        }
+
+        public async Task<bool> MajDateNaissanceAsync(Guid eleveId, DateTime? dateNaissance)
+        {
+            try { var r = await _httpClient.PutAsJsonAsync($"eleves/{eleveId}/date-naissance", new { dateNaissance }); return r.IsSuccessStatusCode; }
+            catch { return false; }
+        }
+
+        public async Task<bool> MajLieuNaissanceAsync(Guid eleveId, string lieuNaissance)
+        {
+            try { var r = await _httpClient.PutAsJsonAsync($"eleves/{eleveId}/lieu-naissance", new { lieuNaissance }); return r.IsSuccessStatusCode; }
+            catch { return false; }
+        }
+
+        public async Task<bool> MajNationaliteAsync(Guid eleveId, string nationalite)
+        {
+            try { var r = await _httpClient.PutAsJsonAsync($"eleves/{eleveId}/nationalite", new { nationalite }); return r.IsSuccessStatusCode; }
+            catch { return false; }
+        }
+
+        public async Task<bool> MajTelephoneAsync(Guid eleveId, string telephone)
+        {
+            try { var r = await _httpClient.PutAsJsonAsync($"eleves/{eleveId}/telephone", new { telephone }); return r.IsSuccessStatusCode; }
+            catch { return false; }
+        }
+
         public async Task<OperationEnMasseResult> OperationsEnMasseAsync(
             IReadOnlyList<Guid> ids, string operation, string? valeur)
         {
