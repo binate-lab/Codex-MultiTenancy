@@ -495,10 +495,24 @@ namespace TrajanEcoleApp.Pages.Scolarites
             _vEnEdition = null;
         }
 
-        // Clic sur « Modifier » d'une ligne du détail : charge ses valeurs dans le sous-form
-        // et bascule en mode modification (le bouton Valider fera un PUT).
-        private void EditerVersement(VersementDetailItem v)
+        // Clic sur « Modifier » d'une ligne du détail : confirmation, puis charge ses valeurs
+        // dans le sous-form et bascule en mode modification (le bouton Valider fera un PUT).
+        private async Task EditerVersement(VersementDetailItem v)
         {
+            if (_sel is null) return;
+
+            var parameters = new DialogParameters
+            {
+                { nameof(ConfirmerAction.Titre), "Modifier le versement" },
+                { nameof(ConfirmerAction.Message),
+                    $"Vous allez modifier le versement de {Fmt(v.Montant)} "
+                    + $"de {_sel.Nom} {_sel.Prenoms} (N° Inscr. {_sel.NumOrdre})." },
+            };
+            var options = new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, BackdropClick = false };
+            var dialog = await _dialogService.ShowAsync<ConfirmerAction>(null, parameters, options);
+            var result = await dialog.Result;
+            if (result is null || result.Canceled) return;
+
             _vEnEdition = v.Id;
             _vMontant = v.Montant;
             _vDate = v.DateVersement;
@@ -561,9 +575,17 @@ namespace TrajanEcoleApp.Pages.Scolarites
         {
             if (_sel is null) return;
 
-            var ok = await _js.InvokeAsync<bool>("confirm",
-                $"Supprimer définitivement ce versement de {Fmt(v.Montant)} du {v.DateVersement:dd/MM/yyyy} ?");
-            if (!ok) return;
+            var parameters = new DialogParameters
+            {
+                { nameof(ConfirmerAction.Titre), "Supprimer le versement" },
+                { nameof(ConfirmerAction.Message),
+                    $"Voulez-vous supprimer le versement de {Fmt(v.Montant)} "
+                    + $"de {_sel.Nom} {_sel.Prenoms} (N° Inscr. {_sel.NumOrdre}) ?" },
+            };
+            var options = new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, BackdropClick = false };
+            var dialog = await _dialogService.ShowAsync<ConfirmerAction>(null, parameters, options);
+            var confirmation = await dialog.Result;
+            if (confirmation is null || confirmation.Canceled) return;
 
             _vEnCours = true;
             try

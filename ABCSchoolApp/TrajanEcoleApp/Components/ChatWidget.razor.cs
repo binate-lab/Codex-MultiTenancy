@@ -30,13 +30,13 @@ namespace TrajanEcoleApp.Components
 
         // Style de la bulle (bouton rond) : ancree dans le conteneur, ou flottante a droite.
         private string StyleBouton => Anchored
-            ? "position: absolute; bottom: 12px; left: 12px;"
+            ? "position: absolute; bottom: 40px; left: 12px;"
             : "position: fixed; bottom: 24px; right: 24px;";
 
         // Style du panneau ouvert : ancre au-dessus de la bulle (peut deborder a droite,
         // z-index eleve), ou flottant a droite comme avant.
         private string StylePanneau => Anchored
-            ? "position: absolute; bottom: 80px; left: 12px; width: 360px; max-width: calc(100vw - 32px); height: 460px; max-height: 68vh;"
+            ? "position: absolute; bottom: 108px; left: 12px; width: 360px; max-width: calc(100vw - 32px); height: 460px; max-height: 68vh;"
             : "position: fixed; bottom: 90px; right: 24px; width: 360px; max-width: calc(100vw - 32px); height: 520px; max-height: calc(100vh - 130px);";
 
         // La bulle vit dans le layout (montee une fois) : on re-rend a chaque navigation
