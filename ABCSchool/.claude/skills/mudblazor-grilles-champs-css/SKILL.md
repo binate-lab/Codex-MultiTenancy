@@ -374,6 +374,29 @@ données. Rappel de cascade quand deux règles `!important` de même spécificit
 `index.html`, le `<style>` inline est placé APRÈS le `<link>` du bundle scopé
 `TrajanEcoleApp.styles.css` → la globale l'emporte.
 
+### Hauteur d'un champ = défaut MudBlazor tant qu'on ne la fixe pas
+
+Un `MudSelect` / `MudTextField` / `MudNumericField` sur lequel on n'a mis QUE
+`Margin="Margin.Dense"` + `Variant="Variant.Outlined"` (+ éventuellement une largeur et une
+police) **prend la hauteur PAR DÉFAUT de MudBlazor** pour un champ *Dense + Outlined* — ce
+n'est PAS une valeur qu'on a choisie. Donc si on te demande « quelle est la hauteur ? » et
+qu'aucune règle `height` n'existe sur le champ : la réponse est **« le défaut MudBlazor
+(Dense + Outlined) »**. Ne l'invente pas en pixels — **mesure-la** (elle dépend aussi de la
+police et du thème). Sur la page réelle (F12 → Console) :
+
+```js
+document.querySelector('.lc-bulk-op .mud-input-control').getBoundingClientRect().height  // hauteur RÉELLE rendue (px, bordure comprise)
+getComputedStyle(document.querySelector('.lc-bulk-op input')).height                     // hauteur CSS de l'input seul
+```
+
+`getBoundingClientRect().height` = ce qu'on voit vraiment ; `getComputedStyle(...).height` =
+la valeur CSS (hors bordure selon `box-sizing`). Pour **changer** cette hauteur (au lieu du
+défaut), voir la **Recette 2** : fixer `height` sur l'`input` + `min-height` sur
+`.mud-input-control-input-container`/`.mud-input.mud-input-outlined`, en **global** et
+`!important` (préfixe `.acc-window` si page look Access). Réf. vécue : les déroulantes du
+panneau « Action en masse » de la Liste de classe (`.lc-bulk-op` / `.lc-bulk-val`) sont
+laissées au défaut MudBlazor — largeur en `Style` inline, mais aucune hauteur imposée.
+
 ## Fichiers de référence (à lire pour voir le pattern en vrai)
 
 - `Pages/Economat/Echeancier.razor` + `.razor.css` — **la grille 26px canonique** (`.ech-grid`).
