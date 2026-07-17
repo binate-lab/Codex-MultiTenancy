@@ -390,8 +390,12 @@ getComputedStyle(document.querySelector('.lc-bulk-op input')).height            
 ```
 
 `getBoundingClientRect().height` = ce qu'on voit vraiment ; `getComputedStyle(...).height` =
-la valeur CSS (hors bordure selon `box-sizing`). Pour **changer** cette hauteur (au lieu du
-défaut), voir la **Recette 2** : fixer `height` sur l'`input` + `min-height` sur
+la valeur CSS (hors bordure selon `box-sizing`). **Valeur mesurée dans ce projet** (Dense +
+Outlined, police 14px, page `.acc-window`) : **≈ 37,63px** (identique pour `.lc-bulk-op` et
+`.lc-bulk-val` — cohérent puisque même config, seul le `Clearable`/la largeur diffèrent, sans
+effet sur la hauteur). C'est un repère, pas une constante : ça bouge avec la police/le thème.
+Pour **changer** cette hauteur (au lieu du défaut), voir la **Recette 2** : fixer `height` sur
+l'`input` + `min-height` sur
 `.mud-input-control-input-container`/`.mud-input.mud-input-outlined`, en **global** et
 `!important` (préfixe `.acc-window` si page look Access). Réf. vécue : les déroulantes du
 panneau « Action en masse » de la Liste de classe (`.lc-bulk-op` / `.lc-bulk-val`) sont
