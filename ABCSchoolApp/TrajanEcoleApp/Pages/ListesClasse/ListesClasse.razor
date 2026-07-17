@@ -286,6 +286,55 @@
                 Source : Pédagogie (PedagogieDb). Statut / Classe / LV2 / Arts éditables (Ctrl+' = recopie du dessus).
             </MudText>
         </div>
+
+        @* ============ Opérations en masse sur les élèves AFFICHÉS (filtrés) ============ *@
+        <div class="lc-bulk">
+            <span class="lc-bulk-label">Action en masse :</span>
+            <MudSelect T="string" Value="_bulkOp" ValueChanged="OnBulkOpChanged" Clearable="true"
+                       Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Class="lc-bulk-op"
+                       Style="width:185px" Placeholder="Choisir…">
+                <MudSelectItem Value="@("prenom-minuscule")">Minuscule (Prénoms)</MudSelectItem>
+                <MudSelectItem Value="@("prenom-majuscule")">Majuscule (Prénoms)</MudSelectItem>
+                @if (_ecolePublique)
+                {
+                    <MudSelectItem Value="@("inscrire")">Inscrire tous</MudSelectItem>
+                    <MudSelectItem Value="@("desinscrire")">Désinscrire tous</MudSelectItem>
+                }
+                <MudSelectItem Value="@("lv2")">Copier LV_2</MudSelectItem>
+                <MudSelectItem Value="@("arts")">Copier Arts</MudSelectItem>
+                <MudSelectItem Value="@("serie")">Copier Série</MudSelectItem>
+            </MudSelect>
+
+            @if (BulkNeedsValeur)
+            {
+                <MudSelect T="string" @bind-Value="_bulkValeur" Dense="true" Margin="Margin.Dense"
+                           Variant="Variant.Outlined" Class="lc-bulk-val" Style="width:145px" Placeholder="Valeur…">
+                    @foreach (var v in BulkValeurOptions)
+                    {
+                        <MudSelectItem Value="@v">@v</MudSelectItem>
+                    }
+                </MudSelect>
+            }
+
+            <MudButton Variant="Variant.Filled" Color="Color.Primary" Size="Size.Small"
+                       OnClick="ExecuterOperationAsync" Disabled="_bulkEnCours" Class="lc-bulk-go">
+                @if (_bulkEnCours)
+                {
+                    <MudProgressCircular Size="Size.Small" Indeterminate="true" Class="me-2" />
+                    <span>En cours…</span>
+                }
+                else
+                {
+                    <span>Go</span>
+                }
+            </MudButton>
+
+            @* Jauge indéterminée pendant l'opération (le nombre d'élèves peut rendre le Go long). *@
+            @if (_bulkEnCours)
+            {
+                <MudProgressLinear Color="Color.Primary" Indeterminate="true" Class="lc-bulk-progress" />
+            }
+        </div>
         </div><!-- /lc-grid-col -->
 
         @* ============ Fiche Élève, à droite de la grille (calque du « Point de l'élève » du

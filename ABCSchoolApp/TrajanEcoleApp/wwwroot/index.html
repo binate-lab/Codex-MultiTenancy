@@ -145,6 +145,19 @@
             padding-left: 1px !important;
             padding-right: 1px !important;
         }
+        /* Panneau « Action en masse » (bas de grille Liste de classe) : champs à taille normale
+           (sinon happés à 22px par la règle .acc-window) + largeurs fixes. */
+        .acc-window .lc-bulk-op { width: 185px !important; min-width: 185px !important; max-width: 185px !important; }
+        .acc-window .lc-bulk-val { width: 145px !important; min-width: 145px !important; max-width: 145px !important; }
+        .acc-window .lc-bulk-op input,
+        .acc-window .lc-bulk-op .mud-select-input,
+        .acc-window .lc-bulk-val input,
+        .acc-window .lc-bulk-val .mud-select-input {
+            font-size: 14px !important;
+        }
+        /* Jauge du panneau : en GLOBAL (le CSS scopé n'atteint pas la racine du MudProgressLinear).
+           flex-basis:100% => la barre passe sur une ligne complète, sous les contrôles. */
+        .lc-bulk-progress { flex-basis: 100% !important; width: 100% !important; margin-top: 2px; }
         .acc-window .acc-grid-eleves td input,
         .acc-window .acc-grid-eleves td .mud-input-slot,
         .acc-window .acc-grid-eleves td .mud-select-input {

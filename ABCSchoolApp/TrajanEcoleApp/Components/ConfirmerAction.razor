@@ -1,0 +1,36 @@
+@* Avertissement de confirmation générique Oui/Non. « Non » est le bouton FOCALISÉ par défaut :
+   un simple Entrée/Espace déclenche « Non » (annulation) — il faut choisir explicitement « Oui ».
+   Réutilisable pour toute action de masse / potentiellement lourde. *@
+<MudDialog>
+    <TitleContent>
+        <MudText Typo="Typo.h6">
+            <MudIcon Icon="@Icons.Material.Filled.Warning" Color="Color.Warning" Class="mr-3 mb-n1" />
+            @Titre
+        </MudText>
+    </TitleContent>
+    <DialogContent>
+        <MudText>@Message</MudText>
+    </DialogContent>
+    <DialogActions>
+        <MudButton @ref="_boutonNon" OnClick="Non" Variant="Variant.Filled" Class="mr-3 mb-n2">Non</MudButton>
+        <MudButton OnClick="Oui" Color="Color.Primary" Variant="Variant.Filled">Oui</MudButton>
+    </DialogActions>
+</MudDialog>
+
+@code {
+    [CascadingParameter] IMudDialogInstance MudDialog { get; set; } = default!;
+
+    [Parameter] public string Titre { get; set; } = "Confirmation";
+    [Parameter] public string Message { get; set; } = string.Empty;
+
+    private MudButton? _boutonNon;
+
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender && _boutonNon is not null)
+            await _boutonNon.FocusAsync();
+    }
+
+    private void Oui() => MudDialog.Close(DialogResult.Ok(true));
+    private void Non() => MudDialog.Cancel();
+}

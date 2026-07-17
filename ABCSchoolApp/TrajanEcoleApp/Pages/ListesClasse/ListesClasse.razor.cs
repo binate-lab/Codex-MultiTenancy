@@ -7,6 +7,7 @@ using Microsoft.JSInterop;
 using MudBlazor;
 using TrajanEcole.Shared.Library.Enums;
 using TrajanEcole.Shared.Library.Helpers;
+using TrajanEcoleApp.Components;
 
 namespace TrajanEcoleApp.Pages.ListesClasse
 {
@@ -25,6 +26,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         // (IEleveService, injecté globalement par _Imports.razor). NE PAS taper Scolarite.Api.
         [Inject] private IStructureService _structureService { get; set; } = default!;
         [Inject] private IJSRuntime _js { get; set; } = default!;
+        // _dialogService (IDialogService) et _snackbar sont injectés globalement par _Imports.razor.
 
         // Année scolaire en cours (bandeau) — même source que SchoolNavMenu.
         private string _annee = "—";
@@ -415,6 +417,116 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             {
                 row.Arts = ancien;
                 _snackbar.Add("Impossible d'enregistrer les Arts.", Severity.Error);
+            }
+        }
+
+        // ================== Opérations en masse (panneau « Go » du bas de grille) ==================
+        // Agit sur les élèves ACTUELLEMENT filtrés (Filtered). Persisté côté Pédagogie en une
+        // transaction (PUT /eleves/operations), puis rechargement de la grille.
+        private string _bulkOp = string.Empty;      // opération choisie (clé)
+        private string _bulkValeur = string.Empty;  // valeur pour Copier LV_2 / Arts / Série
+        private bool _bulkEnCours;                   // désactive « Go » pendant l'appel
+
+        // Option « vider la colonne » : sentinel affiché (≠ chaîne vide, sinon la garde « valeur
+        // obligatoire » la refuserait) ; converti en "" au moment de l'envoi.
+        private const string ValeurVide = "(Vide)";
+
+        private static readonly string[] OptionsLv2 = { "Allemand", "Espagnol", ValeurVide };
+        private static readonly string[] OptionsArts = { "Arts Plastiques", "Musique", ValeurVide };
+        private static readonly string[] OptionsSerie = { "A", "A1", "A2", "C", "D", "x" };
+
+        // Les opérations « Copier … » exigent une valeur (2e déroulante).
+        private bool BulkNeedsValeur => _bulkOp is "lv2" or "arts" or "serie";
+
+        private IEnumerable<string> BulkValeurOptions => _bulkOp switch
+        {
+            "lv2" => OptionsLv2,
+            "arts" => OptionsArts,
+            "serie" => OptionsSerie,
+            _ => Enumerable.Empty<string>(),
+        };
+
+        // Changement d'action : on réinitialise la valeur (une valeur LV2 n'a pas de sens pour Série).
+        private void OnBulkOpChanged(string op)
+        {
+            _bulkOp = op ?? string.Empty;
+            _bulkValeur = string.Empty;
+        }
+
+        // Libellé lisible pour la confirmation.
+        private string BulkLabel(string op) => op switch
+        {
+            "prenom-minuscule" => "Minuscule (Prénoms)",
+            "prenom-majuscule" => "Majuscule (Prénoms)",
+            "inscrire" => "Inscrire tous",
+            "desinscrire" => "Désinscrire tous",
+            "lv2" => $"Copier LV_2 = « {_bulkValeur} »",
+            "arts" => $"Copier Arts = « {_bulkValeur} »",
+            "serie" => $"Copier Série = « {_bulkValeur} »",
+            _ => op,
+        };
+
+        private async Task ExecuterOperationAsync()
+        {
+            if (string.IsNullOrWhiteSpace(_bulkOp))
+            {
+                _snackbar.Add("Choisis une action.", Severity.Info);
+                return;
+            }
+            if (BulkNeedsValeur && string.IsNullOrWhiteSpace(_bulkValeur))
+            {
+                _snackbar.Add("Choisis une valeur.", Severity.Info);
+                return;
+            }
+            // Gating client (le serveur le refait) : inscrire/désinscrire réservé aux écoles publiques.
+            if (_bulkOp is "inscrire" or "desinscrire" && !_ecolePublique)
+            {
+                _snackbar.Add("Réservé aux écoles publiques.", Severity.Warning);
+                return;
+            }
+
+            var ids = Filtered.Select(e => e.Id).ToList();
+            if (ids.Count == 0)
+            {
+                _snackbar.Add("Aucun élève affiché.", Severity.Info);
+                return;
+            }
+
+            // Avertissement Oui/Non (« Non » focalisé par défaut). Backdrop non cliquable : on
+            // ferme explicitement. Une action de masse ne se déclenche pas par mégarde.
+            var parameters = new DialogParameters
+            {
+                { nameof(ConfirmerAction.Titre), "Action en masse" },
+                { nameof(ConfirmerAction.Message),
+                    $"Appliquer « {BulkLabel(_bulkOp)} » à {ids.Count} élève(s) affiché(s) ?" },
+            };
+            var options = new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, BackdropClick = false };
+            var dialog = await _dialogService.ShowAsync<ConfirmerAction>(null, parameters, options);
+            var result = await dialog.Result;
+            if (result is null || result.Canceled) return;
+
+            _bulkEnCours = true;
+            StateHasChanged();   // affiche la jauge/spinner AVANT l'appel (qui peut être long)
+            try
+            {
+                // « (Vide) » = vider la colonne → on envoie une chaîne vide.
+                var valeur = BulkNeedsValeur
+                    ? (_bulkValeur == ValeurVide ? string.Empty : _bulkValeur)
+                    : null;
+                var res = await _eleveService.OperationsEnMasseAsync(ids, _bulkOp, valeur);
+                if (!res.IsSuccessful)
+                {
+                    _snackbar.Add($"Échec : {res.Error}", Severity.Error);
+                    return;
+                }
+                // Recharge depuis Pédagogie pour refléter les changements (prénoms, statuts, LV2…).
+                await ChargerElevesAsync();
+                SelectionnerPremierDePage();
+                _snackbar.Add($"{res.Count} élève(s) mis à jour.", Severity.Success);
+            }
+            finally
+            {
+                _bulkEnCours = false;
             }
         }
 

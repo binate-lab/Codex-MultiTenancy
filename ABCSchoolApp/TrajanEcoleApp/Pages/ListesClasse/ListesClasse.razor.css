@@ -777,3 +777,18 @@
     font-size: 12px;
     white-space: nowrap;
 }
+
+/* ============ Panneau « Action en masse » (bas de grille) ============ */
+.lc-bulk {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-wrap: wrap;
+    margin-top: 6px;
+    padding: 4px 2px;
+}
+
+.lc-bulk-label {
+    font-weight: 600;
+    font-size: 13px;
+}

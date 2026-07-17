@@ -33,6 +33,11 @@ namespace App.Infrastructure.Services.Eleves
         Task<bool> MajLv2Async(Guid eleveId, string lv2);
         Task<bool> MajArtsAsync(Guid eleveId, string arts);
 
+        // Operation en masse sur une liste d'eleves (panneau « Go » du bas de la grille).
+        // operation ∈ { prenom-minuscule, prenom-majuscule, inscrire, desinscrire, lv2, arts,
+        // serie } ; valeur requise pour lv2/arts/serie.
+        Task<OperationEnMasseResult> OperationsEnMasseAsync(IReadOnlyList<Guid> ids, string operation, string? valeur);
+
         // Regenere les matricules de l'ecole courante (portee deduite du token cote serveur).
         // complet=false : recalcule les cles de controle (garde les chiffres) ; complet=true :
         // anonymise (chiffres neufs). Ecrit le journal [eleves].[LogsMatricules] cote Pedagogie.
@@ -42,6 +47,9 @@ namespace App.Infrastructure.Services.Eleves
     // Resultat de la regeneration en masse (Pedagogie renvoie { total, corriges, regenerations }).
     public record RegenererMatriculesResult(
         bool IsSuccessful, int Total, int Corriges, int Regenerations, string? Error = null);
+
+    // Resultat d'une operation en masse (Pedagogie renvoie { count }).
+    public record OperationEnMasseResult(bool IsSuccessful, int Count, string? Error = null);
 
     // Resultat simple : Eleves.Api renvoie 201 + { id, numOrdre }, sans ResponseWrapper.
     // NumOrdre = N° Inscription DEFINITIF attribue par Pedagogie (unique par ecole).

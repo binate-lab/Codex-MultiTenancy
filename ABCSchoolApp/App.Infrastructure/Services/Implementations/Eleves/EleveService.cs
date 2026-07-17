@@ -167,6 +167,40 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
+        public async Task<OperationEnMasseResult> OperationsEnMasseAsync(
+            IReadOnlyList<Guid> ids, string operation, string? valeur)
+        {
+            try
+            {
+                // PUT /eleves/operations { ids, operation, valeur }. Le JWT ecole-scoped (dont le
+                // claim « statut » Public/Prive) est propage par l'AuthHeaderHandler.
+                var resp = await _httpClient.PutAsJsonAsync("eleves/operations", new { ids, operation, valeur });
+                if (resp.IsSuccessStatusCode)
+                {
+                    var data = await resp.Content.ReadFromJsonAsync<OperationsEnMasseResponse>();
+                    return new OperationEnMasseResult(true, data?.Count ?? 0);
+                }
+
+                // Corps d'erreur : soit { error }, soit texte brut. On extrait le message si possible.
+                var raw = await resp.Content.ReadAsStringAsync();
+                var msg = raw;
+                try
+                {
+                    var o = System.Text.Json.JsonSerializer.Deserialize<ErreurResponse>(
+                        raw, new System.Text.Json.JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+                    if (!string.IsNullOrWhiteSpace(o?.Error)) msg = o.Error;
+                }
+                catch { /* pas du JSON : on garde le texte brut */ }
+
+                return new OperationEnMasseResult(false, 0,
+                    string.IsNullOrWhiteSpace(msg) ? $"Echec ({(int)resp.StatusCode})" : msg);
+            }
+            catch (Exception ex)
+            {
+                return new OperationEnMasseResult(false, 0, ex.Message);
+            }
+        }
+
         public async Task<RegenererMatriculesResult> RegenererMatriculesAsync(bool complet)
         {
             try
@@ -197,5 +231,7 @@ namespace App.Infrastructure.Services.Implementations.Eleves
         private record MatriculeExisteResponse(bool Existe);
         private record PedagogieElevesResponse(List<ElevePedagogieItem> Eleves);
         private record RegenererResponse(int Total, int Corriges, int Regenerations);
+        private record OperationsEnMasseResponse(int Count);
+        private record ErreurResponse(string? Error);
     }
 }
