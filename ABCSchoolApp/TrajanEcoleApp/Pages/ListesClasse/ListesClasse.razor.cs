@@ -785,6 +785,10 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private int GrilleGarcons => Filtered.Count(e => EstGarcon(e.Sexe));
         private int GrilleFilles => Filtered.Count(e => EstFille(e.Sexe));
 
+        // Pourcentages G/F sur le TOTAL affiché (peut ne pas sommer à 100 si des sexes sont vides).
+        private int PourcentGarcons => Filtered.Any() ? (int)Math.Round(100.0 * GrilleGarcons / Filtered.Count()) : 0;
+        private int PourcentFilles => Filtered.Any() ? (int)Math.Round(100.0 * GrilleFilles / Filtered.Count()) : 0;
+
         // ================== Navigation clavier & copie « cellule du dessus » ==================
         // Réutilise le handler JS global « svtGrilleEleves » (index.html) : Haut/Bas déplacent
         // le focus entre lignes, Ctrl+' recopie la valeur de la cellule du dessus via ce

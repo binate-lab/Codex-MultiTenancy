@@ -389,7 +389,7 @@
 
 .lc-field {
     display: flex;
-    gap: 4px;                 /* valeur rapprochée du label (était 8px) */
+    gap: 8px;                 /* espace label↔valeur un peu élargi (était 4px) */
     align-items: baseline;
     border-bottom: 1px dotted #b9c6ce;
     padding: 1px 0;
@@ -401,7 +401,8 @@
 }
 
 .lc-field span {
-    flex: 0 0 62px;           /* largeur du label réduite (était 84px) → valeur plus près */
+    flex: 0 0 76px;           /* label assez large pour « Lieu naiss. » sur 1 ligne (était 62px) */
+    white-space: nowrap;      /* le label ne passe jamais sur 2 lignes */
     color: #5a748a;
 }
 

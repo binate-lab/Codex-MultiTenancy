@@ -353,10 +353,10 @@
 
         <div class="acc-gridfoot">
             <MudText Typo="Typo.caption">
-                @Filtered.Count() élève(s) affiché(s) — Garçons : @GrilleGarcons · Filles : @GrilleFilles
+                @Filtered.Count() élève(s) affiché(s) — Garçons : @GrilleGarcons (@PourcentGarcons %) · Filles : @GrilleFilles (@PourcentFilles %)
             </MudText>
             <MudText Typo="Typo.caption" Class="acc-demo-note">
-                Source : Pédagogie (PedagogieDb). Statut / Classe / Red / LV2 / Arts éditables (Ctrl+' = recopie du dessus).
+                Statut / Classe / Red / LV2 / Arts éditables (Ctrl+' = recopie du dessus).
             </MudText>
         </div>
 
@@ -497,14 +497,14 @@
                                 <div class="lc-field"><span>Nationalité</span><b>@_sel.Nationalite</b></div>
                                 <div class="lc-field lc-field-large"><span>Matricule</span><b>@FormatMatricule(_sel.Matricule)</b></div>
                                 <div class="lc-field lc-field-large"><span>Lieu naiss.</span><b>@_sel.LieuNaissance</b></div>
-                                <div class="lc-field"><span>Cycle</span><b>@_sel.Cycle</b></div>
-                                <div class="lc-field"><span>Niveau</span><b>@_sel.Niveau</b></div>
+                                <div class="lc-field"><span>Red</span><b>@_sel.Red</b></div>
+                                <div class="lc-field"><span>LV_2</span><b>@_sel.LV_2</b></div>
                                 <div class="lc-field"><span>Classe</span><b>@_sel.Classe</b></div>
                                 <div class="lc-field"><span>Série</span><b>@_sel.Serie</b></div>
                                 <div class="lc-field"><span>Statut</span><b>@_sel.Statut</b></div>
                                 <div class="lc-field"><span>Inscrit</span><b>@(_sel.Inscrit ? "Oui" : "Non")</b></div>
-                                <div class="lc-field"><span>Actif</span><b>@(_sel.Actif ? "Oui" : "Non")</b></div>
                                 <div class="lc-field"><span>Tél.</span><b>@_sel.Telephone</b></div>
+                                <div class="lc-field"><span>Actif</span><b>@(_sel.Actif ? "Oui" : "Non")</b></div>
                             </div>
                         </div>
                     </div>
