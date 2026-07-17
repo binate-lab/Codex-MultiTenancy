@@ -1,5 +1,6 @@
 using System.Globalization;
 using App.Infrastructure.Services.Economat;
+using TrajanEcoleApp.Components;
 using Microsoft.AspNetCore.Components;
 using Microsoft.JSInterop;
 using MudBlazor;
@@ -94,9 +95,16 @@ namespace TrajanEcoleApp.Pages.Economat
         // Ajoute les lignes FG manquantes aux eleves qui ont deja un echeancier.
         private async Task AppliquerAuxExistantsAsync()
         {
-            var oui = await _js.InvokeAsync<bool>("confirm",
-                "Ajouter les postes de Frais Généraux manquants à tous les élèves déjà inscrits ?");
-            if (!oui) return;
+            var parameters = new DialogParameters
+            {
+                { nameof(ConfirmerAction.Titre), "Appliquer aux élèves existants" },
+                { nameof(ConfirmerAction.Message),
+                    "Ajouter les postes de Frais Généraux manquants à tous les élèves déjà inscrits ?" },
+            };
+            var options = new DialogOptions { MaxWidth = MaxWidth.ExtraSmall, BackdropClick = false };
+            var dialog = await _dialogService.ShowAsync<ConfirmerAction>(null, parameters, options);
+            var confirmation = await dialog.Result;
+            if (confirmation is null || confirmation.Canceled) return;
 
             _enCours = true;
             try
