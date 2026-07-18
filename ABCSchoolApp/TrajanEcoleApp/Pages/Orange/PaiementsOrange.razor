@@ -1,0 +1,86 @@
+@page "/paiements-orange"
+@layout SchoolLayout
+
+<MudPaper Elevation="6" Class="ma-2">
+    <MudToolBar Dense="true" Class="px-3" Style="background-color:#e67e22; color:white;">
+        <MudIcon Icon="@Icons.Material.Outlined.Payments" Class="mr-2" />
+        <MudText Typo="Typo.h6">Orange Money — Paiements reçus</MudText>
+        <MudSpacer />
+        <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Inherit"
+                   OnClick="Fermer">Fermer</MudButton>
+    </MudToolBar>
+
+    <div class="pa-4">
+        <MudText Typo="Typo.body2" Class="mb-3 mud-text-secondary" Style="max-width:820px;">
+            Paiements notifiés par Orange Money. Un paiement <b>en attente</b> a été rattaché à un élève :
+            validez-le pour l'imputer sur son échéancier. Un <b>orphelin</b> n'a pas trouvé d'élève
+            (matricule inconnu) : rattachez-le au bon élève avant validation.
+        </MudText>
+
+        <div class="d-flex align-center gap-3 mb-3" style="max-width:420px;">
+            <MudSelect T="string" @bind-Value="_statut" Label="Statut" Dense="true"
+                       Variant="Variant.Outlined" Margin="Margin.Dense" @bind-Value:after="ChargerAsync">
+                <MudSelectItem Value="@("EnAttente")">En attente</MudSelectItem>
+                <MudSelectItem Value="@("Orphelin")">Orphelins</MudSelectItem>
+                <MudSelectItem Value="@("Valide")">Validés</MudSelectItem>
+                <MudSelectItem Value="@("Rejete")">Rejetés</MudSelectItem>
+                <MudSelectItem Value="@("")">Tous</MudSelectItem>
+            </MudSelect>
+            <MudTooltip Text="Rafraîchir">
+                <MudIconButton Icon="@Icons.Material.Filled.Refresh" Color="Color.Primary"
+                               Disabled="_enCours" OnClick="ChargerAsync" />
+            </MudTooltip>
+        </div>
+
+        <MudTable Items="_lignes" Dense="true" Hover="true" Bordered="true" Striped="true" Loading="_enCours">
+            <HeaderContent>
+                <MudTh>Reçu le</MudTh>
+                <MudTh>Date paiement</MudTh>
+                <MudTh>Matricule</MudTh>
+                <MudTh>Nom & Prénoms</MudTh>
+                <MudTh Style="text-align:right;">Montant</MudTh>
+                <MudTh>Référence</MudTh>
+                <MudTh Style="width:110px; text-align:center;">Statut</MudTh>
+                <MudTh Style="width:70px; text-align:center;">Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Reçu le">@context.ReceivedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</MudTd>
+                <MudTd DataLabel="Date paiement">@context.DatePaiement.ToString("dd/MM/yyyy")</MudTd>
+                <MudTd DataLabel="Matricule">@context.Matricule</MudTd>
+                <MudTd DataLabel="Nom & Prénoms">@context.Nom @context.Prenoms</MudTd>
+                <MudTd DataLabel="Montant" Style="text-align:right;">@Fmt(context.Montant) FCFA</MudTd>
+                <MudTd DataLabel="Référence">@context.Reference</MudTd>
+                <MudTd DataLabel="Statut" Style="text-align:center;">
+                    <MudChip T="string" Size="Size.Small" Color="@CouleurStatut(context.Statut)"
+                             Variant="Variant.Filled">@LibelleStatut(context.Statut)</MudChip>
+                </MudTd>
+                <MudTd DataLabel="Actions" Style="text-align:center;">
+                    @if (context.Statut is "EnAttente" or "Orphelin")
+                    {
+                        <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Color="Color.Secondary"
+                                 TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
+                            @if (context.Statut == "EnAttente")
+                            {
+                                <MudMenuItem Disabled="_enCours" OnClick="@(() => ValiderAsync(context))">Valider</MudMenuItem>
+                            }
+                            @if (context.Statut == "Orphelin")
+                            {
+                                <MudMenuItem Disabled="_enCours" OnClick="@(() => RattacherAsync(context))">Rattacher à un élève</MudMenuItem>
+                            }
+                            <MudMenuItem Disabled="_enCours" OnClick="@(() => RejeterAsync(context))">Rejeter</MudMenuItem>
+                        </MudMenu>
+                    }
+                    else if (!string.IsNullOrWhiteSpace(context.Note))
+                    {
+                        <MudTooltip Text="@context.Note">
+                            <MudIcon Icon="@Icons.Material.Filled.Info" Size="Size.Small" Color="Color.Default" />
+                        </MudTooltip>
+                    }
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText Class="pa-2">Aucun paiement pour ce filtre.</MudText>
+            </NoRecordsContent>
+        </MudTable>
+    </div>
+</MudPaper>

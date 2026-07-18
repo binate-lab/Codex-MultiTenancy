@@ -1,0 +1,92 @@
+@page "/marchands-orange"
+@layout SchoolLayout
+
+<MudPaper Elevation="6" Class="ma-2">
+    <MudToolBar Dense="true" Class="px-3" Style="background-color:#e67e22; color:white;">
+        <MudIcon Icon="@Icons.Material.Outlined.Storefront" Class="mr-2" />
+        <MudText Typo="Typo.h6">Orange Money — Comptes marchands</MudText>
+        <MudSpacer />
+        <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Inherit"
+                   OnClick="Fermer">Fermer</MudButton>
+    </MudToolBar>
+
+    <div class="pa-4" style="max-width:900px;">
+        <MudText Typo="Typo.body2" Class="mb-3 mud-text-secondary">
+            Chaque compte marchand relie un identifiant Orange à cette école. Orange l'utilise
+            dans ses notifications de paiement ; le <b>secret</b> sert à signer (HMAC) chaque appel.
+            Le secret n'est affiché <b>qu'une seule fois</b> à la création ou à la rotation — copiez-le
+            aussitôt pour le transmettre à Orange.
+        </MudText>
+
+        @* Bannière secret : visible une seule fois après création / rotation. *@
+        @if (_secretAffiche is not null)
+        {
+            <MudAlert Severity="Severity.Warning" Class="mb-4" Dense="false" ShowCloseIcon="false">
+                <MudText Typo="Typo.subtitle2" Class="mb-1">
+                    Secret du marchand « @_codeSecretAffiche » — copiez-le maintenant, il ne sera plus jamais affiché.
+                </MudText>
+                <div class="d-flex align-center gap-2" style="max-width:640px;">
+                    <MudTextField @bind-Value="_secretAffiche" ReadOnly="true" Variant="Variant.Outlined"
+                                  Margin="Margin.Dense" Class="flex-grow-1" />
+                    <MudButton StartIcon="@Icons.Material.Filled.ContentCopy" Color="Color.Primary"
+                               Variant="Variant.Filled" OnClick="CopierSecretAsync">Copier</MudButton>
+                    <MudButton Variant="Variant.Text" OnClick="@(() => { _secretAffiche = null; _codeSecretAffiche = null; })">
+                        J'ai copié
+                    </MudButton>
+                </div>
+            </MudAlert>
+        }
+
+        @* Ligne d'ajout *@
+        <div class="d-flex align-center gap-2 mb-3" style="max-width:640px;">
+            <MudTextField @bind-Value="_nouveauCode" Immediate="true" Label="Code marchand (Orange)"
+                          Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="_enCours" />
+            <MudTextField @bind-Value="_nouveauLibelle" Immediate="true" Label="Libellé (optionnel)"
+                          Variant="Variant.Outlined" Margin="Margin.Dense" Disabled="_enCours" />
+            <MudTooltip Text="Créer le compte">
+                <MudFab StartIcon="@Icons.Material.Filled.Add" Size="Size.Small" IconSize="Size.Medium"
+                        Color="Color.Primary" Disabled="_enCours" OnClick="AjouterAsync" />
+            </MudTooltip>
+        </div>
+
+        <MudTable Items="_lignes" Dense="true" Hover="true" Bordered="true" Striped="true">
+            <HeaderContent>
+                <MudTh>Code marchand</MudTh>
+                <MudTh>Libellé</MudTh>
+                <MudTh Style="width:90px; text-align:center;">Actif</MudTh>
+                <MudTh Style="width:140px;">Secret</MudTh>
+                <MudTh Style="width:70px; text-align:center;">Actions</MudTh>
+            </HeaderContent>
+            <RowTemplate>
+                <MudTd DataLabel="Code marchand">
+                    <MudTextField T="string" @bind-Value="context.CodeMarchand"
+                                  Variant="Variant.Text" Underline="false" Margin="Margin.Dense" />
+                </MudTd>
+                <MudTd DataLabel="Libellé">
+                    <MudTextField T="string" @bind-Value="context.Libelle"
+                                  Variant="Variant.Text" Underline="false" Margin="Margin.Dense" />
+                </MudTd>
+                <MudTd DataLabel="Actif" Style="text-align:center;">
+                    <MudCheckBox T="bool" @bind-Value="context.Actif" Dense="true" Color="Color.Primary" />
+                </MudTd>
+                <MudTd DataLabel="Secret">
+                    <span style="font-family:monospace; color:#616161;">@context.SecretApercu</span>
+                </MudTd>
+                <MudTd DataLabel="Actions" Style="text-align:center;">
+                    <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Color="Color.Secondary"
+                             TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
+                        <MudMenuItem Disabled="@(_enCours || !context.EstModifiee)"
+                                     OnClick="@(() => EnregistrerAsync(context))">Enregistrer</MudMenuItem>
+                        <MudMenuItem Disabled="_enCours"
+                                     OnClick="@(() => RotationAsync(context))">Renouveler le secret</MudMenuItem>
+                        <MudMenuItem Disabled="_enCours"
+                                     OnClick="@(() => SupprimerAsync(context))">Supprimer</MudMenuItem>
+                    </MudMenu>
+                </MudTd>
+            </RowTemplate>
+            <NoRecordsContent>
+                <MudText Class="pa-2">Aucun compte marchand configuré.</MudText>
+            </NoRecordsContent>
+        </MudTable>
+    </div>
+</MudPaper>

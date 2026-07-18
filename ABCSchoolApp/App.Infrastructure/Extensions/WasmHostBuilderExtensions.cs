@@ -15,6 +15,8 @@ using App.Infrastructure.Services.Structures;
 using App.Infrastructure.Services.Implementations.Structures;
 using App.Infrastructure.Services.Economat;
 using App.Infrastructure.Services.Implementations.Economat;
+using App.Infrastructure.Services.Orange;
+using App.Infrastructure.Services.Implementations.Orange;
 using App.Infrastructure.Services.AnneesScolaires;
 using App.Infrastructure.Services.Implementations.AnneesScolaires;
 using App.Infrastructure.Services.Implementations.Schools;
@@ -154,6 +156,22 @@ namespace App.Infrastructure.Extensions
             // Client typie dedie au module Economat de Scolarite.Api : bareme Transport (zones).
             builder.Services
                 .AddHttpClient<IZoneTransportService, ZoneTransportService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
+            // Client typé dédié au webhook Orange Money de Scolarite.Api : comptes marchands.
+            builder.Services
+                .AddHttpClient<ICompteMarchandOrangeService, CompteMarchandOrangeService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
+            // Client typé dédié au webhook Orange Money de Scolarite.Api : supervision des paiements.
+            builder.Services
+                .AddHttpClient<IPaiementOrangeService, PaiementOrangeService>(client =>
                 {
                     client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
                 })
