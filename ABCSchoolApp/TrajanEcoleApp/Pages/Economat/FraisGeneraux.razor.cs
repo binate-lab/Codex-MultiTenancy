@@ -80,6 +80,23 @@ namespace TrajanEcoleApp.Pages.Economat
             finally { _enCours = false; }
         }
 
+        // Persistance « façon tableur » au blur d'une cellule (comme la grille Zones Transport) :
+        // sauvegarde silencieuse si la ligne a changé, message seulement en cas d'erreur (et on
+        // restaure alors la valeur d'origine). Évite d'avoir à ouvrir le menu ⋮ → Enregistrer.
+        private async Task EnregistrerSiModifieeAsync(FgRow row)
+        {
+            if (_enCours || !row.EstModifiee) return;
+
+            var result = await _fgService.UpdateAsync(row.VersItem());
+            if (result.IsSuccessful)
+                row.FigerSnapshot();
+            else
+            {
+                row.Restaurer();
+                _snackbar.Add(result.Error, Severity.Error);
+            }
+        }
+
         private async Task SupprimerAsync(FgRow row)
         {
             _enCours = true;

@@ -43,19 +43,23 @@
             <RowTemplate>
                 <MudTd DataLabel="Ordre" Style="text-align:center;">
                     <MudNumericField T="int" @bind-Value="context.Ordre" HideSpinButtons="false" Min="0"
-                                     Variant="Variant.Text" Underline="false" Margin="Margin.Dense" Style="width:70px;" />
+                                     Variant="Variant.Text" Underline="false" Margin="Margin.Dense" Style="width:70px;"
+                                     OnBlur="@(() => EnregistrerSiModifieeAsync(context))" />
                 </MudTd>
                 <MudTd DataLabel="Libellé">
                     <MudTextField T="string" @bind-Value="context.Libelle"
-                                  Variant="Variant.Text" Underline="false" Margin="Margin.Dense" />
+                                  Variant="Variant.Text" Underline="false" Margin="Margin.Dense"
+                                  OnBlur="@(() => EnregistrerSiModifieeAsync(context))" />
                 </MudTd>
                 <MudTd DataLabel="Montant" Style="text-align:right;">
                     <MudNumericField T="decimal" @bind-Value="context.Montant" HideSpinButtons="true" Min="0"
                                      Format="#,0" Culture="@_fr"
-                                     Variant="Variant.Text" Underline="false" Margin="Margin.Dense" Style="width:130px;" />
+                                     Variant="Variant.Text" Underline="false" Margin="Margin.Dense" Style="width:130px;"
+                                     OnBlur="@(() => EnregistrerSiModifieeAsync(context))" />
                 </MudTd>
                 <MudTd DataLabel="Visible" Style="text-align:center;">
-                    <MudCheckBox T="bool" @bind-Value="context.OK" Dense="true" Color="Color.Primary" />
+                    <MudCheckBox T="bool" @bind-Value="context.OK" Dense="true" Color="Color.Primary"
+                                 @bind-Value:after="@(() => EnregistrerSiModifieeAsync(context))" />
                 </MudTd>
                 <MudTd DataLabel="Actions" Style="text-align:center;">
                     <MudMenu Icon="@Icons.Material.Filled.MoreVert" Size="Size.Small" Color="Color.Secondary"
