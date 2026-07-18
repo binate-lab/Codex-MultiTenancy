@@ -15,6 +15,11 @@ namespace App.Infrastructure.Services.Orange
         public Guid? VersementId { get; set; }
         public DateTime ReceivedAt { get; set; }
         public string? Note { get; set; }
+
+        // Identité RÉELLE de l'élève rattaché (vide si orphelin) : c'est lui qui sera crédité.
+        // Nom/Prenoms ci-dessus = ce qu'Orange a déclaré (peut différer → alerte côté page).
+        public string EleveNomComplet { get; set; } = string.Empty;
+        public string EleveMatricule { get; set; } = string.Empty;
     }
 
     public record PaiementOpResult(bool IsSuccessful, string? Error = null);

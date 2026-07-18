@@ -101,6 +101,15 @@ namespace TrajanEcoleApp.Pages.Orange
             finally { _enCours = false; }
         }
 
+        // Le nom déclaré par Orange diffère-t-il de l'élève réellement rattaché ?
+        // (signal d'alerte : typo, homonyme, ou rapprochement à revérifier).
+        private static bool NomDeclareDiffere(PaiementOrangeItem p)
+        {
+            if (string.IsNullOrWhiteSpace(p.EleveNomComplet)) return false;
+            var declare = $"{p.Nom} {p.Prenoms}".Trim();
+            return !string.Equals(declare, p.EleveNomComplet.Trim(), StringComparison.OrdinalIgnoreCase);
+        }
+
         private void Fermer() => _navigation.NavigateTo("/ecole");
 
         private static string Fmt(decimal montant) => montant.ToString("#,0", Fr);
