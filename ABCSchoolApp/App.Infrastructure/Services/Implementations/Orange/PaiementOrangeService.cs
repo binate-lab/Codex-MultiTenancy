@@ -30,6 +30,9 @@ namespace App.Infrastructure.Services.Implementations.Orange
         public Task<PaiementOpResult> ValiderAsync(Guid id)
             => EnvoyerAsync(() => _httpClient.PostAsJsonAsync($"orange/paiements/{id}/valider", new { }));
 
+        public Task<PaiementOpResult> ValiderManuAsync(Guid id)
+            => EnvoyerAsync(() => _httpClient.PostAsJsonAsync($"orange/paiements/{id}/valider-manuel", new { }));
+
         public Task<PaiementOpResult> RattacherAsync(Guid id, string matricule)
             => EnvoyerAsync(() => _httpClient.PostAsJsonAsync(
                 $"orange/paiements/{id}/rattacher", new { matricule }));

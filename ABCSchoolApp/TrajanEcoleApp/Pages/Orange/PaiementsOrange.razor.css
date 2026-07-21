@@ -1,0 +1,28 @@
+/* Grille des paiements Orange : lignes compactées (30px). Un peu plus haut que le
+   standard 26px du projet car les cellules portent des CHIPS (statut, A/M, lien payeur),
+   plus hauts qu'un simple texte. Page hors .acc-window -> le CSS scopé suffit. */
+.pmt-grid ::deep td {
+    padding: 0 8px !important;
+    height: 30px !important;
+}
+
+/* En-têtes alignés sur le même padding horizontal que les cellules. */
+.pmt-grid ::deep th {
+    padding-left: 8px !important;
+    padding-right: 8px !important;
+}
+
+/* Chips (statut, A/M, lien payeur) compactés pour tenir dans la hauteur de ligne. */
+.pmt-grid ::deep td .mud-chip {
+    height: 22px !important;
+    margin: 0 2px 0 0 !important;
+}
+
+.pmt-grid ::deep td .mud-chip .mud-chip-content {
+    font-size: 11px !important;
+}
+
+/* Bouton d'actions (menu 3 points) : dégonflé pour ne pas imposer sa hauteur à la ligne. */
+.pmt-grid ::deep td .mud-icon-button {
+    padding: 2px !important;
+}

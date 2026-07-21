@@ -32,19 +32,25 @@
             </MudTooltip>
         </div>
 
-        <MudTable Items="_lignes" Dense="true" Hover="true" Bordered="true" Striped="true" Loading="_enCours">
+        @* Grille bornee en largeur : sans max-width, la table s'etire sur tout l'ecran et
+           l'espace excedentaire gonfle les colonnes libres (Nom, Montant, Reference). *@
+        @* Wrapper indispensable : c'est LUI qui porte le scope Blazor (::deep), pas la MudTable. *@
+        <div class="pmt-grid">
+        <MudTable Items="_lignes" Dense="true" Hover="true" Bordered="true" Striped="true" Loading="_enCours"
+                  RowsPerPage="15" Style="max-width:1440px;">
             <HeaderContent>
-                <MudTh>Reçu le</MudTh>
-                <MudTh>Date paiement</MudTh>
-                <MudTh>Matricule</MudTh>
+                <MudTh Style="width:150px; white-space:nowrap;">Reçu le</MudTh>
+                <MudTh Style="width:95px;">Date paiement</MudTh>
+                <MudTh Style="width:95px;">Matricule</MudTh>
                 <MudTh>Nom & Prénoms</MudTh>
-                <MudTh Style="text-align:right;">Montant</MudTh>
-                <MudTh>Référence</MudTh>
-                <MudTh Style="width:110px; text-align:center;">Statut</MudTh>
-                <MudTh Style="width:70px; text-align:center;">Actions</MudTh>
+                <MudTh Style="width:110px; text-align:right;">Montant</MudTh>
+                <MudTh Style="width:200px;">N° payeur</MudTh>
+                <MudTh Style="width:160px;">Référence</MudTh>
+                <MudTh Style="width:170px; text-align:center;">Statut</MudTh>
+                <MudTh Style="width:56px; text-align:center;">Actions</MudTh>
             </HeaderContent>
             <RowTemplate>
-                <MudTd DataLabel="Reçu le">@context.ReceivedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</MudTd>
+                <MudTd DataLabel="Reçu le" Style="white-space:nowrap;">@context.ReceivedAt.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</MudTd>
                 <MudTd DataLabel="Date paiement">@context.DatePaiement.ToString("dd/MM/yyyy")</MudTd>
                 <MudTd DataLabel="Matricule">@context.Matricule</MudTd>
                 <MudTd DataLabel="Nom & Prénoms">
@@ -70,11 +76,36 @@
                         </MudTooltip>
                     }
                 </MudTd>
-                <MudTd DataLabel="Montant" Style="text-align:right;">@Fmt(context.Montant) FCFA</MudTd>
+                <MudTd DataLabel="Montant" Style="text-align:right; white-space:nowrap;">@Fmt(context.Montant)F</MudTd>
+                <MudTd DataLabel="N° payeur" Style="white-space:nowrap;">
+                    @if (!string.IsNullOrWhiteSpace(context.NumeroPayeur))
+                    {
+                        <span style="font-family:monospace;">@context.NumeroPayeur</span>
+                        <MudChip T="string" Size="Size.Small" Variant="Variant.Text"
+                                 Color="@CouleurLien(context.LienPayeur)" Class="ml-1">
+                            @LibelleLien(context.LienPayeur)
+                        </MudChip>
+                    }
+                    else
+                    {
+                        <span class="mud-text-secondary">—</span>
+                    }
+                </MudTd>
                 <MudTd DataLabel="Référence">@context.Reference</MudTd>
                 <MudTd DataLabel="Statut" Style="text-align:center;">
                     <MudChip T="string" Size="Size.Small" Color="@CouleurStatut(context.Statut)"
                              Variant="Variant.Filled">@LibelleStatut(context.Statut)</MudChip>
+                    @if (!string.IsNullOrWhiteSpace(context.ModeValidation))
+                    {
+                        <MudTooltip Text="@(context.ModeValidation == "A"
+                            ? "Validé automatiquement (imputé sur l'enfant du matricule)."
+                            : "Validé manuellement : montant réparti par le caissier dans Versements.")">
+                            <MudChip T="string" Size="Size.Small" Variant="Variant.Outlined"
+                                     Color="@(context.ModeValidation == "A" ? Color.Success : Color.Warning)">
+                                @context.ModeValidation
+                            </MudChip>
+                        </MudTooltip>
+                    }
                 </MudTd>
                 <MudTd DataLabel="Actions" Style="text-align:center;">
                     @if (context.Statut is "EnAttente" or "Orphelin")
@@ -83,7 +114,8 @@
                                  TransformOrigin="Origin.BottomLeft" AnchorOrigin="Origin.BottomLeft">
                             @if (context.Statut == "EnAttente")
                             {
-                                <MudMenuItem Disabled="_enCours" OnClick="@(() => ValiderAsync(context))">Valider</MudMenuItem>
+                                <MudMenuItem Disabled="_enCours" OnClick="@(() => ValiderAsync(context))">Valider Auto</MudMenuItem>
+                                <MudMenuItem Disabled="_enCours" OnClick="@(() => ValiderManuAsync(context))">Valider Manu</MudMenuItem>
                             }
                             @if (context.Statut == "Orphelin")
                             {
@@ -103,6 +135,12 @@
             <NoRecordsContent>
                 <MudText Class="pa-2">Aucun paiement pour ce filtre.</MudText>
             </NoRecordsContent>
+            <PagerContent>
+                <MudTablePager PageSizeOptions="@(new int[] { 15, 25, 50, 100 })"
+                               RowsPerPageString="Lignes par page"
+                               InfoFormat="{first_item}-{last_item} sur {all_items}" />
+            </PagerContent>
         </MudTable>
+        </div>
     </div>
 </MudPaper>

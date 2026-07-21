@@ -29,17 +29,34 @@ namespace TrajanEcoleApp.Pages.Orange
             finally { _enCours = false; }
         }
 
-        // Valide un paiement en attente : impute le versement lié + notifie le parent.
+        // Valider AUTO (A) : impute le versement lié sur l'échéancier + notifie le parent.
         private async Task ValiderAsync(PaiementOrangeItem p)
         {
             var confirm = await _dialogService.ShowMessageBox(
-                "Valider le paiement",
-                $"Valider le paiement de {Fmt(p.Montant)} FCFA (réf {p.Reference}) ? Il sera imputé " +
-                "sur l'échéancier de l'élève.",
-                yesText: "Valider", cancelText: "Annuler");
+                "Valider automatiquement (A)",
+                $"Valider le paiement de {Fmt(p.Montant)}F (réf {p.Reference}) ? Il sera imputé " +
+                "automatiquement sur l'échéancier de l'élève.",
+                yesText: "Valider Auto", cancelText: "Annuler");
             if (confirm != true) return;
 
-            await ExecuterAsync(() => _paiementService.ValiderAsync(p.Id), "Paiement validé et imputé.");
+            await ExecuterAsync(() => _paiementService.ValiderAsync(p.Id), "Paiement validé et imputé (A).");
+        }
+
+        // Valider MANU (M) : le montant couvre plusieurs enfants (fratrie payée avec un seul
+        // matricule). Le brouillon est retiré ; le caissier répartit lui-même dans /scolarites
+        // en réutilisant la référence Orange (autorisée entre versements de même CodeParent).
+        private async Task ValiderManuAsync(PaiementOrangeItem p)
+        {
+            var confirm = await _dialogService.ShowMessageBox(
+                "Valider manuellement (M)",
+                $"Marquer le paiement de {Fmt(p.Montant)}F (réf {p.Reference}) « à répartir » ? " +
+                "Rien ne sera imputé automatiquement : vous saisirez vous-même les versements des " +
+                $"enfants concernés dans Versements, avec la même référence {p.Reference}.",
+                yesText: "Valider Manu", cancelText: "Annuler");
+            if (confirm != true) return;
+
+            await ExecuterAsync(() => _paiementService.ValiderManuAsync(p.Id),
+                $"Paiement marqué M : à répartir dans Versements (réf {p.Reference}).");
         }
 
         // Rattache un orphelin : l'agent saisit le matricule correct de l'élève.
@@ -121,6 +138,21 @@ namespace TrajanEcoleApp.Pages.Orange
             "Valide" => "Validé",
             "Rejete" => "Rejeté",
             _ => statut,
+        };
+
+        // Libellé du lien payeur (Pere/Mere/Tuteur/Inconnu → affichage accentué).
+        private static string LibelleLien(string lien) => lien switch
+        {
+            "Pere" => "Père",
+            "Mere" => "Mère",
+            "Tuteur" => "Tuteur",
+            _ => "Inc.",
+        };
+
+        private static Color CouleurLien(string lien) => lien switch
+        {
+            "Pere" or "Mere" or "Tuteur" => Color.Success,
+            _ => Color.Default,
         };
 
         private static Color CouleurStatut(string statut) => statut switch
