@@ -29,18 +29,18 @@
                 <label class="acc-flabel">Nom :</label>
                 <MudTextField @bind-Value="_fNom" Immediate="true" Clearable="true"
                               Placeholder="Nom…"
-                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fmaj" />
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fmaj lc-nom" />
             </div>
             <div class="acc-fgroup">
                 <label class="acc-flabel">Prénoms :</label>
                 <MudTextField @bind-Value="_fPrenoms" Immediate="true" Clearable="true"
                               Placeholder="Prénoms…"
-                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield" />
+                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield lc-prenoms" />
             </div>
             <div class="acc-fgroup">
                 <label class="acc-flabel">Niveau :</label>
                 <MudSelect Value="_fNiveau" ValueChanged="OnFiltreNiveauChanged" T="string" Clearable="true" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow acc-fniveau">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd lc-fniveau">
                     <MudSelectItem Value="@("")">Tous</MudSelectItem>
                     @foreach (var n in _niveaux)
                     {
@@ -53,7 +53,7 @@
                 @* Déroulante en cascade : ne montre que les classes du niveau filtré
                    (toutes les classes si aucun niveau n'est choisi). *@
                 <MudSelect @bind-Value="_fClasse" T="string" Clearable="true" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow acc-fclasse">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd lc-fclasse">
                     <MudSelectItem Value="@("")">Toutes</MudSelectItem>
                     @foreach (var cl in ClassesFiltre)
                     {
@@ -64,7 +64,7 @@
             <div class="acc-fgroup">
                 <label class="acc-flabel">Statut :</label>
                 <MudSelect @bind-Value="_fStatut" T="string" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd">
                     <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
                     <MudSelectItem Value="@("Aff")">Aff</MudSelectItem>
                     <MudSelectItem Value="@("Naff")">Naff</MudSelectItem>
@@ -73,7 +73,7 @@
             <div class="acc-fgroup">
                 <label class="acc-flabel">Transport :</label>
                 <MudSelect @bind-Value="_fTransport" T="string" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd">
                     <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
                     <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
                     <MudSelectItem Value="@("Non")">Non</MudSelectItem>
@@ -84,7 +84,7 @@
                 @* Déroulante alimentée par les CodeParent existants (distincts) des élèves
                    chargés : un nouveau code saisi dans la grille apparaît ici automatiquement. *@
                 <MudSelect @bind-Value="_fCodeParent" T="string" Clearable="true" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fcodeparent">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd">
                     <MudSelectItem Value="@("")">Tous</MudSelectItem>
                     @foreach (var cp in CodeParentsDisponibles)
                     {
@@ -112,7 +112,7 @@
                 <div class="acc-fgroup">
                     <label class="acc-flabel">Inscrit :</label>
                     <MudSelect @bind-Value="_fInscrit" T="string" Dense="true"
-                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd">
                         <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
                         <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
                         <MudSelectItem Value="@("Non")">Non</MudSelectItem>
@@ -121,7 +121,7 @@
                 <div class="acc-fgroup">
                     <label class="acc-flabel">Actif :</label>
                     <MudSelect @bind-Value="_fActif" T="string" Dense="true"
-                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd">
                         <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
                         <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
                         <MudSelectItem Value="@("Non")">Non</MudSelectItem>

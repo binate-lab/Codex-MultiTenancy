@@ -27,100 +27,92 @@
         .acc-window .acc-ffield input {
             height: 30px !important;
         }
-        /* Filtres de Versements (.sc-filtres) : texte des champs à 14px (labels inchangés).
-           Spécificité 0,3,1 > générique .acc-window .acc-ffield input (0,2,1) → l'emporte.
-           Scopé → n'affecte PAS /listes-classe. */
-        .acc-window .sc-filtres .acc-ffield input,
-        .acc-window .sc-filtres .acc-ffield .mud-input-slot,
-        .acc-window .sc-filtres .acc-ffield .mud-select-input {
-            font-size: 14px !important;
-        }
-        /* Toutes les déroulantes (MudSelect) des filtres Versements — Niveau, Classe, Statut,
-           Inscrit, Actif, Transport, CodeParent : padding vertical 4px haut / 0 bas.
-           Cible .mud-select-input → n'affecte PAS les champs texte (Nom, Prénoms, Matricule, N°). */
-        .acc-window .sc-filtres .acc-ffield .mud-select-input {
-            padding-top: 4px !important;
-            padding-bottom: 0 !important;
-        }
+        /* (Les filtres de Versements /scolarites suivent désormais le MÊME gabarit que
+           /listes-classe — voir le bloc « gabarit COMMUN » plus bas, partagé via
+           .lc-filtres/.sc-filtres.) */
         .acc-window .acc-ffield .mud-input-slot,
         .acc-window .acc-ffield .mud-input.mud-input-outlined,
         .acc-window .acc-ffield .mud-input-control-input-container {
             min-height: 30px !important;
         }
 
-        /* Liste de classe (.lc-filtres) : filtres alignés sur l'aspect de la page Échéancier
-           — typo MudBlazor par défaut (16px) pour NE PAS tronquer les libellés, à largeur
-           110px identique. Spécificité 0,4,0 (> .acc-ffield 0,3,0) + définie après : l'emporte.
-           Scopé à .lc-filtres → n'affecte PAS les filtres de /scolarites (qui partagent .acc-ffield). */
-        /* Police 16px (= Échéancier) + centrage vertical : la base .acc-ffield force
-           padding vertical = 0 (texte collé en haut dès qu'on gagne en hauteur). On rétablit
-           un padding vertical symétrique qui définit la hauteur ET centre le texte, comme
-           Échéancier. Scopé /listes-classe (n'affecte pas /scolarites). */
+        /* ===== Gabarit COMMUN des barres de filtres /listes-classe (.lc-filtres) ET
+           /scolarites (.sc-filtres) — MÊME aspect sur les deux pages. Scopé aux marqueurs de
+           page → n'affecte aucune autre page .acc-window (qui partagent .acc-ffield). ===== */
+
+        /* Champs texte (.acc-ffield : Nom, Prénoms, Matricule, N° Inscr) : police 16px + padding
+           vertical symétrique qui définit la hauteur ET centre le texte (la base .acc-ffield
+           force padding 0 → sinon texte collé en haut). */
         .acc-window .lc-filtres .acc-ffield input,
         .acc-window .lc-filtres .acc-ffield .mud-input-slot,
-        .acc-window .lc-filtres .acc-ffield .mud-select-input {
+        .acc-window .lc-filtres .acc-ffield .mud-select-input,
+        .acc-window .sc-filtres .acc-ffield input,
+        .acc-window .sc-filtres .acc-ffield .mud-input-slot,
+        .acc-window .sc-filtres .acc-ffield .mud-select-input {
             font-size: 16px !important;
             height: auto !important;
             padding-top: 4px !important;
             padding-bottom: 2px !important;
         }
         .acc-window .lc-filtres .acc-ffield .mud-input.mud-input-outlined,
-        .acc-window .lc-filtres .acc-ffield .mud-input-control-input-container {
+        .acc-window .lc-filtres .acc-ffield .mud-input-control-input-container,
+        .acc-window .sc-filtres .acc-ffield .mud-input.mud-input-outlined,
+        .acc-window .sc-filtres .acc-ffield .mud-input-control-input-container {
             min-height: 22px !important;
         }
-        /* Filtre Niveau un peu plus large (libellés de niveau) — scopé /listes-classe,
-           l'emporte sur .acc-fnarrow (110px) par spécificité 0,4,0. */
-        .acc-window .lc-filtres .lc-fniveau {
-            width: 130px !important;
-            min-width: 130px !important;
-            max-width: 130px !important;
-        }
-        /* Matricule / N° Inscr un peu plus larges (scopé /listes-classe). Spécificité 0,3,0
-           → l'emporte sur .acc-ffield (130px) et .acc-fnarrow (110px). */
-        .acc-window .lc-filtres .lc-matricule {
+
+        /* Largeurs des champs texte : Matricule 170, N° Inscr 120, Nom & Prénoms 170. */
+        .acc-window .lc-filtres .lc-matricule,
+        .acc-window .sc-filtres .lc-matricule {
             width: 170px !important;
             min-width: 170px !important;
             max-width: 170px !important;
         }
-        .acc-window .lc-filtres .lc-numordre {
+        .acc-window .lc-filtres .lc-numordre,
+        .acc-window .sc-filtres .lc-numordre {
             width: 120px !important;
             min-width: 120px !important;
             max-width: 120px !important;
         }
-        /* Filtres Nom / Prénoms (2e ligne, après N° Inscr) : 170px. */
         .acc-window .lc-filtres .lc-nom,
-        .acc-window .lc-filtres .lc-prenoms {
+        .acc-window .lc-filtres .lc-prenoms,
+        .acc-window .sc-filtres .lc-nom,
+        .acc-window .sc-filtres .lc-prenoms {
             width: 170px !important;
             min-width: 170px !important;
             max-width: 170px !important;
         }
-        /* Filtre Inscrit (porte .lc-bulk-op) : 110px. Scopé .lc-filtres → ne touche PAS le
-           vrai « Action en masse » (185px, hors .lc-filtres). Spécificité 0,3,0 > 0,2,0. */
-        .acc-window .lc-filtres .lc-bulk-op {
+
+        /* Déroulantes passées en .lc-bulk-op = hauteur par défaut MudBlazor (gabarit « Action
+           en masse ») ; largeur 110px par défaut + police 16px via .lc-fstd. .lc-bulk-op est
+           scopé à la barre → ne touche PAS le vrai « Action en masse » (185px, hors barre). */
+        .acc-window .lc-filtres .lc-bulk-op,
+        .acc-window .sc-filtres .lc-bulk-op {
             width: 110px !important;
             min-width: 110px !important;
             max-width: 110px !important;
         }
-        /* Cycle / Niveau / Classe / Statut / Sexe / Actif : passés en .lc-bulk-op (pour prendre
-           la hauteur par défaut MudBlazor du champ « Action en masse »), MAIS on préserve leur
-           police 16px et leurs largeurs d'origine. Le marqueur .lc-fstd n'est PAS sur Inscrit
-           → Inscrit reste à 14px/110px, inchangé. */
         .acc-window .lc-filtres .lc-fstd input,
-        .acc-window .lc-filtres .lc-fstd .mud-select-input {
+        .acc-window .lc-filtres .lc-fstd .mud-select-input,
+        .acc-window .sc-filtres .lc-fstd input,
+        .acc-window .sc-filtres .lc-fstd .mud-select-input {
             font-size: 16px !important;
         }
-        .acc-window .lc-filtres .lc-fstd {
+        .acc-window .lc-filtres .lc-fstd,
+        .acc-window .sc-filtres .lc-fstd {
             width: 110px !important;
             min-width: 110px !important;
             max-width: 110px !important;
         }
-        /* Niveau (130px) et Classe (135px) : spécificité 0,4,0 pour battre le 110px ci-dessus. */
-        .acc-window .lc-filtres .lc-fstd.lc-fniveau {
+        /* Niveau 130 / Classe 135 : spécificité 0,4,0 pour battre le 110px ci-dessus. */
+        .acc-window .lc-filtres .lc-fstd.lc-fniveau,
+        .acc-window .sc-filtres .lc-fstd.lc-fniveau {
             width: 130px !important;
             min-width: 130px !important;
             max-width: 130px !important;
         }
-        .acc-window .lc-filtres .lc-fstd.lc-fclasse {
+        .acc-window .lc-filtres .lc-fstd.lc-fclasse,
+        .acc-window .sc-filtres .lc-fstd.lc-fclasse {
             width: 135px !important;
             min-width: 135px !important;
             max-width: 135px !important;
