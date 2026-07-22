@@ -30,7 +30,7 @@
             <div class="acc-fgroup">
                 <label class="acc-flabel">Cycle :</label>
                 <MudSelect Value="_fCycleId" ValueChanged="OnFiltreCycleChanged" T="string" Clearable="true" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd">
                     <MudSelectItem Value="@("")">Tous</MudSelectItem>
                     @foreach (var c in _cycles)
                     {
@@ -42,7 +42,7 @@
                 <label class="acc-flabel">Niveau :</label>
                 @* Cascade : ne montre que les niveaux du cycle filtré (tous si aucun cycle). *@
                 <MudSelect Value="_fNiveau" ValueChanged="OnFiltreNiveauChanged" T="string" Clearable="true" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow lc-fniveau">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd lc-fniveau">
                     <MudSelectItem Value="@("")">Tous</MudSelectItem>
                     @foreach (var n in NiveauxFiltre)
                     {
@@ -54,7 +54,7 @@
                 <label class="acc-flabel">Classe :</label>
                 @* Cascade : classes du niveau filtré, sinon du cycle filtré, sinon toutes. *@
                 <MudSelect Value="_fClasse" ValueChanged="OnFiltreClasseChanged" T="string" Clearable="true" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow acc-fclasse">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd lc-fclasse">
                     <MudSelectItem Value="@("")">Toutes</MudSelectItem>
                     @foreach (var cl in ClassesFiltre)
                     {
@@ -65,7 +65,7 @@
             <div class="acc-fgroup">
                 <label class="acc-flabel">Statut :</label>
                 <MudSelect Value="_fStatut" ValueChanged="OnFiltreStatutChanged" T="string" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd">
                     <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
                     <MudSelectItem Value="@("Aff")">Aff</MudSelectItem>
                     <MudSelectItem Value="@("Naff")">Naff</MudSelectItem>
@@ -74,7 +74,7 @@
             <div class="acc-fgroup">
                 <label class="acc-flabel">Sexe :</label>
                 <MudSelect Value="_fSexe" ValueChanged="OnFiltreSexeChanged" T="string" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd">
                     <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
                     <MudSelectItem Value="@("G")">Garçons</MudSelectItem>
                     <MudSelectItem Value="@("F")">Filles</MudSelectItem>
@@ -83,7 +83,7 @@
             <div class="acc-fgroup">
                 <label class="acc-flabel">Inscrit :</label>
                 <MudSelect Value="_fInscrit" ValueChanged="OnFiltreInscritChanged" T="string" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd">
                     <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
                     <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
                     <MudSelectItem Value="@("Non")">Non</MudSelectItem>
@@ -92,7 +92,7 @@
             <div class="acc-fgroup">
                 <label class="acc-flabel">Actif :</label>
                 <MudSelect Value="_fActif" ValueChanged="OnFiltreActifChanged" T="string" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd">
                     <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
                     <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
                     <MudSelectItem Value="@("Non")">Non</MudSelectItem>
@@ -108,13 +108,25 @@
                     <label class="acc-flabel">Matricule :</label>
                     <MudTextField Value="_fMatricule" ValueChanged="OnFiltreMatriculeChanged" T="string"
                                   Immediate="true" Clearable="true"
-                                  Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-yellow" />
+                                  Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-yellow lc-matricule" />
                 </div>
                 <div class="acc-fgroup">
                     <label class="acc-flabel">N° Inscr. :</label>
                     <MudTextField Value="_fNumOrdre" ValueChanged="OnFiltreNumOrdreChanged" T="string"
                                   Immediate="true" Clearable="true" Placeholder="N°…"
-                                  Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow acc-yellow" />
+                                  Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow acc-yellow lc-numordre" />
+                </div>
+                <div class="acc-fgroup">
+                    <label class="acc-flabel">Nom :</label>
+                    <MudTextField Value="_fNom" ValueChanged="OnFiltreNomChanged" T="string"
+                                  Immediate="true" Clearable="true" Placeholder="Nom…"
+                                  Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield lc-nom" />
+                </div>
+                <div class="acc-fgroup">
+                    <label class="acc-flabel">Prénoms :</label>
+                    <MudTextField Value="_fPrenoms" ValueChanged="OnFiltrePrenomsChanged" T="string"
+                                  Immediate="true" Clearable="true" Placeholder="Prénoms…"
+                                  Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield lc-prenoms" />
                 </div>
             </div>
         </div>

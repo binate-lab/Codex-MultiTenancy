@@ -50,7 +50,16 @@
 .acc-fgroup {
     display: flex;
     flex-direction: column;
-    gap: 2px;
+    gap: 0;            /* champ collé sous son label (remonte légèrement) */
+}
+
+/* 2e ligne de filtres (Matricule + N° Inscription) : conteneur pleine largeur => passe sous
+   la 1re ligne, aligné à gauche. */
+.sc-row2 {
+    flex-basis: 100%;
+    display: flex;
+    gap: 0 14px;
+    align-items: flex-end;
 }
 
 .acc-flabel {

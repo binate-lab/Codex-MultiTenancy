@@ -21,7 +21,7 @@
         </div>
 
         <!-- ============ Barre de filtres ============ -->
-        <div class="acc-filterbar">
+        <div class="acc-filterbar sc-filtres">
             @* Tous les filtres sur UNE ligne, dans l'ordre de tabulation
                (Nom -> Prénoms -> Matricule -> N° Inscription -> Niveau -> Classe ->
                Statut -> Inscrit). Le Tab / Shift+Tab suit naturellement l'ordre du DOM. *@
@@ -36,17 +36,6 @@
                 <MudTextField @bind-Value="_fPrenoms" Immediate="true" Clearable="true"
                               Placeholder="Prénoms…"
                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield" />
-            </div>
-            <div class="acc-fgroup">
-                <label class="acc-flabel">Matricule :</label>
-                <MudTextField @bind-Value="_fMatricule" Immediate="true" Clearable="true"
-                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-yellow acc-fmatricule" />
-            </div>
-            <div class="acc-fgroup">
-                <label class="acc-flabel">N° Inscription :</label>
-                <MudTextField @bind-Value="_fNumOrdre" Immediate="true" Clearable="true"
-                              Placeholder="N°…"
-                              Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-yellow acc-fnumordre" />
             </div>
             <div class="acc-fgroup">
                 <label class="acc-flabel">Niveau :</label>
@@ -82,24 +71,6 @@
                 </MudSelect>
             </div>
             <div class="acc-fgroup">
-                <label class="acc-flabel">Inscrit :</label>
-                <MudSelect @bind-Value="_fInscrit" T="string" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
-                    <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
-                    <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
-                    <MudSelectItem Value="@("Non")">Non</MudSelectItem>
-                </MudSelect>
-            </div>
-            <div class="acc-fgroup">
-                <label class="acc-flabel">Actif :</label>
-                <MudSelect @bind-Value="_fActif" T="string" Dense="true"
-                           Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
-                    <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
-                    <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
-                    <MudSelectItem Value="@("Non")">Non</MudSelectItem>
-                </MudSelect>
-            </div>
-            <div class="acc-fgroup">
                 <label class="acc-flabel">Transport :</label>
                 <MudSelect @bind-Value="_fTransport" T="string" Dense="true"
                            Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
@@ -123,6 +94,40 @@
             </div>
             <MudButton OnClick="Effacer" Variant="Variant.Outlined" Size="Size.Small"
                        StartIcon="@Icons.Material.Filled.FilterAltOff" Class="ml-auto">Effacer</MudButton>
+
+            @* Matricule + N° Inscription + Inscrit + Actif descendus sur une 2e ligne
+               (pleine largeur => saut de ligne). *@
+            <div class="sc-row2">
+                <div class="acc-fgroup">
+                    <label class="acc-flabel">Matricule :</label>
+                    <MudTextField @bind-Value="_fMatricule" Immediate="true" Clearable="true"
+                                  Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-yellow acc-fmatricule" />
+                </div>
+                <div class="acc-fgroup">
+                    <label class="acc-flabel">N° Inscription :</label>
+                    <MudTextField @bind-Value="_fNumOrdre" Immediate="true" Clearable="true"
+                                  Placeholder="N°…"
+                                  Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-yellow acc-fnumordre" />
+                </div>
+                <div class="acc-fgroup">
+                    <label class="acc-flabel">Inscrit :</label>
+                    <MudSelect @bind-Value="_fInscrit" T="string" Dense="true"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                        <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
+                        <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
+                        <MudSelectItem Value="@("Non")">Non</MudSelectItem>
+                    </MudSelect>
+                </div>
+                <div class="acc-fgroup">
+                    <label class="acc-flabel">Actif :</label>
+                    <MudSelect @bind-Value="_fActif" T="string" Dense="true"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield acc-fnarrow">
+                        <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
+                        <MudSelectItem Value="@("Oui")">Oui</MudSelectItem>
+                        <MudSelectItem Value="@("Non")">Non</MudSelectItem>
+                    </MudSelect>
+                </div>
+            </div>
         </div>
 
         <!-- ============ Zone rouge : liste des élèves ============ -->

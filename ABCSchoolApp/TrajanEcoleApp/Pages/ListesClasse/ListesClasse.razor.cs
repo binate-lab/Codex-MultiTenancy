@@ -64,6 +64,8 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private string _fActif = "Oui";       // par défaut : seulement les actifs
         private string _fMatricule = string.Empty; // filtre matricule national (souple, sans espaces)
         private string _fNumOrdre = string.Empty;  // filtre N° Inscription (contient)
+        private string _fNom = string.Empty;        // filtre Nom (contient, insensible à la casse)
+        private string _fPrenoms = string.Empty;    // filtre Prénoms (contient, insensible à la casse)
 
         // Page courante (0-based) et taille de page de la grille : pilotées par la MudTable.
         // On les suit pour recaler la sélection sur le 1er élève de la page affichée.
@@ -246,7 +248,11 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 && (_fActif == "Tous" || (_fActif == "Oui") == e.Actif)
                 && (string.IsNullOrWhiteSpace(_fNumOrdre) || e.NumOrdre.ToString().Contains(_fNumOrdre.Trim()))
                 && (string.IsNullOrWhiteSpace(_fMatricule)
-                    || Compact(e.Matricule).Contains(Compact(_fMatricule), StringComparison.OrdinalIgnoreCase)))
+                    || Compact(e.Matricule).Contains(Compact(_fMatricule), StringComparison.OrdinalIgnoreCase))
+                && (string.IsNullOrWhiteSpace(_fNom)
+                    || (e.Nom ?? string.Empty).Contains(_fNom.Trim(), StringComparison.CurrentCultureIgnoreCase))
+                && (string.IsNullOrWhiteSpace(_fPrenoms)
+                    || (e.Prenoms ?? string.Empty).Contains(_fPrenoms.Trim(), StringComparison.CurrentCultureIgnoreCase)))
             // Toujours par ordre alphabétique : Nom croissant, puis Prénoms croissant.
             .OrderBy(e => e.Nom, StringComparer.CurrentCultureIgnoreCase)
             .ThenBy(e => e.Prenoms, StringComparer.CurrentCultureIgnoreCase);
@@ -257,6 +263,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             _fStatut = _fSexe = "Tous";
             _fInscrit = _fActif = "Oui";   // on revient au défaut (inscrits + actifs)
             _fMatricule = _fNumOrdre = string.Empty;
+            _fNom = _fPrenoms = string.Empty;
             AppliquerFiltre();
         }
 
@@ -306,6 +313,8 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private void OnFiltreActifChanged(string v) { _fActif = v ?? "Tous"; AppliquerFiltre(); }
         private void OnFiltreMatriculeChanged(string v) { _fMatricule = v ?? string.Empty; AppliquerFiltre(); }
         private void OnFiltreNumOrdreChanged(string v) { _fNumOrdre = v ?? string.Empty; AppliquerFiltre(); }
+        private void OnFiltreNomChanged(string v) { _fNom = v ?? string.Empty; AppliquerFiltre(); }
+        private void OnFiltrePrenomsChanged(string v) { _fPrenoms = v ?? string.Empty; AppliquerFiltre(); }
 
         // Comparaison souple du matricule : on ignore les espaces (« 22 654 456 M » ~ « 22654456M »).
         private static string Compact(string s) => (s ?? string.Empty).Replace(" ", string.Empty);
