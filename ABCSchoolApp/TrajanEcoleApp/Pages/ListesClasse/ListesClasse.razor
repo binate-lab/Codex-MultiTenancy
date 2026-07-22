@@ -190,7 +190,7 @@
                 <MudTd DataLabel="N° Inscr." Style="text-align:right">@context.NumOrdre</MudTd>
                 <MudTd DataLabel="Matricule" Class="acc-cell-matricule">@FormatMatricule(context.Matricule)</MudTd>
                 <MudTd DataLabel="Nom" Class="acc-cell-nom">
-                    @if (_colonneActive == "nom")
+                    @if (_colonneActive is "nom" or "nom-prenoms")
                     {
                         <MudTextField T="string" Value="@context.Nom"
                                       ValueChanged="@((string v) => OnNomCorrige(context, v))"
@@ -203,7 +203,7 @@
                     }
                 </MudTd>
                 <MudTd DataLabel="Prénoms" Class="acc-cell-prenom">
-                    @if (_colonneActive == "prenoms")
+                    @if (_colonneActive is "prenoms" or "nom-prenoms")
                     {
                         <MudTextField T="string" Value="@context.Prenoms"
                                       ValueChanged="@((string v) => OnPrenomsCorrige(context, v))"
@@ -474,6 +474,7 @@
                        Style="width:185px" Placeholder="(aucune)">
                 <MudSelectItem Value="@("nom")">Nom</MudSelectItem>
                 <MudSelectItem Value="@("prenoms")">Prénoms</MudSelectItem>
+                <MudSelectItem Value="@("nom-prenoms")">Nom &amp; Prénoms</MudSelectItem>
                 <MudSelectItem Value="@("cycle")">Cycle</MudSelectItem>
                 <MudSelectItem Value="@("datenaiss")">Date naiss</MudSelectItem>
                 <MudSelectItem Value="@("lieunaiss")">Lieu naiss</MudSelectItem>
