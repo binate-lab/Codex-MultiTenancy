@@ -185,6 +185,13 @@
             height: 40px !important;
         }
 
+        /* Lignes élèves cliquables (clic = sélection/fiche) : curseur « doigt » au survol.
+           Couvre les DEUX grilles élèves (/scolarites et /listes-classe) via .acc-grid-eleves.
+           Les champs édités en cellule gardent leur curseur natif (texte) par-dessus. */
+        .acc-window .acc-grid-eleves tbody tr {
+            cursor: pointer;
+        }
+
         /* Grille liste élèves : lignes à 26px (alignées sur la grille Modalités de versement).
            Les champs des cellules (happés par les 22px « Access ») sont compactés pour tenir. */
         .acc-window .acc-grid-eleves td {
