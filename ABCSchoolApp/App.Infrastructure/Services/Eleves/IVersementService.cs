@@ -21,6 +21,10 @@ namespace App.Infrastructure.Services.Eleves
         public bool Macaron { get; set; }
         public string ModeRame { get; set; }
         public int? Mois { get; set; }
+
+        // Référence DGI de la facture normalisée (FNE) certifiée pour ce versement.
+        // Null tant que la certification n'a pas abouti → « — » sur l'aperçu du reçu.
+        public string? ReferenceFne { get; set; }
     }
 
     // Bloc de synthese (Total frais / Payé / Reste / Crédit) renvoye avec le detail.

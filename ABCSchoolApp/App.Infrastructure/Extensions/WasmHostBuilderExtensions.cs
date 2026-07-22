@@ -17,6 +17,8 @@ using App.Infrastructure.Services.Economat;
 using App.Infrastructure.Services.Implementations.Economat;
 using App.Infrastructure.Services.Orange;
 using App.Infrastructure.Services.Implementations.Orange;
+using App.Infrastructure.Services.Fne;
+using App.Infrastructure.Services.Implementations.Fne;
 using App.Infrastructure.Services.AnneesScolaires;
 using App.Infrastructure.Services.Implementations.AnneesScolaires;
 using App.Infrastructure.Services.Implementations.Schools;
@@ -172,6 +174,14 @@ namespace App.Infrastructure.Extensions
             // Client typé dédié au webhook Orange Money de Scolarite.Api : supervision des paiements.
             builder.Services
                 .AddHttpClient<IPaiementOrangeService, PaiementOrangeService>(client =>
+                {
+                    client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
+                })
+                .AddHttpMessageHandler<AuthenticationHeaderHandler>();
+
+            // Client typé dédié au module FNE de Scolarite.Api : paramètres DGI + suivi des factures.
+            builder.Services
+                .AddHttpClient<IFneService, FneService>(client =>
                 {
                     client.BaseAddress = new Uri(builder.Configuration.GetSection("ApiSettings:ScolariteApiUrl").Get<string>());
                 })

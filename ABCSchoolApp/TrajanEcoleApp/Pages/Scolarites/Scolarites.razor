@@ -584,7 +584,10 @@
                     <div class="recu-champ"><span>Classe</span><b>@FormatClasse(_sel.Classe)</b></div>
                 </div>
 
-                @* Versements enregistrés. *@
+                @* Versements enregistrés. La colonne « Réf. FNE » (certification DGI) n'apparaît
+                   que si au moins un versement est certifié : une école non enrôlée à la FNE
+                   garde son reçu d'avant, à l'identique — même logique que le reçu PDF. *@
+                @{ var recuAvecFne = _versements.Any(x => !string.IsNullOrWhiteSpace(x.ReferenceFne)); }
                 <div class="recu-section-titre">Versements</div>
                 <table class="recu-table">
                     <thead>
@@ -594,6 +597,10 @@
                             <th>Nature</th>
                             <th>Mode</th>
                             <th>Référence</th>
+                            @if (recuAvecFne)
+                            {
+                                <th>Réf. FNE</th>
+                            }
                             <th class="r-montant">Montant</th>
                         </tr>
                     </thead>
@@ -608,12 +615,16 @@
                                 <td>@v.Nature</td>
                                 <td>@v.MoyenPaiement</td>
                                 <td>@v.ReferencePaiement</td>
+                                @if (recuAvecFne)
+                                {
+                                    <td>@(string.IsNullOrWhiteSpace(v.ReferenceFne) ? "—" : v.ReferenceFne)</td>
+                                }
                                 <td class="r-montant">@Fmt(v.Montant)</td>
                             </tr>
                         }
                         @if (_versements.Count == 0)
                         {
-                            <tr><td colspan="6" class="recu-vide">Aucun versement enregistré.</td></tr>
+                            <tr><td colspan="@(recuAvecFne ? 7 : 6)" class="recu-vide">Aucun versement enregistré.</td></tr>
                         }
                     </tbody>
                 </table>
