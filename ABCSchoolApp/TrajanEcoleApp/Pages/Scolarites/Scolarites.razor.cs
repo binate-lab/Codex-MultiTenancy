@@ -790,6 +790,15 @@ namespace TrajanEcoleApp.Pages.Scolarites
         // aux listes et au reçu.
         private static string FormatMatricule(string mat) => MatriculeFormatter.Format(mat);
 
+        // Matricule pour l'IMPRESSION (aperçu HTML du reçu) : les matricules provisoires
+        // « internes » (commencent par 80) ne sont pas des matricules nationaux → masqués,
+        // comme sur le reçu PDF (RecuMapper) et les listes de classe imprimées.
+        private static string FormatMatriculeImpression(string mat)
+        {
+            var compact = (mat ?? string.Empty).Replace(" ", string.Empty);
+            return compact.StartsWith("80") ? string.Empty : FormatMatricule(mat);
+        }
+
         // Libellé de classe collège reformaté (« 6e1 » -> « 6è 1 ») — helper partagé.
         private static string FormatClasse(string classe) => ClasseFormatter.Format(classe);
 
