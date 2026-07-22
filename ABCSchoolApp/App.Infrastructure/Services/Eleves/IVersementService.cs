@@ -77,6 +77,12 @@ namespace App.Infrastructure.Services.Eleves
         // apres un versement d'inscription).
         public bool Actif { get; set; }
         public bool Inscrit { get; set; }
+
+        // Timbre FNE (DGI) de l'aperçu du reçu : dernière certification parmi les versements
+        // encore présents. Null = aucun versement certifié → pas de bloc FNE sur l'aperçu.
+        public string? FneReference { get; set; }
+        public DateTime? FneDate { get; set; }
+        public string? FneQrBase64 { get; set; }   // PNG du QR (sticker DGI) en base64
     }
 
     // Resultat d'ecriture : Error porte le message metier du backend ; Data = etat

@@ -694,9 +694,31 @@
                     </table>
                 }
 
-                <div class="recu-signature">
-                    <div>Le Comptable / la Caisse</div>
-                    <div class="recu-signature-ligne">Signature &amp; cachet</div>
+                @* Timbre FNE (certification DGI) à gauche + signature à droite — parité avec
+                   le reçu PDF. Sans certification, la signature reste seule. *@
+                <div class="recu-pied-fne">
+                    @if (_detail is not null && !string.IsNullOrWhiteSpace(_detail.FneReference))
+                    {
+                        <div class="recu-fne">
+                            @if (!string.IsNullOrWhiteSpace(_detail.FneQrBase64))
+                            {
+                                <img class="recu-fne-qr" src="data:image/png;base64,@_detail.FneQrBase64" alt="QR FNE" />
+                            }
+                            <div class="recu-fne-texte">
+                                <div class="recu-fne-titre">FACTURE NORMALISÉE ÉLECTRONIQUE</div>
+                                <div>Réf. DGI : @_detail.FneReference</div>
+                                @if (_detail.FneDate is not null)
+                                {
+                                    <div>Certifiée le : @_detail.FneDate.Value.ToLocalTime().ToString("dd/MM/yyyy HH:mm")</div>
+                                }
+                                <div class="recu-fne-mention">Vérifiable par scan du QR code (portail DGI).</div>
+                            </div>
+                        </div>
+                    }
+                    <div class="recu-signature">
+                        <div>Le Comptable / la Caisse</div>
+                        <div class="recu-signature-ligne">Signature &amp; cachet</div>
+                    </div>
                 </div>
             </div>
         </div>

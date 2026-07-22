@@ -406,6 +406,8 @@ namespace TrajanEcoleApp.Pages.Scolarites
         // Élève sélectionné (clic sur une ligne de la grille rouge) + son état versements.
         private EleveScolariteRow _sel;
         private ScolariteResume _resume;
+        // Réponse complète du backend : porte aussi le timbre FNE (réf DGI + QR) de l'aperçu.
+        private VersementsEleveReponse _detail;
         private List<VersementDetailItem> _versements = new();
         private List<EcheanceEleveItem> _echeancier = new();
         private List<ReductionDetailItem> _reductions = new();
@@ -459,6 +461,7 @@ namespace TrajanEcoleApp.Pages.Scolarites
 
         private void AppliquerReponse(VersementsEleveReponse data)
         {
+            _detail = data;
             _resume = data?.Resume;
             _versements = data?.Versements ?? new List<VersementDetailItem>();
             _echeancier = data?.Echeancier ?? new List<EcheanceEleveItem>();
