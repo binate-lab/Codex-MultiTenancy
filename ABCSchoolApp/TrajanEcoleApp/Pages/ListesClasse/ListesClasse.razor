@@ -753,7 +753,7 @@
                                 rangA++;
                                 <tr>
                                     <td class="c-num">@rangA</td>
-                                    <td class="c-mat">@FormatMatricule(e.Matricule)</td>
+                                    <td class="c-mat">@FormatMatriculeImpression(e.Matricule)</td>
                                     <td class="c-nom">@e.Nom @e.Prenoms</td>
                                     @foreach (var jour in JoursAppel)
                                     {
@@ -786,7 +786,7 @@
                                     }
                                 </div>
                                 <div class="lc-tromb-nom">@e.Nom @e.Prenoms</div>
-                                <div class="lc-tromb-mat">@FormatMatricule(e.Matricule)</div>
+                                <div class="lc-tromb-mat">@FormatMatriculeImpression(e.Matricule)</div>
                             </div>
                         }
                         @if (ElevesImpression.Count == 0)
@@ -828,7 +828,7 @@
                                 rang++;
                                 <tr>
                                     <td class="c-num">@rang</td>
-                                    <td class="c-mat">@FormatMatricule(e.Matricule)</td>
+                                    <td class="c-mat">@FormatMatriculeImpression(e.Matricule)</td>
                                     <td class="c-nom">@e.Nom @e.Prenoms</td>
                                     <td class="c-sexe">@e.Sexe</td>
                                     @if (ModeleNotes)
