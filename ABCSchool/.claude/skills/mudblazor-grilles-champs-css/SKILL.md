@@ -12,7 +12,11 @@ description: >
   « le champ reste trop grand / à 22px », « la largeur ne change pas », « aligner les lignes
   sur X px », « mettre les filtres sur une ligne », « scroll horizontal de la grille »,
   « me déplacer au clavier entre les lignes », « copier la cellule du dessus / recopier la
-  valeur d'au-dessus », même sans citer « MudBlazor », « scopé » ou « ::deep ». Ce skill
+  valeur d'au-dessus », même sans citer « MudBlazor », « scopé » ou « ::deep ». Couvre aussi
+  la STRUCTURE des barres de filtres du front (marqueurs de page .lc-filtres/.sc-filtres pour
+  scoper sans déborder sur l'autre page, 2e ligne lc-row2/sc-row2, gabarit lc-bulk-op) et le
+  squelette pour AJOUTER un filtre de bout en bout — déclenche aussi sur « ajoute un filtre »,
+  « descends tel filtre sur une 2e ligne », « aligne ce filtre sur Action en masse ». Ce skill
   encode POURQUOI le CSS scopé Blazor échoue sur les composants MudBlazor et OÙ mettre la
   règle pour qu'elle prenne. N'utilise PAS ce skill pour : de la logique métier (filtrage,
   calcul) ; styliser un élément HTML pur hors MudBlazor ; changer le thème global via le
@@ -338,6 +342,56 @@ Points d'attention (tirés du vécu) :
   copie. La détection `previousElementSibling` reste dans le `<tbody>` visible.
 - Le handler est **global** (une seule fois dans `index.html`) mais borné à `.acc-grid-eleves`
   (no-op ailleurs) ; adapte ce sélecteur à ta grille.
+
+## Recette 6 — Barres de filtres (structure & ajout d'un filtre)
+
+Les pages de listes ont une **barre de filtres** `<div class="acc-filterbar …">` au-dessus de la
+grille. Deux existent : `/listes-classe` et `/scolarites` (Versements). Elles **partagent la
+classe générique `.acc-ffield`** sur leurs champs → une règle `.acc-window .acc-ffield {…}`
+toucherait LES DEUX pages.
+
+**Marqueur de page = la clé du scoping.** Chaque barre porte un marqueur propre :
+`.lc-filtres` (/listes-classe), `.sc-filtres` (/scolarites). Toute règle de largeur/police/padding
+d'un filtre se préfixe par ce marqueur :
+
+```css
+/* Spécificité 0,3,x → bat le générique .acc-window .acc-ffield (0,2,x) ET reste scopée à la page. */
+.acc-window .lc-filtres .acc-ffield .mud-select-input { font-size: 14px !important; }
+.acc-window .sc-filtres .acc-ffield input { padding-top: 4px !important; }
+```
+
+Cibler **`.mud-select-input`** = uniquement les déroulantes (MudSelect) ; **`input`** = aussi les
+champs texte. Un filtre précis se marque par une classe dédiée (ex. `lc-matricule`, `lc-numordre`)
+puisque `acc-fnarrow`/`acc-fclasse` sont partagées entre plusieurs filtres.
+
+**2e ligne de filtres** : un conteneur `lc-row2` / `sc-row2` en `flex-basis:100%` provoque un saut
+de ligne (il occupe toute la largeur) → tout ce qui suit passe dessous. Sert à descendre des
+filtres (Matricule, N° Inscr, Inscrit, Actif…) sur une 2e ligne.
+
+**Ajouter un filtre de bout en bout** (ce n'est PAS que du CSS — mais on documente le squelette) :
+1. champ d'état `_fXxx` dans le code-behind ;
+2. clause dans `Filtered =>` (cumul ET), `Contains` insensible à la casse pour du texte ;
+3. reset dans `Effacer()` ;
+4. handler `OnFiltreXxxChanged(v){ _fXxx = v; AppliquerFiltre(); }` — **Value/ValueChanged**, pas
+   `@bind-Value` sur MudSelect (le handler ne partirait pas de façon fiable) ;
+5. markup `<div class="acc-fgroup"><label class="acc-flabel">…</label><MudSelect/MudTextField
+   Class="acc-ffield …"/></div>` ;
+6. largeur en **global** (`index.html`), scopée au marqueur de page.
+
+**Gabarit `lc-bulk-op`** (le champ « Action en masse » en bas de la grille /listes-classe) : c'est
+la référence quand on veut aligner des filtres sur ce look — largeur **185px** (en `Style` inline),
+police **14px**, hauteur **≈37,6px** (défaut MudBlazor Dense+Outlined, aucune hauteur imposée ;
+mesure-la, voir la sous-section « Hauteur d'un champ »). Piège vécu : mettre `lc-bulk-op` sur un
+filtre le **sort** des règles `.lc-filtres .acc-ffield` (il n'a plus `.acc-ffield`) → il reprend
+185px/14px. Pour garder la largeur/police d'origine, ajoute un 2e marqueur (ex. `.lc-fstd` =
+police 16px + largeur 110px), et pour les largeurs spéciales utilise un **sélecteur combiné**
+(deux classes sur le même élément) pour gagner en spécificité :
+
+```css
+.acc-window .lc-filtres .lc-fstd .mud-select-input { font-size: 16px !important; }
+.acc-window .lc-filtres .lc-fstd            { width: 110px !important; min-width:110px; max-width:110px; }
+.acc-window .lc-filtres .lc-fstd.lc-fniveau { width: 130px !important; } /* 0,4,0 bat le 110 ci-dessus */
+```
 
 ## Cadence de rechargement (sinon tu testes dans le vide)
 
