@@ -146,7 +146,7 @@ namespace TrajanEcoleApp.Pages.Orange
             "Pere" => "Père",
             "Mere" => "Mère",
             "Tuteur" => "Tuteur",
-            _ => "Inc.",
+            _ => "Inconnu",
         };
 
         private static Color CouleurLien(string lien) => lien switch
