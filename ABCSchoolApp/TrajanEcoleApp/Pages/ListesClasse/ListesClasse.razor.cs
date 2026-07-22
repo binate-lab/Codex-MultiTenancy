@@ -66,6 +66,8 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private string _fNumOrdre = string.Empty;  // filtre N° Inscription (contient)
         private string _fNom = string.Empty;        // filtre Nom (contient, insensible à la casse)
         private string _fPrenoms = string.Empty;    // filtre Prénoms (contient, insensible à la casse)
+        private string _fLv2 = "Tous";              // filtre LV_2 : "Tous" / "Allemand" / "Espagnol" / "(Vide)"
+        private string _fArts = "Tous";             // filtre Arts : "Tous" / "Arts Plastiques" / "Musique" / "(Vide)"
 
         // Page courante (0-based) et taille de page de la grille : pilotées par la MudTable.
         // On les suit pour recaler la sélection sur le 1er élève de la page affichée.
@@ -252,7 +254,11 @@ namespace TrajanEcoleApp.Pages.ListesClasse
                 && (string.IsNullOrWhiteSpace(_fNom)
                     || (e.Nom ?? string.Empty).Contains(_fNom.Trim(), StringComparison.CurrentCultureIgnoreCase))
                 && (string.IsNullOrWhiteSpace(_fPrenoms)
-                    || (e.Prenoms ?? string.Empty).Contains(_fPrenoms.Trim(), StringComparison.CurrentCultureIgnoreCase)))
+                    || (e.Prenoms ?? string.Empty).Contains(_fPrenoms.Trim(), StringComparison.CurrentCultureIgnoreCase))
+                && (_fLv2 == "Tous"
+                    || (_fLv2 == ValeurVide ? string.IsNullOrWhiteSpace(e.LV_2) : e.LV_2 == _fLv2))
+                && (_fArts == "Tous"
+                    || (_fArts == ValeurVide ? string.IsNullOrWhiteSpace(e.Arts) : e.Arts == _fArts)))
             // Toujours par ordre alphabétique : Nom croissant, puis Prénoms croissant.
             .OrderBy(e => e.Nom, StringComparer.CurrentCultureIgnoreCase)
             .ThenBy(e => e.Prenoms, StringComparer.CurrentCultureIgnoreCase);
@@ -264,6 +270,7 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             _fInscrit = _fActif = "Oui";   // on revient au défaut (inscrits + actifs)
             _fMatricule = _fNumOrdre = string.Empty;
             _fNom = _fPrenoms = string.Empty;
+            _fLv2 = _fArts = "Tous";
             AppliquerFiltre();
         }
 
@@ -315,6 +322,8 @@ namespace TrajanEcoleApp.Pages.ListesClasse
         private void OnFiltreNumOrdreChanged(string v) { _fNumOrdre = v ?? string.Empty; AppliquerFiltre(); }
         private void OnFiltreNomChanged(string v) { _fNom = v ?? string.Empty; AppliquerFiltre(); }
         private void OnFiltrePrenomsChanged(string v) { _fPrenoms = v ?? string.Empty; AppliquerFiltre(); }
+        private void OnFiltreLv2Changed(string v) { _fLv2 = v ?? "Tous"; AppliquerFiltre(); }
+        private void OnFiltreArtsChanged(string v) { _fArts = v ?? "Tous"; AppliquerFiltre(); }
 
         // Comparaison souple du matricule : on ignore les espaces (« 22 654 456 M » ~ « 22654456M »).
         private static string Compact(string s) => (s ?? string.Empty).Replace(" ", string.Empty);
@@ -513,6 +522,35 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             {
                 row.Telephone = ancien;
                 _snackbar.Add("Impossible d'enregistrer le téléphone.", Severity.Error);
+            }
+        }
+
+        // Corrections Nom / Prénoms (« Activer colonne ») : le nom ne peut pas être vidé.
+        private async Task OnNomCorrige(EleveRow row, string nouveau)
+        {
+            if (string.IsNullOrWhiteSpace(nouveau)) { _snackbar.Add("Le nom est obligatoire.", Severity.Warning); return; }
+            nouveau = nouveau.Trim();
+            if (nouveau == row.Nom) return;
+            var ancien = row.Nom;
+            row.Nom = nouveau;
+            if (!await _eleveService.MajNomAsync(row.Id, nouveau))
+            {
+                row.Nom = ancien;
+                _snackbar.Add("Impossible d'enregistrer le nom.", Severity.Error);
+            }
+        }
+
+        private async Task OnPrenomsCorrige(EleveRow row, string nouveau)
+        {
+            if (string.IsNullOrWhiteSpace(nouveau)) { _snackbar.Add("Les prénoms sont obligatoires.", Severity.Warning); return; }
+            nouveau = nouveau.Trim();
+            if (nouveau == row.Prenoms) return;
+            var ancien = row.Prenoms;
+            row.Prenoms = nouveau;
+            if (!await _eleveService.MajPrenomsAsync(row.Id, nouveau))
+            {
+                row.Prenoms = ancien;
+                _snackbar.Add("Impossible d'enregistrer les prénoms.", Severity.Error);
             }
         }
 
@@ -928,8 +966,8 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             public Guid Id { get; }
             public int NumOrdre { get; }        // N° Inscription (unique par école)
             public string Matricule { get; }
-            public string Nom { get; }
-            public string Prenoms { get; }
+            public string Nom { get; set; }      // éditable via « Activer colonne=Nom »
+            public string Prenoms { get; set; }  // éditable via « Activer colonne=Prénoms »
             public int Cycle { get; set; }      // N° de cycle (éditable en école publique)
             public string Niveau { get; set; }  // éditable en école publique (cascade → classes)
             public string Serie { get; }

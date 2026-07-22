@@ -240,6 +240,18 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             catch { return false; }
         }
 
+        public async Task<bool> MajNomAsync(Guid eleveId, string nom)
+        {
+            try { var r = await _httpClient.PutAsJsonAsync($"eleves/{eleveId}/nom", new { nom }); return r.IsSuccessStatusCode; }
+            catch { return false; }
+        }
+
+        public async Task<bool> MajPrenomsAsync(Guid eleveId, string prenoms)
+        {
+            try { var r = await _httpClient.PutAsJsonAsync($"eleves/{eleveId}/prenoms", new { prenoms }); return r.IsSuccessStatusCode; }
+            catch { return false; }
+        }
+
         public async Task<OperationEnMasseResult> OperationsEnMasseAsync(
             IReadOnlyList<Guid> ids, string operation, string? valeur)
         {

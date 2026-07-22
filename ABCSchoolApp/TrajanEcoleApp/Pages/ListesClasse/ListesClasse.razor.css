@@ -173,6 +173,13 @@
     width: 70px;
 }
 
+/* Champs de correction Nom / Prénoms (« Activer colonne ») : pleine largeur de leur colonne
+   (le 70px générique ci-dessus serait trop étroit pour un nom). */
+.acc-grid ::deep .acc-cell-nom .acc-cell-select,
+.acc-grid ::deep .acc-cell-prenom .acc-cell-select {
+    width: 100%;
+}
+
 /* Colonne Classe : le sélecteur fait EXACTEMENT la largeur de la colonne (comme dans la
    grille Versements/Scolarités), donc la flèche tombe à droite et le libellé (« TleD3 »,
    « NON DÉFINIE »…) n'est plus tronqué. */

@@ -128,6 +128,26 @@
                                   Immediate="true" Clearable="true" Placeholder="Prénoms…"
                                   Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-ffield lc-prenoms" />
                 </div>
+                <div class="acc-fgroup">
+                    <label class="acc-flabel">LV_2 :</label>
+                    <MudSelect Value="_fLv2" ValueChanged="OnFiltreLv2Changed" T="string" Dense="true"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd">
+                        <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
+                        <MudSelectItem Value="@("Allemand")">Allemand</MudSelectItem>
+                        <MudSelectItem Value="@("Espagnol")">Espagnol</MudSelectItem>
+                        <MudSelectItem Value="@("(Vide)")">(Vide)</MudSelectItem>
+                    </MudSelect>
+                </div>
+                <div class="acc-fgroup">
+                    <label class="acc-flabel">Arts :</label>
+                    <MudSelect Value="_fArts" ValueChanged="OnFiltreArtsChanged" T="string" Dense="true"
+                               Variant="Variant.Outlined" Margin="Margin.Dense" Class="lc-bulk-op lc-fstd">
+                        <MudSelectItem Value="@("Tous")">Tous</MudSelectItem>
+                        <MudSelectItem Value="@("Arts Plastiques")">Arts Plastiques</MudSelectItem>
+                        <MudSelectItem Value="@("Musique")">Musique</MudSelectItem>
+                        <MudSelectItem Value="@("(Vide)")">(Vide)</MudSelectItem>
+                    </MudSelect>
+                </div>
             </div>
         </div>
 
@@ -169,8 +189,32 @@
             <RowTemplate>
                 <MudTd DataLabel="N° Inscr." Style="text-align:right">@context.NumOrdre</MudTd>
                 <MudTd DataLabel="Matricule" Class="acc-cell-matricule">@FormatMatricule(context.Matricule)</MudTd>
-                <MudTd DataLabel="Nom" Class="acc-cell-nom">@context.Nom</MudTd>
-                <MudTd DataLabel="Prénoms" Class="acc-cell-prenom">@context.Prenoms</MudTd>
+                <MudTd DataLabel="Nom" Class="acc-cell-nom">
+                    @if (_colonneActive == "nom")
+                    {
+                        <MudTextField T="string" Value="@context.Nom"
+                                      ValueChanged="@((string v) => OnNomCorrige(context, v))"
+                                      Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                                      Class="acc-cell-select" />
+                    }
+                    else
+                    {
+                        @context.Nom
+                    }
+                </MudTd>
+                <MudTd DataLabel="Prénoms" Class="acc-cell-prenom">
+                    @if (_colonneActive == "prenoms")
+                    {
+                        <MudTextField T="string" Value="@context.Prenoms"
+                                      ValueChanged="@((string v) => OnPrenomsCorrige(context, v))"
+                                      Dense="true" Margin="Margin.Dense" Variant="Variant.Text" Underline="false"
+                                      Class="acc-cell-select" />
+                    }
+                    else
+                    {
+                        @context.Prenoms
+                    }
+                </MudTd>
                 <MudTd DataLabel="Cycle" data-col="Cycle" data-eleve-id="@context.Id">
                     @* « Activer colonne=Cycle » : correction (toutes écoles, SANS cascade). Sinon,
                        édition publique avec cascade, ou lecture seule en privé. *@
@@ -428,6 +472,8 @@
             <MudSelect T="string" Value="_colonneActive" ValueChanged="OnColonneActiveChanged" Clearable="true"
                        Dense="true" Margin="Margin.Dense" Variant="Variant.Outlined" Class="lc-bulk-op"
                        Style="width:185px" Placeholder="(aucune)">
+                <MudSelectItem Value="@("nom")">Nom</MudSelectItem>
+                <MudSelectItem Value="@("prenoms")">Prénoms</MudSelectItem>
                 <MudSelectItem Value="@("cycle")">Cycle</MudSelectItem>
                 <MudSelectItem Value="@("datenaiss")">Date naiss</MudSelectItem>
                 <MudSelectItem Value="@("lieunaiss")">Lieu naiss</MudSelectItem>

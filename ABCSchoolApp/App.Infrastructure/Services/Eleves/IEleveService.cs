@@ -44,6 +44,8 @@ namespace App.Infrastructure.Services.Eleves
         Task<bool> MajLieuNaissanceAsync(Guid eleveId, string lieuNaissance);
         Task<bool> MajNationaliteAsync(Guid eleveId, string nationalite);
         Task<bool> MajTelephoneAsync(Guid eleveId, string telephone);
+        Task<bool> MajNomAsync(Guid eleveId, string nom);
+        Task<bool> MajPrenomsAsync(Guid eleveId, string prenoms);
 
         // Operation en masse sur une liste d'eleves (panneau « Go » du bas de la grille).
         // operation ∈ { prenom-minuscule, prenom-majuscule, inscrire, desinscrire, lv2, arts,
