@@ -509,29 +509,79 @@
                         </div>
                     </div>
 
-                    @* Tuteur : sous le corps (photo + détail), séparé par un trait pleine largeur. *@
-                    <div class="lc-tuteur">
-                        <div class="lc-tuteur-titre">Tuteur</div>
-                        @* Tuteur éditable : persistance au blur (Immediate=false), rollback si échec. *@
-                        <div class="lc-tuteur-corps">
-                            @* Nom et Prénom concaténés sur la même ligne (deux champs côte à côte). *@
-                            <div class="lc-field"><span>Nom</span>
-                                <MudTextField Value="@_sel.TuteurNom" ValueChanged="@(v => OnTuteurChanged("Nom", v))"
-                                              T="string" Immediate="false" Margin="Margin.Dense"
-                                              Variant="Variant.Text" Class="lc-tuteur-input" />
-                                <MudTextField Value="@_sel.TuteurPrenom" ValueChanged="@(v => OnTuteurChanged("Prenom", v))"
-                                              T="string" Immediate="false" Margin="Margin.Dense"
-                                              Variant="Variant.Text" Class="lc-tuteur-input" />
+                    @* Correspondants : Tuteur / Père / Mère côte à côte, séparés du corps par un trait.
+                       Édition au blur (Immediate=false), rollback si échec ; chaque changement est
+                       propagé de Pédagogie vers Scolarite (SMS de paiement, reçus). *@
+                    <div class="lc-parents">
+                        <div class="lc-parent">
+                            <div class="lc-tuteur-titre">Tuteur</div>
+                            <div class="lc-tuteur-corps">
+                                <div class="lc-field"><span>Nom</span>
+                                    <MudTextField Value="@_sel.TuteurNom" ValueChanged="@(v => OnTuteurChanged("Nom", v))"
+                                                  T="string" Immediate="false" Margin="Margin.Dense"
+                                                  Variant="Variant.Text" Class="lc-tuteur-input" />
+                                    <MudTextField Value="@_sel.TuteurPrenom" ValueChanged="@(v => OnTuteurChanged("Prenom", v))"
+                                                  T="string" Immediate="false" Margin="Margin.Dense"
+                                                  Variant="Variant.Text" Class="lc-tuteur-input" />
+                                </div>
+                                <div class="lc-field"><span>Tél.</span>
+                                    <MudTextField Value="@_sel.TuteurTel1" ValueChanged="@(v => OnTuteurChanged("Tel1", v))"
+                                                  T="string" Immediate="false" Margin="Margin.Dense"
+                                                  Variant="Variant.Text" Class="lc-tuteur-input" />
+                                </div>
+                                <div class="lc-field"><span>WhatsApp</span>
+                                    <MudTextField Value="@_sel.TuteurTel2" ValueChanged="@(v => OnTuteurChanged("Tel2", v))"
+                                                  T="string" Immediate="false" Margin="Margin.Dense"
+                                                  Variant="Variant.Text" Class="lc-tuteur-input" />
+                                </div>
                             </div>
-                            <div class="lc-field"><span>Tél.</span>
-                                <MudTextField Value="@_sel.TuteurTel1" ValueChanged="@(v => OnTuteurChanged("Tel1", v))"
-                                              T="string" Immediate="false" Margin="Margin.Dense"
-                                              Variant="Variant.Text" Class="lc-tuteur-input" />
+                        </div>
+
+                        <div class="lc-parent">
+                            <div class="lc-tuteur-titre">Père</div>
+                            <div class="lc-tuteur-corps">
+                                <div class="lc-field"><span>Nom</span>
+                                    <MudTextField Value="@_sel.PereNom" ValueChanged="@(v => OnPereChanged("Nom", v))"
+                                                  T="string" Immediate="false" Margin="Margin.Dense"
+                                                  Variant="Variant.Text" Class="lc-tuteur-input" />
+                                    <MudTextField Value="@_sel.PerePrenom" ValueChanged="@(v => OnPereChanged("Prenom", v))"
+                                                  T="string" Immediate="false" Margin="Margin.Dense"
+                                                  Variant="Variant.Text" Class="lc-tuteur-input" />
+                                </div>
+                                <div class="lc-field"><span>Tél.</span>
+                                    <MudTextField Value="@_sel.PereTel1" ValueChanged="@(v => OnPereChanged("Tel1", v))"
+                                                  T="string" Immediate="false" Margin="Margin.Dense"
+                                                  Variant="Variant.Text" Class="lc-tuteur-input" />
+                                </div>
+                                <div class="lc-field"><span>WhatsApp</span>
+                                    <MudTextField Value="@_sel.PereTel2" ValueChanged="@(v => OnPereChanged("Tel2", v))"
+                                                  T="string" Immediate="false" Margin="Margin.Dense"
+                                                  Variant="Variant.Text" Class="lc-tuteur-input" />
+                                </div>
                             </div>
-                            <div class="lc-field"><span>WhatsApp</span>
-                                <MudTextField Value="@_sel.TuteurTel2" ValueChanged="@(v => OnTuteurChanged("Tel2", v))"
-                                              T="string" Immediate="false" Margin="Margin.Dense"
-                                              Variant="Variant.Text" Class="lc-tuteur-input" />
+                        </div>
+
+                        <div class="lc-parent">
+                            <div class="lc-tuteur-titre">Mère</div>
+                            <div class="lc-tuteur-corps">
+                                <div class="lc-field"><span>Nom</span>
+                                    <MudTextField Value="@_sel.MereNom" ValueChanged="@(v => OnMereChanged("Nom", v))"
+                                                  T="string" Immediate="false" Margin="Margin.Dense"
+                                                  Variant="Variant.Text" Class="lc-tuteur-input" />
+                                    <MudTextField Value="@_sel.MerePrenom" ValueChanged="@(v => OnMereChanged("Prenom", v))"
+                                                  T="string" Immediate="false" Margin="Margin.Dense"
+                                                  Variant="Variant.Text" Class="lc-tuteur-input" />
+                                </div>
+                                <div class="lc-field"><span>Tél.</span>
+                                    <MudTextField Value="@_sel.MereTel1" ValueChanged="@(v => OnMereChanged("Tel1", v))"
+                                                  T="string" Immediate="false" Margin="Margin.Dense"
+                                                  Variant="Variant.Text" Class="lc-tuteur-input" />
+                                </div>
+                                <div class="lc-field"><span>WhatsApp</span>
+                                    <MudTextField Value="@_sel.MereTel2" ValueChanged="@(v => OnMereChanged("Tel2", v))"
+                                                  T="string" Immediate="false" Margin="Margin.Dense"
+                                                  Variant="Variant.Text" Class="lc-tuteur-input" />
+                                </div>
                             </div>
                         </div>
                     </div>

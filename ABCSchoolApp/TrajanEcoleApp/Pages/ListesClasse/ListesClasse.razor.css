@@ -415,9 +415,18 @@
 
 /* Bloc Tuteur : sous le corps (photo + détail), séparé par un trait pleine largeur
    (border-top bord à bord du cadre). */
-.lc-tuteur {
+/* Correspondants (Tuteur / Père / Mère) côte à côte, sous le corps de la fiche. */
+.lc-parents {
+    display: flex;
+    gap: 18px;
+    flex-wrap: wrap;                 /* passe à la ligne si la colonne fiche est trop étroite */
     border-top: 2px solid #9fb0bb;
-    padding: 4px 16px 8px;   /* resserré contre le trait de séparation */
+    padding: 4px 16px 8px;
+}
+
+.lc-parent {
+    flex: 1 1 180px;                 /* 3 colonnes égales, largeur mini avant retour à la ligne */
+    min-width: 0;
 }
 
 .lc-tuteur-titre {

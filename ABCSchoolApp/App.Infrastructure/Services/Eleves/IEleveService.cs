@@ -26,8 +26,11 @@ namespace App.Infrastructure.Services.Eleves
         // backend (le niveau change). Retourne false si refuse (400 : cycle/niveau invalide).
         Task<bool> MajCycleNiveauAsync(Guid eleveId, int cycle, string niveau);
 
-        // Tuteur (correspondant) : Nom / Prenom / Tel1 (tel) / Tel2 (WhatsApp).
+        // Tuteur / Père / Mère (correspondants) : Nom / Prenom / Tel1 (tel) / Tel2 (WhatsApp).
+        // Chaque édition est propagée par Pedagogie à Scolarite (event EleveParentsModifies).
         Task<bool> MajTuteurAsync(Guid eleveId, string nom, string prenom, string telephone1, string telephone2);
+        Task<bool> MajPereAsync(Guid eleveId, string nom, string prenom, string telephone1, string telephone2);
+        Task<bool> MajMereAsync(Guid eleveId, string nom, string prenom, string telephone1, string telephone2);
 
         // Langue vivante 2, Arts et Red (R/NR) : editees en ligne dans la grille (deroulantes).
         Task<bool> MajLv2Async(Guid eleveId, string lv2);
@@ -89,9 +92,11 @@ namespace App.Infrastructure.Services.Eleves
         string LV_2,        // langue vivante 2 (Allemand / Espagnol) — éditable dans la grille
         string Arts,        // Arts Plastiques / Musique — éditable dans la grille
         string Red,         // R / NR (redoublant) — éditable dans la grille
-        TuteurItem? Tuteur);   // correspondant / tuteur (nom + téléphones)
+        TuteurItem? Tuteur,   // correspondant / tuteur (nom + téléphones)
+        TuteurItem? Pere,     // père (mêmes champs) — affiché/édité sur la fiche
+        TuteurItem? Mere);    // mère (mêmes champs) — affiché/édité sur la fiche
 
-    // Sous-objet tuteur (calque partiel de ParentDto renvoyé par Pedagogie) : ce dont la
-    // fiche a besoin (Telephone1 = tél., Telephone2 = WhatsApp).
+    // Sous-objet parent (calque partiel de ParentDto renvoyé par Pedagogie) : ce dont la
+    // fiche a besoin (Telephone1 = tél., Telephone2 = WhatsApp). Sert pour Tuteur / Père / Mère.
     public record TuteurItem(string? Nom, string? Prenom, string? Telephone1, string? Telephone2);
 }

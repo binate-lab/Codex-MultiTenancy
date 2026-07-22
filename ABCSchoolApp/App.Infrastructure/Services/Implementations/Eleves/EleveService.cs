@@ -141,6 +141,36 @@ namespace App.Infrastructure.Services.Implementations.Eleves
             }
         }
 
+        public async Task<bool> MajPereAsync(Guid eleveId, string nom, string prenom, string telephone1, string telephone2)
+        {
+            try
+            {
+                var resp = await _httpClient.PutAsJsonAsync(
+                    $"eleves/{eleveId}/pere",
+                    new { nom, prenom, telephone1, telephone2 });
+                return resp.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
+        public async Task<bool> MajMereAsync(Guid eleveId, string nom, string prenom, string telephone1, string telephone2)
+        {
+            try
+            {
+                var resp = await _httpClient.PutAsJsonAsync(
+                    $"eleves/{eleveId}/mere",
+                    new { nom, prenom, telephone1, telephone2 });
+                return resp.IsSuccessStatusCode;
+            }
+            catch
+            {
+                return false;
+            }
+        }
+
         public async Task<bool> MajLv2Async(Guid eleveId, string lv2)
         {
             try

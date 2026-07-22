@@ -123,14 +123,26 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             if (string.IsNullOrWhiteSpace(_codeEts)) return;
 
             var eleves = await _eleveService.GetElevesAsync(_codeEts);
-            _all = eleves.Select(e => new EleveRow(
-                e.Id, e.NumOrdre, e.Matricule, e.Nom, e.Prenom,
-                e.Cycle, e.Niveau, e.Serie, e.Classe,
-                StatutLibelle(e.Statut), e.Sexe, e.DateNaissance, e.LieuNaissance,
-                e.Nationalite, e.Telephone, e.IsInscrit, e.IsActif, e.ImageFile,
-                e.Tuteur?.Nom ?? string.Empty, e.Tuteur?.Prenom ?? string.Empty,
-                e.Tuteur?.Telephone1 ?? string.Empty, e.Tuteur?.Telephone2 ?? string.Empty,
-                e.LV_2 ?? string.Empty, e.Arts ?? string.Empty, e.Red ?? string.Empty)).ToList();
+            _all = eleves.Select(e =>
+            {
+                var row = new EleveRow(
+                    e.Id, e.NumOrdre, e.Matricule, e.Nom, e.Prenom,
+                    e.Cycle, e.Niveau, e.Serie, e.Classe,
+                    StatutLibelle(e.Statut), e.Sexe, e.DateNaissance, e.LieuNaissance,
+                    e.Nationalite, e.Telephone, e.IsInscrit, e.IsActif, e.ImageFile,
+                    e.Tuteur?.Nom ?? string.Empty, e.Tuteur?.Prenom ?? string.Empty,
+                    e.Tuteur?.Telephone1 ?? string.Empty, e.Tuteur?.Telephone2 ?? string.Empty,
+                    e.LV_2 ?? string.Empty, e.Arts ?? string.Empty, e.Red ?? string.Empty);
+                row.PereNom = e.Pere?.Nom ?? string.Empty;
+                row.PerePrenom = e.Pere?.Prenom ?? string.Empty;
+                row.PereTel1 = e.Pere?.Telephone1 ?? string.Empty;
+                row.PereTel2 = e.Pere?.Telephone2 ?? string.Empty;
+                row.MereNom = e.Mere?.Nom ?? string.Empty;
+                row.MerePrenom = e.Mere?.Prenom ?? string.Empty;
+                row.MereTel1 = e.Mere?.Telephone1 ?? string.Empty;
+                row.MereTel2 = e.Mere?.Telephone2 ?? string.Empty;
+                return row;
+            }).ToList();
         }
 
         // Corrige en masse les clés de contrôle des matricules de l'école (garde les chiffres).
@@ -685,6 +697,46 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             }
         }
 
+        // ---- Père éditable dans la fiche, persisté dans Pédagogie (propagé à Scolarite) ----
+        private async Task OnPereChanged(string champ, string valeur)
+        {
+            if (_sel is null) return;
+            var (n, p, t1, t2) = (_sel.PereNom, _sel.PerePrenom, _sel.PereTel1, _sel.PereTel2);
+            switch (champ)
+            {
+                case "Nom": _sel.PereNom = valeur; break;
+                case "Prenom": _sel.PerePrenom = valeur; break;
+                case "Tel1": _sel.PereTel1 = valeur; break;
+                case "Tel2": _sel.PereTel2 = valeur; break;
+            }
+            if (!await _eleveService.MajPereAsync(
+                    _sel.Id, _sel.PereNom, _sel.PerePrenom, _sel.PereTel1, _sel.PereTel2))
+            {
+                (_sel.PereNom, _sel.PerePrenom, _sel.PereTel1, _sel.PereTel2) = (n, p, t1, t2);
+                _snackbar.Add("Impossible d'enregistrer le père.", Severity.Error);
+            }
+        }
+
+        // ---- Mère éditable dans la fiche, persistée dans Pédagogie (propagée à Scolarite) ----
+        private async Task OnMereChanged(string champ, string valeur)
+        {
+            if (_sel is null) return;
+            var (n, p, t1, t2) = (_sel.MereNom, _sel.MerePrenom, _sel.MereTel1, _sel.MereTel2);
+            switch (champ)
+            {
+                case "Nom": _sel.MereNom = valeur; break;
+                case "Prenom": _sel.MerePrenom = valeur; break;
+                case "Tel1": _sel.MereTel1 = valeur; break;
+                case "Tel2": _sel.MereTel2 = valeur; break;
+            }
+            if (!await _eleveService.MajMereAsync(
+                    _sel.Id, _sel.MereNom, _sel.MerePrenom, _sel.MereTel1, _sel.MereTel2))
+            {
+                (_sel.MereNom, _sel.MerePrenom, _sel.MereTel1, _sel.MereTel2) = (n, p, t1, t2);
+                _snackbar.Add("Impossible d'enregistrer la mère.", Severity.Error);
+            }
+        }
+
         // ---- Impression de la Fiche Élève ----
         // On sélectionne l'élève (sa fiche s'affiche), puis on imprime au rendu suivant (le
         // drapeau garantit que la fiche du BON élève est dans le DOM avant window.print).
@@ -886,6 +938,15 @@ namespace TrajanEcoleApp.Pages.ListesClasse
             public string TuteurPrenom { get; set; }
             public string TuteurTel1 { get; set; }   // tél.
             public string TuteurTel2 { get; set; }   // WhatsApp
+            // Père / Mère : mêmes champs, éditables sur la fiche (assignés après construction).
+            public string PereNom { get; set; } = string.Empty;
+            public string PerePrenom { get; set; } = string.Empty;
+            public string PereTel1 { get; set; } = string.Empty;
+            public string PereTel2 { get; set; } = string.Empty;
+            public string MereNom { get; set; } = string.Empty;
+            public string MerePrenom { get; set; } = string.Empty;
+            public string MereTel1 { get; set; } = string.Empty;
+            public string MereTel2 { get; set; } = string.Empty;
             public string LV_2 { get; set; }         // langue vivante 2 (Allemand / Espagnol), éditable
             public string Arts { get; set; }         // Arts Plastiques / Musique, éditable
             public string Red { get; set; }          // R / NR (redoublant), éditable
