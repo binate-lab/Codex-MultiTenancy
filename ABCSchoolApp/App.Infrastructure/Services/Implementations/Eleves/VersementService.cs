@@ -200,21 +200,31 @@ namespace App.Infrastructure.Services.Implementations.Eleves
 
         public async Task<byte[]> GetRecuPdfAsync(Guid eleveId, string ecole, string logoBase64, string ville, string anneeScolaire)
         {
+            HttpResponseMessage reponse;
             try
             {
                 // POST : l'en-tete (nom d'ecole + logo base64) peut peser plusieurs Ko.
-                var reponse = await _httpClient.PostAsJsonAsync(
+                reponse = await _httpClient.PostAsJsonAsync(
                     $"eleves/{eleveId}/versements/recu",
                     new { ecole, logoBase64, ville, anneeScolaire });
-
-                if (!reponse.IsSuccessStatusCode) return null;
-
-                return await reponse.Content.ReadAsByteArrayAsync();
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                // La requete n'a meme pas abouti cote reseau : contenu mixte (page https ->
+                // API http), CORS bloque, DNS/TLS... On remonte la vraie cause au lieu de null
+                // (meme patron que RapportService).
+                throw new HttpRequestException($"Appel « recu » impossible : {ex.Message}", ex);
             }
+
+            if (!reponse.IsSuccessStatusCode)
+            {
+                var corps = await reponse.Content.ReadAsStringAsync();
+                if (corps.Length > 300) corps = corps[..300];
+                throw new HttpRequestException(
+                    $"HTTP {(int)reponse.StatusCode} {reponse.ReasonPhrase} sur « recu ». {corps}".Trim());
+            }
+
+            return await reponse.Content.ReadAsByteArrayAsync();
         }
 
         // Envoie le recu PDF au parent (Tuteur.Telephone1) via WhatsApp. Meme en-tete que

@@ -828,13 +828,20 @@ namespace TrajanEcoleApp.Pages.Scolarites
                 var pdf = await _versementService.GetRecuPdfAsync(_sel.Id, _nomEcole, logoBase64, _villeEcole, annee);
                 if (pdf is null || pdf.Length == 0)
                 {
-                    _snackbar.Add("Reçu indisponible pour cet élève.", Severity.Error);
+                    _snackbar.Add("Le reçu est vide pour cet élève.", Severity.Warning);
                     return;
                 }
 
                 var nomFichier = $"recu-{Compact(_sel.Matricule)}-{DateTime.Today:yyyyMMdd}.pdf";
                 await _js.InvokeVoidAsync("trajanTelechargerFichier",
                     nomFichier, Convert.ToBase64String(pdf), "application/pdf");
+            }
+            catch (Exception ex)
+            {
+                // Message HONNETE : la vraie cause (HTTP 401, contenu mixte, CORS…) au lieu
+                // d'un « indisponible » trompeur. Detail complet dans la console (F12).
+                _snackbar.Add($"Échec du reçu : {ex.Message}", Severity.Error);
+                Console.Error.WriteLine($"[Recu {_sel?.Matricule}] {ex}");
             }
             finally
             {
