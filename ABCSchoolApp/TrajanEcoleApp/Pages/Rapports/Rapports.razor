@@ -214,13 +214,20 @@
 
             if (pdf is null || pdf.Length == 0)
             {
-                _snackbar.Add("Rapport indisponible pour cette période.", Severity.Error);
+                _snackbar.Add("Le rapport est vide pour cette période (aucun versement).", Severity.Warning);
                 return;
             }
 
             var nomFichier = $"{prefixe}-{debut:yyyyMMdd}-{fin:yyyyMMdd}.pdf";
             await _js.InvokeVoidAsync("trajanTelechargerFichier",
                 nomFichier, Convert.ToBase64String(pdf), "application/pdf");
+        }
+        catch (Exception ex)
+        {
+            // Message HONNETE : on affiche la vraie cause (HTTP 401, contenu mixte, CORS…)
+            // au lieu d'un « indisponible » trompeur. Detail complet dans la console (F12).
+            _snackbar.Add($"Échec de génération : {ex.Message}", Severity.Error);
+            Console.Error.WriteLine($"[Rapport {_selected}] {ex}");
         }
         finally
         {

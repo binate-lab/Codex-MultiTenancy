@@ -36,9 +36,10 @@ namespace App.Infrastructure.Services.Implementations.Rapports
         private async Task<byte[]> PostRapportAsync(
             string route, DateOnly debut, DateOnly fin, string ecole, string logoBase64, string ville, string anneeScolaire)
         {
+            HttpResponseMessage reponse;
             try
             {
-                var reponse = await _httpClient.PostAsJsonAsync(route, new
+                reponse = await _httpClient.PostAsJsonAsync(route, new
                 {
                     dateDebut = debut,
                     dateFin = fin,
@@ -47,15 +48,23 @@ namespace App.Infrastructure.Services.Implementations.Rapports
                     anneeScolaire,
                     logoBase64
                 });
-
-                if (!reponse.IsSuccessStatusCode) return null;
-
-                return await reponse.Content.ReadAsByteArrayAsync();
             }
-            catch
+            catch (Exception ex)
             {
-                return null;
+                // La requete n'a meme pas abouti cote reseau : contenu mixte (page https ->
+                // API http), CORS bloque, DNS/TLS... On remonte la vraie cause au lieu de null.
+                throw new HttpRequestException($"Appel « {route} » impossible : {ex.Message}", ex);
             }
+
+            if (!reponse.IsSuccessStatusCode)
+            {
+                var corps = await reponse.Content.ReadAsStringAsync();
+                if (corps.Length > 300) corps = corps[..300];
+                throw new HttpRequestException(
+                    $"HTTP {(int)reponse.StatusCode} {reponse.ReasonPhrase} sur « {route} ». {corps}".Trim());
+            }
+
+            return await reponse.Content.ReadAsByteArrayAsync();
         }
     }
 }
