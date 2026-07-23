@@ -8,11 +8,16 @@
 <MudPaper Elevation="6" Class="ma-2">
     <div class="acc-window">
 
-        <!-- Bandeau : titre + année -->
+        <!-- Bandeau : titre + année + Fermer (même patron que /scolarites) -->
         <div class="acc-titlebar">
             <div class="d-flex align-center gap-3">
                 <span class="acc-title">Rapports — Économat</span>
                 <span class="acc-year">@_annee</span>
+            </div>
+            <div class="d-flex align-center gap-2">
+                <MudButton Variant="Variant.Text" Size="Size.Small"
+                           StartIcon="@Icons.Material.Filled.Close"
+                           OnClick="@(() => _navigation.NavigateTo("/ecole"))">Fermer</MudButton>
             </div>
         </div>
 
