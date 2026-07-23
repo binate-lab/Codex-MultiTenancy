@@ -45,6 +45,13 @@
                     <div class="rpt-carte-titre">Par nature</div>
                     <div class="rpt-carte-desc">Bilan des encaissements par nature (Arriéré, Inscription, Scolarité…), ventilé Général / AFF / NAFF.</div>
                 </div>
+
+                <div class="rpt-carte @(_selected == RapportId.ParModePaiement ? "rpt-carte-active" : "")"
+                     @onclick="@(() => Selectionner(RapportId.ParModePaiement))">
+                    <MudIcon Icon="@Icons.Material.Filled.CreditCard" Color="Color.Info" Size="Size.Large" />
+                    <div class="rpt-carte-titre">Par mode de paiement</div>
+                    <div class="rpt-carte-desc">Bilan des encaissements par moyen de paiement (Espèce, Chèque, Virement, Mobile Money…) avec la part de chacun.</div>
+                </div>
             </div>
 
             <!-- ============ Familles à venir (extensible) ============ -->
@@ -104,7 +111,7 @@
 @code {
     private static readonly CultureInfo _fr = CultureInfo.GetCultureInfo("fr-FR");
 
-    private enum RapportId { ParEleve, ParClasse, ParNature }
+    private enum RapportId { ParEleve, ParClasse, ParNature, ParModePaiement }
 
     private RapportId? _selected;
 
@@ -122,9 +129,10 @@
     {
         _selected = id;
 
-        // Le bilan par nature se fait par defaut sur la journee du jour (date1 = date2 = aujourd'hui) ;
-        // les autres rapports gardent la periode « mois en cours ».
-        if (id == RapportId.ParNature)
+        // Les bilans de caisse (par nature, par mode de paiement) se font par defaut sur la
+        // journee du jour (date1 = date2 = aujourd'hui) ; les autres rapports gardent la
+        // periode « mois en cours ».
+        if (id is RapportId.ParNature or RapportId.ParModePaiement)
         {
             _debut = DateTime.Today;
             _fin = DateTime.Today;
@@ -136,6 +144,7 @@
         RapportId.ParEleve => "Versements par élève",
         RapportId.ParClasse => "Versements par classe",
         RapportId.ParNature => "Bilan par nature des versements",
+        RapportId.ParModePaiement => "Bilan par mode de paiement",
         _ => string.Empty
     };
 
@@ -197,6 +206,9 @@
                 RapportId.ParNature => (
                     await _rapportService.GetRapportParNaturePdfAsync(debut, fin, _nomEcole, logoBase64, _villeEcole, annee),
                     "bilan-par-nature"),
+                RapportId.ParModePaiement => (
+                    await _rapportService.GetRapportParModePaiementPdfAsync(debut, fin, _nomEcole, logoBase64, _villeEcole, annee),
+                    "bilan-par-mode-paiement"),
                 _ => (null, "rapport")
             };
 

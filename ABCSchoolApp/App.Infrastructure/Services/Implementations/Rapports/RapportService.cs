@@ -29,6 +29,10 @@ namespace App.Infrastructure.Services.Implementations.Rapports
             DateOnly debut, DateOnly fin, string ecole, string logoBase64, string ville, string anneeScolaire)
             => PostRapportAsync("rapports/versements/par-nature", debut, fin, ecole, logoBase64, ville, anneeScolaire);
 
+        public Task<byte[]> GetRapportParModePaiementPdfAsync(
+            DateOnly debut, DateOnly fin, string ecole, string logoBase64, string ville, string anneeScolaire)
+            => PostRapportAsync("rapports/versements/par-mode-paiement", debut, fin, ecole, logoBase64, ville, anneeScolaire);
+
         private async Task<byte[]> PostRapportAsync(
             string route, DateOnly debut, DateOnly fin, string ecole, string logoBase64, string ville, string anneeScolaire)
         {

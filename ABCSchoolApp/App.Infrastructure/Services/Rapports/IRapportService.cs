@@ -18,5 +18,10 @@ namespace App.Infrastructure.Services.Rapports
         // Général (Aff + Naff) / Aff / Naff.
         Task<byte[]> GetRapportParNaturePdfAsync(
             DateOnly debut, DateOnly fin, string ecole, string logoBase64, string ville, string anneeScolaire);
+
+        // Bilan par mode de paiement (portrait) sur une periode : montant + part par
+        // moyen de paiement (Espèce, Chèque, Virement, Mobile Money…).
+        Task<byte[]> GetRapportParModePaiementPdfAsync(
+            DateOnly debut, DateOnly fin, string ecole, string logoBase64, string ville, string anneeScolaire);
     }
 }
