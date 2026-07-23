@@ -833,7 +833,9 @@ namespace TrajanEcoleApp.Pages.Scolarites
                 }
 
                 var nomFichier = $"recu-{Compact(_sel.Matricule)}-{DateTime.Today:yyyyMMdd}.pdf";
-                await _js.InvokeVoidAsync("trajanTelechargerFichier",
+                // Ouverture dans un ONGLET (lecteur PDF du navigateur) : affichage immediat,
+                // et les gestionnaires de telechargement (IDM...) ne s'en melent pas.
+                await _js.InvokeVoidAsync("trajanOuvrirFichier",
                     nomFichier, Convert.ToBase64String(pdf), "application/pdf");
             }
             catch (Exception ex)

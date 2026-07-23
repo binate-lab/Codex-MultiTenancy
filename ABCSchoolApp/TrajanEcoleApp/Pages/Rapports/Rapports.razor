@@ -36,7 +36,14 @@
                      @onclick="@(() => Selectionner(RapportId.ParClasse))">
                     <MudIcon Icon="@Icons.Material.Filled.TableChart" Color="Color.Secondary" Size="Size.Large" />
                     <div class="rpt-carte-titre">Par classe</div>
-                    <div class="rpt-carte-desc">Synthèse par classe + totaux et taux de recouvrement (camembert).</div>
+                    <div class="rpt-carte-desc">Point au jour (sans période) : synthèse par classe + totaux et taux de recouvrement (camembert).</div>
+                </div>
+
+                <div class="rpt-carte @(_selected == RapportId.Recouvrement ? "rpt-carte-active" : "")"
+                     @onclick="@(() => Selectionner(RapportId.Recouvrement))">
+                    <MudIcon Icon="@Icons.Material.Filled.TrendingDown" Color="Color.Warning" Size="Size.Large" />
+                    <div class="rpt-carte-titre">Recouvrement</div>
+                    <div class="rpt-carte-desc">Point au jour : ce qui devait être recouvré (échéances échues) face à ce qui l'a été, par classe.</div>
                 </div>
 
                 <div class="rpt-carte @(_selected == RapportId.ParNature ? "rpt-carte-active" : "")"
@@ -58,11 +65,6 @@
             <MudText Typo="Typo.subtitle1" Class="rpt-famille">Autres familles (à venir)</MudText>
             <div class="rpt-cartes">
                 <div class="rpt-carte rpt-carte-disabled">
-                    <MudIcon Icon="@Icons.Material.Filled.TrendingDown" Size="Size.Large" />
-                    <div class="rpt-carte-titre">Recouvrement</div>
-                    <div class="rpt-carte-desc">Élèves en retard, taux par classe…</div>
-                </div>
-                <div class="rpt-carte rpt-carte-disabled">
                     <MudIcon Icon="@Icons.Material.Filled.Groups" Size="Size.Large" />
                     <div class="rpt-carte-titre">Effectifs</div>
                     <div class="rpt-carte-desc">Par niveau, par sexe…</div>
@@ -79,18 +81,21 @@
             {
                 <MudPaper Elevation="2" Class="rpt-config mt-4 pa-4">
                     <MudText Typo="Typo.subtitle1" Class="mb-3">
-                        <b>@TitreRapport(_selected.Value)</b> — période
+                        <b>@TitreRapport(_selected.Value)</b> — @(SansPeriode ? "point au jour" : "période")
                     </MudText>
 
                     <div class="d-flex align-end gap-4 flex-wrap mb-4">
-                        <MudDatePicker Label="Du" @bind-Date="_debut" DateFormat="dd/MM/yyyy"
-                                       Editable="true" ImmediateText="true"
-                                       Culture="@_fr" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                       Style="max-width: 190px;" />
-                        <MudDatePicker Label="Au" @bind-Date="_fin" DateFormat="dd/MM/yyyy"
-                                       Editable="true" ImmediateText="true"
-                                       Culture="@_fr" Variant="Variant.Outlined" Margin="Margin.Dense"
-                                       Style="max-width: 190px;" />
+                        @if (!SansPeriode)
+                        {
+                            <MudDatePicker Label="Du" @bind-Date="_debut" DateFormat="dd/MM/yyyy"
+                                           Editable="true" ImmediateText="true"
+                                           Culture="@_fr" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                           Style="max-width: 190px;" />
+                            <MudDatePicker Label="Au" @bind-Date="_fin" DateFormat="dd/MM/yyyy"
+                                           Editable="true" ImmediateText="true"
+                                           Culture="@_fr" Variant="Variant.Outlined" Margin="Margin.Dense"
+                                           Style="max-width: 190px;" />
+                        }
                         <MudButton Variant="Variant.Filled" Color="Color.Primary"
                                    StartIcon="@Icons.Material.Filled.PictureAsPdf"
                                    Disabled="_enCours" OnClick="GenererAsync">
@@ -111,9 +116,12 @@
 @code {
     private static readonly CultureInfo _fr = CultureInfo.GetCultureInfo("fr-FR");
 
-    private enum RapportId { ParEleve, ParClasse, ParNature, ParModePaiement }
+    private enum RapportId { ParEleve, ParClasse, ParNature, ParModePaiement, Recouvrement }
 
     private RapportId? _selected;
+
+    // Rapports « point au jour » : pas de periode a saisir (l'API ignore les dates).
+    private bool SansPeriode => _selected is RapportId.ParClasse or RapportId.Recouvrement;
 
     private string _annee = "—";
     private string _nomEcole = string.Empty;
@@ -145,6 +153,7 @@
         RapportId.ParClasse => "Versements par classe",
         RapportId.ParNature => "Bilan par nature des versements",
         RapportId.ParModePaiement => "Bilan par mode de paiement",
+        RapportId.Recouvrement => "Rapport de recouvrement",
         _ => string.Empty
     };
 
@@ -173,15 +182,18 @@
     {
         if (_selected is null) return;
 
-        if (_debut is null || _fin is null)
+        if (!SansPeriode)
         {
-            _snackbar.Add("Renseigne la période (Du / Au).", Severity.Warning);
-            return;
-        }
-        if (_debut > _fin)
-        {
-            _snackbar.Add("La date de début doit précéder la date de fin.", Severity.Warning);
-            return;
+            if (_debut is null || _fin is null)
+            {
+                _snackbar.Add("Renseigne la période (Du / Au).", Severity.Warning);
+                return;
+            }
+            if (_debut > _fin)
+            {
+                _snackbar.Add("La date de début doit précéder la date de fin.", Severity.Warning);
+                return;
+            }
         }
 
         _enCours = true;
@@ -192,8 +204,9 @@
                 : await _js.InvokeAsync<string>("trajanImageEnBase64", _logoEcole);
 
             var annee = _annee == "—" ? string.Empty : _annee;
-            var debut = DateOnly.FromDateTime(_debut.Value);
-            var fin = DateOnly.FromDateTime(_fin.Value);
+            // Rapports sans periode : dates du jour (ignorees par l'API, contrat inchange).
+            var debut = SansPeriode ? DateOnly.FromDateTime(DateTime.Today) : DateOnly.FromDateTime(_debut.Value);
+            var fin = SansPeriode ? DateOnly.FromDateTime(DateTime.Today) : DateOnly.FromDateTime(_fin.Value);
 
             var (pdf, prefixe) = _selected.Value switch
             {
@@ -209,6 +222,9 @@
                 RapportId.ParModePaiement => (
                     await _rapportService.GetRapportParModePaiementPdfAsync(debut, fin, _nomEcole, logoBase64, _villeEcole, annee),
                     "bilan-par-mode-paiement"),
+                RapportId.Recouvrement => (
+                    await _rapportService.GetRapportRecouvrementPdfAsync(_nomEcole, logoBase64, _villeEcole, annee),
+                    "rapport-recouvrement"),
                 _ => (null, "rapport")
             };
 
@@ -218,8 +234,12 @@
                 return;
             }
 
-            var nomFichier = $"{prefixe}-{debut:yyyyMMdd}-{fin:yyyyMMdd}.pdf";
-            await _js.InvokeVoidAsync("trajanTelechargerFichier",
+            var nomFichier = SansPeriode
+                ? $"{prefixe}-{DateTime.Today:yyyyMMdd}.pdf"
+                : $"{prefixe}-{debut:yyyyMMdd}-{fin:yyyyMMdd}.pdf";
+            // Ouverture dans un ONGLET (lecteur PDF du navigateur) : affichage immediat,
+            // et les gestionnaires de telechargement (IDM...) ne s'en melent pas.
+            await _js.InvokeVoidAsync("trajanOuvrirFichier",
                 nomFichier, Convert.ToBase64String(pdf), "application/pdf");
         }
         catch (Exception ex)

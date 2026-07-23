@@ -20,8 +20,13 @@ namespace App.Infrastructure.Services.Rapports
             DateOnly debut, DateOnly fin, string ecole, string logoBase64, string ville, string anneeScolaire);
 
         // Bilan par mode de paiement (portrait) sur une periode : montant + part par
-        // moyen de paiement (Espèce, Chèque, Virement, Mobile Money…).
+        // moyen de paiement (Espèce, Chèque, Virement, Mobile Money…) + camembert.
         Task<byte[]> GetRapportParModePaiementPdfAsync(
             DateOnly debut, DateOnly fin, string ecole, string logoBase64, string ville, string anneeScolaire);
+
+        // Rapport de recouvrement (paysage, sans periode — point au jour) : par classe,
+        // attendu (echeances echues) vs recouvre, reste, taux + anneau.
+        Task<byte[]> GetRapportRecouvrementPdfAsync(
+            string ecole, string logoBase64, string ville, string anneeScolaire);
     }
 }

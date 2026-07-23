@@ -744,6 +744,29 @@
             URL.revokeObjectURL(url);
         };
 
+        // Ouvre le fichier dans un ONGLET (lecteur PDF du navigateur) au lieu de le
+        // télécharger : affichage immédiat, et les gestionnaires de téléchargement
+        // (IDM...) ne s'en mêlent pas. Si le navigateur bloque le popup, on retombe
+        // sur le téléchargement classique. L'URL blob est révoquée après 60 s (le
+        // temps que l'onglet charge le document).
+        window.trajanOuvrirFichier = function (nomFichier, base64, typeMime) {
+            var octets = Uint8Array.from(atob(base64), function (c) { return c.charCodeAt(0); });
+            var url = URL.createObjectURL(new Blob([octets], { type: typeMime || 'application/octet-stream' }));
+            var fenetre = window.open(url, '_blank');
+            if (!fenetre) {
+                // Popup bloqué : repli téléchargement (et on révoque tout de suite).
+                var a = document.createElement('a');
+                a.href = url;
+                a.download = nomFichier;
+                document.body.appendChild(a);
+                a.click();
+                document.body.removeChild(a);
+                URL.revokeObjectURL(url);
+                return;
+            }
+            setTimeout(function () { URL.revokeObjectURL(url); }, 60000);
+        };
+
         // Grille élèves (/scolarites) pilotée comme un tableur :
         //  - Flèche Haut / Bas : déplace le focus vers la cellule de MÊME colonne dans la
         //    ligne adjacente (data-col identique). En veille si une déroulante est ouverte

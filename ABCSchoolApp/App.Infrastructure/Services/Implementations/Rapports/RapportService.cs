@@ -33,6 +33,15 @@ namespace App.Infrastructure.Services.Implementations.Rapports
             DateOnly debut, DateOnly fin, string ecole, string logoBase64, string ville, string anneeScolaire)
             => PostRapportAsync("rapports/versements/par-mode-paiement", debut, fin, ecole, logoBase64, ville, anneeScolaire);
 
+        // Sans periode : l'API ignore les dates (contrat RapportPeriodeRequest inchange,
+        // on envoie la date du jour pour les deux bornes).
+        public Task<byte[]> GetRapportRecouvrementPdfAsync(
+            string ecole, string logoBase64, string ville, string anneeScolaire)
+        {
+            var aujourdhui = DateOnly.FromDateTime(DateTime.Today);
+            return PostRapportAsync("rapports/versements/recouvrement", aujourdhui, aujourdhui, ecole, logoBase64, ville, anneeScolaire);
+        }
+
         private async Task<byte[]> PostRapportAsync(
             string route, DateOnly debut, DateOnly fin, string ecole, string logoBase64, string ville, string anneeScolaire)
         {
