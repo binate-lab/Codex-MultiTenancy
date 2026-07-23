@@ -28,11 +28,24 @@ namespace App.Infrastructure.Services.Economat
     // Resultat d'ecriture : Error porte le message metier du backend (409 doublon...).
     public record EcheancierOpResult(bool IsSuccessful, string Error = null);
 
+    // Bilan de la generation en masse des echeanciers manquants (simulation ou reelle).
+    public class GenerationEcheanciersResultat
+    {
+        public int SansEcheancier { get; set; }
+        public int Generes { get; set; }
+        public int VersementsRejoues { get; set; }
+        public int RestentSansEcheancier { get; set; }
+        public List<string> BaremesManquants { get; set; } = new();
+    }
+
     public interface IEcheancierService
     {
         Task<IReadOnlyList<ModaliteVersementItem>> GetModalitesAsync(string annee = null);
         Task<EcheancierOpResult> CreateModaliteAsync(string anneeScolaire, string niveauCode, string statut);
         Task<EcheancierOpResult> UpdateMontantsAsync(ModaliteVersementItem ligne);
         Task<EcheancierOpResult> DeleteModaliteAsync(Guid id);
+
+        // simulation = true : bilan complet sans rien enregistrer (apercu avant execution).
+        Task<(GenerationEcheanciersResultat Resultat, string Erreur)> GenererEcheanciersManquantsAsync(bool simulation);
     }
 }

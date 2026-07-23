@@ -53,6 +53,27 @@ namespace App.Infrastructure.Services.Implementations.Economat
         public Task<EcheancierOpResult> DeleteModaliteAsync(Guid id)
             => EnvoyerAsync(() => _httpClient.DeleteAsync($"economat/modalites/{id}"));
 
+        public async Task<(GenerationEcheanciersResultat Resultat, string Erreur)> GenererEcheanciersManquantsAsync(bool simulation)
+        {
+            try
+            {
+                var reponse = await _httpClient.PostAsync(
+                    $"economat/modalites/generer-echeanciers?simulation={(simulation ? "true" : "false")}", null);
+
+                if (!reponse.IsSuccessStatusCode)
+                {
+                    return (null, await LireErreurAsync(reponse));
+                }
+
+                var resultat = await reponse.Content.ReadFromJsonAsync<GenerationEcheanciersResultat>();
+                return (resultat, null);
+            }
+            catch (Exception ex)
+            {
+                return (null, $"Service indisponible : {ex.Message}");
+            }
+        }
+
         // Envoi + extraction du message metier des reponses non-2xx (meme approche que
         // StructureService : 409 { error }, 400 texte brut...) pour la snackbar.
         private static async Task<EcheancierOpResult> EnvoyerAsync(Func<Task<HttpResponseMessage>> envoi)

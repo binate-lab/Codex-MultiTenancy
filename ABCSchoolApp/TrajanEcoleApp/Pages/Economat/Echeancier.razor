@@ -7,6 +7,10 @@
         <MudIcon Icon="@Icons.Material.Outlined.EventNote" Class="mr-2" />
         <MudText Typo="Typo.h6">Échéancier — Modalités de versement</MudText>
         <MudSpacer />
+        <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Inherit" Class="mr-4"
+                   StartIcon="@Icons.Material.Filled.PlaylistAdd"
+                   Disabled="_generationEnCours"
+                   OnClick="PreparerGenerationAsync">Générer les échéanciers manquants</MudButton>
         <MudText Typo="Typo.subtitle2" Class="mr-4">@_annee</MudText>
         <MudButton Variant="Variant.Outlined" Size="Size.Small" Color="Color.Inherit"
                    OnClick="@(() => _navigation.NavigateTo("/ecole"))">Fermer</MudButton>
@@ -114,3 +118,48 @@
         </div>
     </div>
 </MudPaper>
+
+@* Aperçu AVANT génération en masse : la simulation (rien d'enregistré) dit combien
+   d'échéanciers seront créés et quels barèmes manquent ; l'écriture n'a lieu qu'à la
+   confirmation. *@
+@if (_generationApercuOuvert && _generationResultat is not null)
+{
+    <MudOverlay Visible="true" DarkBackground="true" ZIndex="1300" Class="d-flex align-center justify-center">
+        <MudPaper Class="pa-6" Style="max-width: 620px; width: 92vw;">
+            <MudText Typo="Typo.h6" Class="mb-3">Génération des échéanciers manquants</MudText>
+
+            <MudText Class="mb-1">Élèves sans échéancier : <b>@_generationResultat.SansEcheancier</b></MudText>
+            <MudText Class="mb-1">Échéanciers qui seront générés (copie du barème @_annee + Frais Généraux) : <b>@_generationResultat.Generes</b></MudText>
+            @if (_generationResultat.VersementsRejoues > 0)
+            {
+                <MudText Class="mb-1">Élèves dont les versements existants seront ré-imputés : <b>@_generationResultat.VersementsRejoues</b></MudText>
+            }
+
+            @if (_generationResultat.RestentSansEcheancier > 0)
+            {
+                <MudText Class="mt-3" Color="Color.Warning">
+                    <b>@_generationResultat.RestentSansEcheancier</b> élève(s) resteront sans échéancier — barème absent pour :
+                </MudText>
+                <ul style="margin: 6px 0 0 22px;">
+                    @foreach (var cle in _generationResultat.BaremesManquants)
+                    {
+                        <li><MudText Typo="Typo.body2">@cle</MudText></li>
+                    }
+                </ul>
+                <MudText Typo="Typo.caption" Class="mt-1 mud-text-secondary">
+                    Ajoute ces lignes au barème ci-dessous puis relance la génération pour les rattraper.
+                </MudText>
+            }
+
+            <div class="d-flex justify-end gap-2 mt-5">
+                <MudButton Variant="Variant.Text" Disabled="_generationEnCours"
+                           OnClick="AnnulerGeneration">Annuler</MudButton>
+                <MudButton Variant="Variant.Filled" Color="Color.Primary" Disabled="_generationEnCours"
+                           StartIcon="@Icons.Material.Filled.PlaylistAddCheck"
+                           OnClick="ConfirmerGenerationAsync">
+                    @(_generationEnCours ? "Génération en cours…" : $"Générer {_generationResultat.Generes} échéancier(s)")
+                </MudButton>
+            </div>
+        </MudPaper>
+    </MudOverlay>
+}

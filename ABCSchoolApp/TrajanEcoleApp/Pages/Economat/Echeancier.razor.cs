@@ -28,6 +28,72 @@ namespace TrajanEcoleApp.Pages.Economat
         private string _filtreNiveau;
         private string _filtreStatut;
 
+        // Génération en masse des échéanciers manquants : aperçu (simulation, rien
+        // d'enregistré) puis exécution réelle à la confirmation.
+        private bool _generationEnCours;
+        private bool _generationApercuOuvert;
+        private GenerationEcheanciersResultat _generationResultat;
+
+        private async Task PreparerGenerationAsync()
+        {
+            _generationEnCours = true;
+            try
+            {
+                var (resultat, erreur) = await _echeancierService.GenererEcheanciersManquantsAsync(simulation: true);
+                if (resultat is null)
+                {
+                    _snackbar.Add($"Échec de l'aperçu : {erreur}", Severity.Error);
+                    return;
+                }
+                if (resultat.SansEcheancier == 0)
+                {
+                    _snackbar.Add("Tous les élèves ont déjà leur échéancier.", Severity.Info);
+                    return;
+                }
+
+                _generationResultat = resultat;
+                _generationApercuOuvert = true;
+            }
+            finally
+            {
+                _generationEnCours = false;
+            }
+        }
+
+        private void AnnulerGeneration()
+        {
+            _generationApercuOuvert = false;
+            _generationResultat = null;
+        }
+
+        private async Task ConfirmerGenerationAsync()
+        {
+            _generationEnCours = true;
+            try
+            {
+                var (resultat, erreur) = await _echeancierService.GenererEcheanciersManquantsAsync(simulation: false);
+                if (resultat is null)
+                {
+                    _snackbar.Add($"Échec de la génération : {erreur}", Severity.Error);
+                    return;
+                }
+
+                _generationApercuOuvert = false;
+                _generationResultat = null;
+
+                var message = $"{resultat.Generes} échéancier(s) généré(s)"
+                    + (resultat.VersementsRejoues > 0 ? $", {resultat.VersementsRejoues} élève(s) ré-imputé(s)" : "")
+                    + (resultat.RestentSansEcheancier > 0
+                        ? $" — {resultat.RestentSansEcheancier} sans barème (voir la grille)."
+                        : ".");
+                _snackbar.Add(message, resultat.RestentSansEcheancier > 0 ? Severity.Warning : Severity.Success);
+            }
+            finally
+            {
+                _generationEnCours = false;
+            }
+        }
+
         private IEnumerable<EcheancierRow> LignesFiltrees => _lignes
             .Where(l => string.IsNullOrEmpty(_filtreNiveau) || l.NiveauCode == _filtreNiveau)
             .Where(l => string.IsNullOrEmpty(_filtreStatut) || l.Statut == _filtreStatut);
