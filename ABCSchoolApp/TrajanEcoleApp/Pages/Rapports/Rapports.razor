@@ -38,6 +38,13 @@
                     <div class="rpt-carte-titre">Par classe</div>
                     <div class="rpt-carte-desc">Synthèse par classe + totaux et taux de recouvrement (camembert).</div>
                 </div>
+
+                <div class="rpt-carte @(_selected == RapportId.ParNature ? "rpt-carte-active" : "")"
+                     @onclick="@(() => Selectionner(RapportId.ParNature))">
+                    <MudIcon Icon="@Icons.Material.Filled.Category" Color="Color.Tertiary" Size="Size.Large" />
+                    <div class="rpt-carte-titre">Par nature</div>
+                    <div class="rpt-carte-desc">Bilan des encaissements par nature (Arriéré, Inscription, Scolarité…), ventilé Général / AFF / NAFF.</div>
+                </div>
             </div>
 
             <!-- ============ Familles à venir (extensible) ============ -->
@@ -97,7 +104,7 @@
 @code {
     private static readonly CultureInfo _fr = CultureInfo.GetCultureInfo("fr-FR");
 
-    private enum RapportId { ParEleve, ParClasse }
+    private enum RapportId { ParEleve, ParClasse, ParNature }
 
     private RapportId? _selected;
 
@@ -111,12 +118,24 @@
 
     private bool _enCours;
 
-    private void Selectionner(RapportId id) => _selected = id;
+    private void Selectionner(RapportId id)
+    {
+        _selected = id;
+
+        // Le bilan par nature se fait par defaut sur la journee du jour (date1 = date2 = aujourd'hui) ;
+        // les autres rapports gardent la periode « mois en cours ».
+        if (id == RapportId.ParNature)
+        {
+            _debut = DateTime.Today;
+            _fin = DateTime.Today;
+        }
+    }
 
     private static string TitreRapport(RapportId id) => id switch
     {
         RapportId.ParEleve => "Versements par élève",
         RapportId.ParClasse => "Versements par classe",
+        RapportId.ParNature => "Bilan par nature des versements",
         _ => string.Empty
     };
 
@@ -175,6 +194,9 @@
                 RapportId.ParClasse => (
                     await _rapportService.GetRapportParClassePdfAsync(debut, fin, _nomEcole, logoBase64, _villeEcole, annee),
                     "rapport-par-classe"),
+                RapportId.ParNature => (
+                    await _rapportService.GetRapportParNaturePdfAsync(debut, fin, _nomEcole, logoBase64, _villeEcole, annee),
+                    "bilan-par-nature"),
                 _ => (null, "rapport")
             };
 

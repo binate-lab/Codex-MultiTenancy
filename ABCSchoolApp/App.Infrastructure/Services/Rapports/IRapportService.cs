@@ -13,5 +13,10 @@ namespace App.Infrastructure.Services.Rapports
         // Rapport mensuel par classe (paysage), groupe par niveau, colonnes financieres + Recup %.
         Task<byte[]> GetRapportParClassePdfAsync(
             DateOnly debut, DateOnly fin, string ecole, string logoBase64, string ville, string anneeScolaire);
+
+        // Bilan par nature des versements (portrait) sur une periode : montant ventile
+        // Général (Aff + Naff) / Aff / Naff.
+        Task<byte[]> GetRapportParNaturePdfAsync(
+            DateOnly debut, DateOnly fin, string ecole, string logoBase64, string ville, string anneeScolaire);
     }
 }
