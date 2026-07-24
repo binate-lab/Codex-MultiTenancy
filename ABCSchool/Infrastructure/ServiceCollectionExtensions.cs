@@ -30,6 +30,7 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using NSwag;
@@ -43,16 +44,27 @@ namespace Infrastructure
 {
     public static class ServiceCollectionExtensions
     {
-        public static IServiceCollection AddInfrastructureServices(this IServiceCollection services, IConfiguration config)
+        public static IServiceCollection AddInfrastructureServices(
+            this IServiceCollection services, IConfiguration config, IHostEnvironment env)
         {
             services.Configure<PkiSettings>(config.GetSection(nameof(PkiSettings)));
 
-            return services
+            // SECURITE multi-tenant : Finbuckle essaie les strategies dans l'ordre
+            // d'enregistrement et retient la PREMIERE qui repond. La strategie d'en-tete
+            // doit donc rester APRES celle du claim — et n'exister qu'en developpement.
+            // Sinon n'importe quel porteur d'un jeton valide bascule sur une autre ecole
+            // en ajoutant un simple en-tete HTTP ; le tenant selectionnant ici la BASE DE
+            // DONNEES, l'isolation entiere tomberait.
+            var multiTenant = services
                 .AddDbContext<TenantDbContext>(options => options
                     .UseSqlServer(config.GetConnectionString("DefaultConnection")))
                 .AddMultiTenant<TrajanEcoleTenantInfo>()
-                    .WithHeaderStrategy(TenancyConstants.TenantIdName)
-                    .WithClaimStrategy(TenancyConstants.TenantIdName)
+                    .WithClaimStrategy(TenancyConstants.TenantIdName);
+
+            if (env.IsDevelopment())
+                multiTenant.WithHeaderStrategy(TenancyConstants.TenantIdName);
+
+            return multiTenant
                     .WithEFCoreStore<TenantDbContext, TrajanEcoleTenantInfo>()
                     .Services
                 .AddDbContext<ApplicationDbContext>(options => options
