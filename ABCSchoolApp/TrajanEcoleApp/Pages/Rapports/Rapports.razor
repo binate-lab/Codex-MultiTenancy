@@ -2,7 +2,9 @@
 @layout SchoolLayout
 @using System.Globalization
 @using global::App.Infrastructure.Services.Rapports
+@using global::App.Infrastructure.Services.Structures
 @inject IRapportService _rapportService
+@inject IStructureService _structureService
 @inject IJSRuntime _js
 
 <MudPaper Elevation="6" Class="ma-2">
@@ -108,6 +110,18 @@
                                            Culture="@_fr" Variant="Variant.Outlined" Margin="Margin.Dense"
                                            Style="max-width: 190px;" />
                         }
+                        @if (_selected == RapportId.BilanEleveClasse)
+                        {
+                            <MudSelect T="string" Label="Classe" @bind-Value="_bilanClasse"
+                                       Variant="Variant.Outlined" Margin="Margin.Dense"
+                                       Clearable="true" Style="min-width: 220px;">
+                                <MudSelectItem T="string" Value="@(string.Empty)">Toutes les classes</MudSelectItem>
+                                @foreach (var c in _classesRef)
+                                {
+                                    <MudSelectItem T="string" Value="@c.Libelle">@c.Libelle</MudSelectItem>
+                                }
+                            </MudSelect>
+                        }
                         <MudButton Variant="Variant.Filled" Color="Color.Primary"
                                    StartIcon="@Icons.Material.Filled.PictureAsPdf"
                                    Disabled="_enCours" OnClick="GenererAsync">
@@ -143,6 +157,10 @@
     private DateTime? _debut = new DateTime(DateTime.Today.Year, DateTime.Today.Month, 1);
     private DateTime? _fin = DateTime.Today;
 
+    // Bilan par eleve et par classe : classe choisie (vide = toutes) + referentiel des classes.
+    private string _bilanClasse = string.Empty;
+    private IReadOnlyList<ClasseItem> _classesRef = new List<ClasseItem>();
+
     private bool _enCours;
 
     private void Selectionner(RapportId id)
@@ -175,6 +193,9 @@
         var annee = await _anneeScolaireService.GetAnneeEnCoursAsync();
         if (annee.IsSuccessful && annee.Data is not null)
             _annee = annee.Data.Libelle;
+
+        // Referentiel des classes de l'ecole (pour le sélecteur du bilan par élève et par classe).
+        _classesRef = await _structureService.GetClassesAsync(_annee == "—" ? null : _annee);
 
         var user = await _applicationStateProvider.GetAuthenticationStateProviderUserAsync();
         var codeEts = user.FindFirst("school")?.Value;
@@ -239,8 +260,8 @@
                     await _rapportService.GetRapportRecouvrementPdfAsync(_nomEcole, logoBase64, _villeEcole, annee),
                     "rapport-recouvrement"),
                 RapportId.BilanEleveClasse => (
-                    await _rapportService.GetBilanEleveClassePdfAsync(_nomEcole, logoBase64, _villeEcole, annee),
-                    "bilan-eleve-classe"),
+                    await _rapportService.GetBilanEleveClassePdfAsync(_bilanClasse, _nomEcole, logoBase64, _villeEcole, annee),
+                    string.IsNullOrWhiteSpace(_bilanClasse) ? "bilan-eleve-classe" : $"bilan-{_bilanClasse}"),
                 _ => (null, "rapport")
             };
 

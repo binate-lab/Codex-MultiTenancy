@@ -31,8 +31,8 @@ namespace App.Infrastructure.Services.Rapports
 
         // Bilan financier par eleve et par classe (portrait, sans periode — point au jour) :
         // une ligne par eleve (statut, total scolarite, reduction, verse, du a ce jour, solde),
-        // une classe par page + totaux par colonne.
+        // une classe par page + totaux par colonne. `classe` vide/null = toutes les classes.
         Task<byte[]> GetBilanEleveClassePdfAsync(
-            string ecole, string logoBase64, string ville, string anneeScolaire);
+            string classe, string ecole, string logoBase64, string ville, string anneeScolaire);
     }
 }

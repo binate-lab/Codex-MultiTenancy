@@ -42,12 +42,39 @@ namespace App.Infrastructure.Services.Implementations.Rapports
             return PostRapportAsync("rapports/versements/recouvrement", aujourdhui, aujourdhui, ecole, logoBase64, ville, anneeScolaire);
         }
 
-        // Sans periode : l'API ignore les dates (on envoie la date du jour pour les deux bornes).
-        public Task<byte[]> GetBilanEleveClassePdfAsync(
-            string ecole, string logoBase64, string ville, string anneeScolaire)
+        // Sans periode (point au jour). `classe` vide/null = toutes les classes ; sinon une
+        // seule classe. Corps dedie (avec « classe ») distinct du RapportPeriodeRequest.
+        public async Task<byte[]> GetBilanEleveClassePdfAsync(
+            string classe, string ecole, string logoBase64, string ville, string anneeScolaire)
         {
-            var aujourdhui = DateOnly.FromDateTime(DateTime.Today);
-            return PostRapportAsync("rapports/versements/bilan-eleve-classe", aujourdhui, aujourdhui, ecole, logoBase64, ville, anneeScolaire);
+            const string route = "rapports/versements/bilan-eleve-classe";
+
+            HttpResponseMessage reponse;
+            try
+            {
+                reponse = await _httpClient.PostAsJsonAsync(route, new
+                {
+                    classe,
+                    ecole,
+                    ville,
+                    anneeScolaire,
+                    logoBase64
+                });
+            }
+            catch (Exception ex)
+            {
+                throw new HttpRequestException($"Appel « {route} » impossible : {ex.Message}", ex);
+            }
+
+            if (!reponse.IsSuccessStatusCode)
+            {
+                var corps = await reponse.Content.ReadAsStringAsync();
+                if (corps.Length > 300) corps = corps[..300];
+                throw new HttpRequestException(
+                    $"HTTP {(int)reponse.StatusCode} {reponse.ReasonPhrase} sur « {route} ». {corps}".Trim());
+            }
+
+            return await reponse.Content.ReadAsByteArrayAsync();
         }
 
         private async Task<byte[]> PostRapportAsync(
