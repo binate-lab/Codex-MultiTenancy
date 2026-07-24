@@ -30,7 +30,6 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.Extensions.Hosting;
 using Microsoft.IdentityModel.Tokens;
 using Newtonsoft.Json;
 using NSwag;
@@ -45,26 +44,31 @@ namespace Infrastructure
     public static class ServiceCollectionExtensions
     {
         public static IServiceCollection AddInfrastructureServices(
-            this IServiceCollection services, IConfiguration config, IHostEnvironment env)
+            this IServiceCollection services, IConfiguration config)
         {
             services.Configure<PkiSettings>(config.GetSection(nameof(PkiSettings)));
 
-            // SECURITE multi-tenant : Finbuckle essaie les strategies dans l'ordre
-            // d'enregistrement et retient la PREMIERE qui repond. La strategie d'en-tete
-            // doit donc rester APRES celle du claim — et n'exister qu'en developpement.
-            // Sinon n'importe quel porteur d'un jeton valide bascule sur une autre ecole
-            // en ajoutant un simple en-tete HTTP ; le tenant selectionnant ici la BASE DE
-            // DONNEES, l'isolation entiere tomberait.
-            var multiTenant = services
+            // SECURITE multi-tenant — L'ORDRE EST CRITIQUE. Finbuckle essaie les strategies
+            // dans l'ordre d'enregistrement et retient la PREMIERE qui repond :
+            //
+            //   1. Claim  : une requete AUTHENTIFIEE porte "tenant" dans son jeton signe.
+            //               Il gagne, et l'en-tete HTTP est alors purement ignore. C'est ce
+            //               qui empeche un porteur de jeton de basculer sur une autre ecole
+            //               en ajoutant un en-tete — le tenant selectionnant ici la BASE DE
+            //               DONNEES, l'isolation entiere en depend.
+            //
+            //   2. En-tete: repli indispensable pour le LOGIN, ou l'utilisateur n'a pas
+            //               encore de jeton donc pas de claim (cf. TokenService.
+            //               GetCurrentTenant, qui exige un tenant resolu). Le supprimer
+            //               rendrait toute connexion impossible.
+            //
+            // Ne JAMAIS remettre WithHeaderStrategy avant WithClaimStrategy.
+            return services
                 .AddDbContext<TenantDbContext>(options => options
                     .UseSqlServer(config.GetConnectionString("DefaultConnection")))
                 .AddMultiTenant<TrajanEcoleTenantInfo>()
-                    .WithClaimStrategy(TenancyConstants.TenantIdName);
-
-            if (env.IsDevelopment())
-                multiTenant.WithHeaderStrategy(TenancyConstants.TenantIdName);
-
-            return multiTenant
+                    .WithClaimStrategy(TenancyConstants.TenantIdName)
+                    .WithHeaderStrategy(TenancyConstants.TenantIdName)
                     .WithEFCoreStore<TenantDbContext, TrajanEcoleTenantInfo>()
                     .Services
                 .AddDbContext<ApplicationDbContext>(options => options

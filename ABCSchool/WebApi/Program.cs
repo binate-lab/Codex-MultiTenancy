@@ -37,7 +37,7 @@ builder.Services.AddCors(options =>
     });
 });
 
-builder.Services.AddInfrastructureServices(builder.Configuration, builder.Environment);
+builder.Services.AddInfrastructureServices(builder.Configuration);
 
 builder.Services.AddJwtAuthentication(builder.Services.GetJwtSettings(builder.Configuration));
 
