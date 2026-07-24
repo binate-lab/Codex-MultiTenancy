@@ -64,6 +64,13 @@
                     <div class="rpt-carte-titre">Par mode de paiement</div>
                     <div class="rpt-carte-desc">Bilan des encaissements par moyen de paiement (Espèce, Chèque, Virement, Mobile Money…) avec la part de chacun.</div>
                 </div>
+
+                <div class="rpt-carte @(_selected == RapportId.BilanEleveClasse ? "rpt-carte-active" : "")"
+                     @onclick="@(() => Selectionner(RapportId.BilanEleveClasse))">
+                    <MudIcon Icon="@Icons.Material.Filled.AccountBalanceWallet" Color="Color.Primary" Size="Size.Large" />
+                    <div class="rpt-carte-titre">Bilan par élève et par classe</div>
+                    <div class="rpt-carte-desc">Point au jour : une ligne par élève (statut, total scolarité, réduction, versé, dû à ce jour, solde), une classe par page avec les totaux par colonne.</div>
+                </div>
             </div>
 
             <!-- ============ Familles à venir (extensible) ============ -->
@@ -121,12 +128,12 @@
 @code {
     private static readonly CultureInfo _fr = CultureInfo.GetCultureInfo("fr-FR");
 
-    private enum RapportId { ParEleve, ParClasse, ParNature, ParModePaiement, Recouvrement }
+    private enum RapportId { ParEleve, ParClasse, ParNature, ParModePaiement, Recouvrement, BilanEleveClasse }
 
     private RapportId? _selected;
 
     // Rapports « point au jour » : pas de periode a saisir (l'API ignore les dates).
-    private bool SansPeriode => _selected is RapportId.ParClasse or RapportId.Recouvrement;
+    private bool SansPeriode => _selected is RapportId.ParClasse or RapportId.Recouvrement or RapportId.BilanEleveClasse;
 
     private string _annee = "—";
     private string _nomEcole = string.Empty;
@@ -159,6 +166,7 @@
         RapportId.ParNature => "Bilan par nature des versements",
         RapportId.ParModePaiement => "Bilan par mode de paiement",
         RapportId.Recouvrement => "Rapport de recouvrement",
+        RapportId.BilanEleveClasse => "Bilan financier par élève et par classe",
         _ => string.Empty
     };
 
@@ -230,6 +238,9 @@
                 RapportId.Recouvrement => (
                     await _rapportService.GetRapportRecouvrementPdfAsync(_nomEcole, logoBase64, _villeEcole, annee),
                     "rapport-recouvrement"),
+                RapportId.BilanEleveClasse => (
+                    await _rapportService.GetBilanEleveClassePdfAsync(_nomEcole, logoBase64, _villeEcole, annee),
+                    "bilan-eleve-classe"),
                 _ => (null, "rapport")
             };
 

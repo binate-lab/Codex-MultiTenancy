@@ -28,5 +28,11 @@ namespace App.Infrastructure.Services.Rapports
         // attendu (echeances echues) vs recouvre, reste, taux + anneau.
         Task<byte[]> GetRapportRecouvrementPdfAsync(
             string ecole, string logoBase64, string ville, string anneeScolaire);
+
+        // Bilan financier par eleve et par classe (portrait, sans periode — point au jour) :
+        // une ligne par eleve (statut, total scolarite, reduction, verse, du a ce jour, solde),
+        // une classe par page + totaux par colonne.
+        Task<byte[]> GetBilanEleveClassePdfAsync(
+            string ecole, string logoBase64, string ville, string anneeScolaire);
     }
 }
