@@ -805,9 +805,19 @@
     padding: 4px 2px;
 }
 
+/* Libelle commun aux barres « Action en masse » et « Activer colonne ».
+   La largeur FIXE est ce qui aligne les deux deroulantes l'une SOUS l'autre : sans elle,
+   chaque deroulante demarre a la fin de son texte. Mesure reelle (Roboto 13px / 600) :
+   « Action en masse : » = 106,79px, « Activer colonne : » = 100,80px -> les deroulantes
+   etaient decalees de 6px. 115px contient le plus long avec une marge de securite si
+   Roboto n'est pas charge (repli Arial, legerement plus large).
+   nowrap : le libelle ne doit jamais passer sur 2 lignes, ce qui casserait l'alignement. */
 .lc-bulk-label {
     font-weight: 600;
     font-size: 13px;
+    flex: 0 0 auto;
+    width: 115px;
+    white-space: nowrap;
 }
 
 /* ============ Panneau « Activer colonne » (édition inline de correction) ============ */

@@ -424,6 +424,10 @@ namespace TrajanEcoleApp.Pages.Scolarites
 
         // Champs de saisie du sous-form bleu ciel.
         private decimal _vMontant;
+
+        // Reference du champ MONTANT : le bouton « Nouveau » y renvoie le focus pour
+        // enchainer les saisies au clavier sans repasser par la souris.
+        private MudNumericField<decimal>? _champMontant;
         private DateTime? _vDate = DateTime.Today;
         private string _vNature = string.Empty;   // fixé après chargement des natures
         private string _vMode = "Espèce";
@@ -483,6 +487,20 @@ namespace TrajanEcoleApp.Pages.Scolarites
 
         // « Nouveau » : réinitialise la saisie (date du jour, Espèce, nature Inscription)
         // et sort du mode modification s'il était actif.
+        // Bouton « Nouveau » (a cote de MONTANT) : vide le sous-form PUIS place le curseur
+        // dans MONTANT. SelectAsync sélectionne le « 0 » remis par NouveauVersement, pour
+        // que la frappe le remplace au lieu de s'y accoler.
+        private async Task NouveauVersementEtFocusAsync()
+        {
+            NouveauVersement();
+
+            if (_champMontant is not null)
+            {
+                await _champMontant.FocusAsync();
+                await _champMontant.SelectAsync();
+            }
+        }
+
         private void NouveauVersement()
         {
             _vMontant = 0;

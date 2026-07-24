@@ -301,9 +301,9 @@
                                                Variant="Variant.Outlined" Margin="Margin.Dense" Class="acc-datemask" />
                                 <label class="svt-montant-label">MONTANT :</label>
                                 <MudNumericField T="decimal" @bind-Value="_vMontant" HideSpinButtons="true" Min="0"
-                                                 Format="#,0" Culture="@_fr"
+                                                 Format="#,0" Culture="@_fr" @ref="_champMontant"
                                                  Variant="Variant.Outlined" Margin="Margin.Dense" Class="svt-montant" />
-                                <MudButton OnClick="NouveauVersement" Variant="Variant.Outlined" Size="Size.Small"
+                                <MudButton OnClick="NouveauVersementEtFocusAsync" Variant="Variant.Outlined" Size="Size.Small"
                                            Class="svt-btn-nouveau">Nouveau</MudButton>
                             </div>
                             <div class="svt-ligne">
